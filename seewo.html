@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>希沃白板学生管理员完全手册 v1.2 Pro</title>
+    <style>
+        /* --- 核心变量与基础样式 --- */
+        :root {
+            --primary-color: #2980b9; /* 希沃蓝 */
+            --primary-light: #e8f4f8;
+            --secondary-color: #34495e;
+            --danger-color: #c0392b;
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+            --toc-width: 260px;
+            --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            scroll-behavior: smooth; /* 启用平滑滚动 */
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', -apple-system, sans-serif;
+            line-height: 1.8;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            display: flex; /* 为侧边栏布局 */
+            overflow-x: hidden;
+        }
+
+        /* --- 侧边栏目录 (TOC) 样式 --- */
+        .toc-container {
+            width: var(--toc-width);
+            height: 100vh;
+            background-color: #fff;
+            position: fixed;
+            left: 0;
+            top: 0;
+            border-right: 1px solid #eee;
+            padding: 20px 0;
+            overflow-y: auto;
+            z-index: 100;
+            opacity: 0;
+            animation: slideInLeft 0.8s var(--ease-out) forwards;
+        }
+
+        .toc-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: var(--primary-color);
+            padding: 0 25px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 10px;
+        }
+
+        .toc-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .toc-item a {
+            display: block;
+            padding: 10px 25px;
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-size: 0.95em;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .toc-item a:hover {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            border-left-color: var(--primary-color);
+            padding-left: 30px; /* 轻微向右浮动 */
+        }
+
+        .toc-sub-item a {
+            padding-left: 45px;
+            font-size: 0.88em;
+            color: #7f8c8d;
+        }
+        
+        .toc-sub-item a:hover {
+            padding-left: 50px;
+        }
+
+        /* --- 主内容区域 --- */
+        .main-content {
+            margin-left: var(--toc-width); /* 为目录留出空间 */
+            flex: 1;
+            padding: 40px;
+            opacity: 0;
+            animation: fadeIn 1s var(--ease-out) 0.3s forwards;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 50px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            position: relative;
+        }
+
+        /* --- 头部与标题 --- */
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin: 0 0 15px 0;
+            font-size: 2.2em;
+        }
+
+        .meta-info {
+            color: #7f8c8d;
+            font-size: 0.95em;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            border-left: 6px solid var(--primary-color);
+            padding-left: 15px;
+            margin-top: 50px;
+            margin-bottom: 25px;
+            background-color: #f8f9fa;
+            padding-top: 8px;
+            padding-bottom: 8px;
+            border-radius: 4px;
+            /* 锚点跳转偏移，防止被顶部遮挡 */
+            scroll-margin-top: 20px;
+        }
+
+        h3 {
+            color: var(--secondary-color);
+            margin-top: 30px;
+            scroll-margin-top: 20px;
+        }
+
+        p, ul, ol { margin-bottom: 20px; }
+        li { margin-bottom: 10px; }
+
+        /* --- 表格样式 --- */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        }
+
+        th, td {
+            border: 1px solid #eee;
+            padding: 15px;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) { background-color: #fafafa; }
+        tr:hover { background-color: #f1f8ff; } /* 交互悬停 */
+
+        /* --- 修饰性组件 --- */
+        .danger { color: var(--danger-color); font-weight: bold; }
+        
+        code {
+            background-color: #f8f9fa;
+            color: var(--danger-color);
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-family: Consolas, Monaco, monospace;
+        }
+
+        .highlight {
+            background-color: #fff3cd;
+            padding: 2px 5px;
+            border-radius: 3px;
+            color: #856404;
+            font-weight: bold;
+        }
+
+        .tip-box {
+            background-color: var(--primary-light);
+            border-left: 5px solid var(--primary-color);
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+            position: relative;
+        }
+
+        /* --- “关于作者” 按钮样式 --- */
+        .author-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #ff6699; /* 哔哩哔哩粉 */
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 0.9em;
+            box-shadow: 0 4px 15px rgba(255, 102, 153, 0.3);
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .author-btn:hover {
+            background-color: #e35281;
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 6px 20px rgba(255, 102, 153, 0.5);
+        }
+
+        .author-btn svg {
+            margin-right: 8px;
+            width: 18px;
+            height: 18px;
+            fill: white;
+        }
+
+        /* --- 动画定义 --- */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* --- 响应式适配 --- */
+        @media (max-width: 1024px) {
+            --toc-width: 220px;
+            .container { padding: 30px; }
+        }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .toc-container {
+                position: relative;
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid #eee;
+                padding: 15px;
+                animation: fadeIn 0.8s ease forwards;
+            }
+            .toc-menu { display: flex; flex-wrap: wrap; justify-content: center; }
+            .toc-item a { padding: 8px 15px; border-left: none; border-radius: 4px; }
+            .toc-sub-item { display: none; } /* 移动端隐藏二级目录 */
+            
+            .main-content { margin-left: 0; padding: 20px; }
+            h1 { font-size: 1.8em; }
+            .author-btn { position: relative; top: 0; right: 0; display: flex; justify-content: center; margin: 0 auto 20px; max-width: 200px; }
+        }
+
+        /* --- 打印样式 --- */
+        @media print {
+            .toc-container, .author-btn { display: none; }
+            .main-content { margin-left: 0; padding: 0; }
+            .container { box-shadow: none; padding: 0; }
+            body { background-color: #fff; }
+            h2 { page-break-after: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="toc-container">
+    <div class="toc-title">手册目录</div>
+    <ul class="toc-menu">
+        <li class="toc-item"><a href="#ch1">第一章：职责与认知</a>
+            <ul class="toc-menu toc-sub-item">
+                <li><a href="#ch1-1">1.1 角色定位</a></li>
+                <li><a href="#ch1-2">1.2 安全操作红线</a></li>
+            </ul>
+        </li>
+        <li class="toc-item"><a href="#ch2">第二章：密码与系统管理</a>
+            <ul class="toc-menu toc-sub-item">
+                <li><a href="#ch2-1">2.1 希沃管家密码</a></li>
+                <li><a href="#ch2-2">2.2 冰点还原详解</a></li>
+            </ul>
+        </li>
+        <li class="toc-item"><a href="#ch3">第三章：软件更新指南</a></li>
+        <li class="toc-item"><a href="#ch4">第四章：日常维护操作</a>
+            <ul class="toc-menu toc-sub-item">
+                <li><a href="#ch4-1">4.1 正确开关机</a></li>
+                <li><a href="#ch4-2">4.2 屏幕清洁规范</a></li>
+                <li><a href="#ch4-3">4.3 触摸屏使用方法</a></li>
+            </ul>
+        </li>
+        <li class="toc-item"><a href="#ch5">第五章：预装软件指南</a></li>
+        <li class="toc-item"><a href="#ch6">第六章：故障处理与求助</a></li>
+        <li class="toc-item"><a href="#appendix">附录：常用快捷键</a></li>
+        <li class="toc-item"><a href="#suggestions">致新管理员</a></li>
+    </ul>
+</nav>
+
+<main class="main-content">
+    <div class="container">
+        <a href="https://b23.tv/67GruA4" target="_blank" class="author-btn">
+            <svg viewBox="0 0 1024 1024"><path d="M777.6 131.2c-1.6 0-3.2 0-4.8 0.1L651.1 228.8c-10.2 8.1-12 23.1-3.9 33.3s23.1 12 33.3 3.9l116-89.6c1.1-0.9 2.2-1.7 3.3-2.5 12.6-9.1 29.8-6.1 38.9 6.5s6.1 29.8-6.5 38.9c-2.1 1.5-4.3 2.8-6.6 4-3.2 1.7-6.2 3.7-9.1 6-12.2 9.5-24 19.5-35.3 30.1-23 21.5-43 45.9-59.8 72.8H303.7c-16.9-26.9-36.8-51.3-59.8-72.8-11.3-10.6-23.1-20.6-35.3-30.1-2.9-2.3-6-4.3-9.1-6-2.3-1.2-4.5-2.5-6.6-4-12.6-9.1-15.6-26.4-6.5-38.9s26.4-15.6 38.9-6.5c1.1 0.8 2.2 1.6 3.3 2.5l116 89.6c10.2 7.9 25.2 6.1 33.3-3.9s6.1-25.2-3.9-33.3L252.5 131.3c-1.6-0.1-3.2-0.1-4.8-0.1-18.3 0-33.1 14.8-33.1 33.1 0 3.2 0.5 6.3 1.3 9.3l-28 17.6C105 241 48 338.6 48 447.2v303.9C48 852.7 130.3 935 231.9 935h560.2c101.6 0 183.9-82.3 183.9-183.9V447.2c0-108.6-57-206.2-139.9-258.3l-28-17.6c0.8-2.9 1.3-6 1.3-9.3 0-18.3-14.8-33.1-33.1-33.1zM352 507.2c35.3 0 64 28.7 64 64s-28.7 64-64 64-64-28.7-64-64 28.7-64 64-64z m320 0c35.3 0 64 28.7 64 64s-28.7 64-64 64-64-28.7-64-64 28.7-64 64-64z"/></svg>
+            联系作者
+        </a>
+
+        <div class="header">
+            <h1>希沃白板学生管理员完全手册</h1>
+            <div class="meta-info">
+                <p>适用对象：班级希沃设备学生管理员 | 手册版本：v1.2（Pro 交互版） | 最后更新：2026年4月</p>
+            </div>
+        </div>
+
+        <h2 id="ch1">第一章：管理员职责与基础认知</h2>
+        
+        <h3 id="ch1-1">1.1 你的角色定位</h3>
+        <p>作为学生管理员，你是班级希沃设备的"第一守护者"。不需要懂编程，不需要会修硬件，只需要掌握以下几个核心操作，就能确保设备正常运行。</p>
+
+        <h3 id="ch1-2">1.2 安全操作红线（必须遵守）</h3>
+        <table>
+            <tr>
+                <th>禁止行为</th>
+                <th>正确做法</th>
+                <th>严重后果</th>
+            </tr>
+            <tr>
+                <td class="danger">直接拔电源关机</td>
+                <td>点击开始菜单 → 电源 → 关机</td>
+                <td>系统损坏、数据丢失</td>
+            </tr>
+            <tr>
+                <td class="danger">开机状态下擦拭屏幕</td>
+                <td>关机并拔掉电源后再擦</td>
+                <td>触电风险、设备损坏</td>
+            </tr>
+            <tr>
+                <td class="danger">在冻结状态下安装软件</td>
+                <td>先解冻 → 安装 → 再冻结</td>
+                <td>软件重启后消失</td>
+            </tr>
+            <tr>
+                <td class="danger">软件没响应时连续猛点</td>
+                <td>耐心等待，或重启解决</td>
+                <td>打开数个窗口导致严重卡顿</td>
+            </tr>
+        </table>
+
+        <h2 id="ch2">第二章：核心密码与系统管理</h2>
+
+        <h3 id="ch2-1">2.1 希沃管家密码</h3>
+        <p><strong>默认密码：</strong> <span class="highlight">000000（六个零）</span></p>
+        <p><strong>用途说明：</strong>开启/关闭冰点还原（硬盘冻结）、查看设备状态与硬件信息。</p>
+        <div class="tip-box">
+            <strong>注意：</strong>希沃管家已关联学校，无需再次操作。如果六个零提示错误，说明学校管理员已修改密码，请联系班主任或信息技术老师获取新密码。
+        </div>
+
+        <h3 id="ch2-2">2.2 冰点还原（硬盘冻结）详解</h3>
+        <p><strong>什么是冰点还原？</strong> 想象硬盘是一块"记忆橡皮泥"：</p>
+        <ul>
+            <li><strong>冻结状态：</strong>不管你怎么捏（安装软件、保存文件、改设置），重启后都会变回原来的样子</li>
+            <li><strong>解冻状态：</strong>捏成的新形状会被保留下来</li>
+        </ul>
+
+        <p><strong>重要例外：下载文件夹特殊说明</strong><br>
+        即使处于冻结状态，下载文件夹（Downloads）内的文件也不会被还原。方便临时存放文件。但重要文件仍建议在解冻状态下操作。</p>
+
+        <p class="danger">操作铁律：安装软件前 → 检查是否冻结 → 若冻结则解冻 → 安装完成后 → 重新冻结</p>
+
+        <p><strong>解冻/冻结操作步骤：</strong></p>
+        <ol>
+            <li>在桌面找到"希沃管家"图标，双击打开。</li>
+            <li>输入密码：000000（或学校修改后的密码）。</li>
+            <li>在主界面找到"冰点还原"选项。</li>
+            <li>选择"解冻"或"冻结"。</li>
+            <li>根据提示<span class="highlight">重启电脑</span>生效。</li>
+        </ol>
+
+        <h2 id="ch3">第三章：希沃白板5更新指南</h2>
+
+        <ol>
+            <li>打开希沃白板5软件。</li>
+            <li>点击界面左上角三条横线（≡）。</li>
+            <li>在弹出菜单中选择"关于我们"。</li>
+            <li>系统会自动检测版本 → 如有新版本，点击"立即下载"。</li>
+            <li>下载完成后，双击下载的 <code>.exe</code> 文件进行安装（覆盖安装）。</li>
+        </ol>
+        <div class="tip-box">
+            <strong>小贴士：</strong>更新前建议先<span class="highlight">解冻系统</span>（见第二章），否则更新可能在重启后被还原。
+        </div>
+
+        <h2 id="ch4">第四章：日常维护操作</h2>
+
+        <h3 id="ch4-1">4.1 正确开关机</h3>
+        <p><strong>开机：</strong>按主机或屏幕上的电源按钮。</p>
+        <p><strong>关机：</strong>点击屏幕左下角"开始" → "电源" → "关机" → 等待屏幕完全变黑。</p>
+        <p class="danger">严禁直接拔掉电源或长按电源键强制关机！</p>
+
+        <h3 id="ch4-2">4.2 屏幕清洁规范</h3>
+        <ul>
+            <li><strong>时机：</strong>放学后或关机状态下。</li>
+            <li><strong>工具：</strong>湿润抹布（拧到不滴水）。</li>
+        </ul>
+        <p><strong>操作：</strong>关机并拔掉电源线 → 用湿润抹布擦拭屏幕，<span class="highlight">重点清洁四周边框的红外线触摸条</span> → 等待完全干燥再开机。</p>
+        <p class="danger">绝对禁止使用酒精、消毒液、纸巾或未关机擦拭。</p>
+
+        <h3 id="ch4-3">4.3 触摸屏使用方法</h3>
+        <ul>
+            <li><strong>书写与擦除：</strong>优先使用触控笔。手掌不要大面积贴住屏幕，避免误触橡皮擦。</li>
+            <li><strong>故障排查：</strong>
+                <ul>
+                    <li>点击位置偏移：清洁四周边框红外线触摸条。</li>
+                    <li>触摸无反应：检查是否有物体遮挡边框 → 重启电脑。</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h2 id="ch5">第五章：预装软件使用指南</h2>
+
+        <div class="tip-box">
+            <strong>重要提示：</strong>由于本机运行内存仅4GB，电脑开机后，第一次启动希沃白板5会比较慢。请<span class="highlight">只双击一次，然后耐心等待</span>，不要连续多次点击。
+        </div>
+        
+        <ul>
+            <li><strong>MusicFree（音乐播放器）：</strong>无广告，已配置插件，可直接搜索播放教学音乐。仅供教学使用。</li>
+            <li><strong>Wallpaper Engine（动态壁纸）：</strong><span class="danger">不建议使用</span>。会导致系统卡顿。</li>
+            <li><strong>夸克浏览器：</strong>内置AI助手、搜题、试卷去手写功能。仅在老师需要时使用。</li>
+            <li><strong>智慧中小学：</strong>从开始菜单中打开，桌面上没有快捷方式。</li>
+        </ul>
+
+        <h2 id="ch6">第六章：故障处理与求助</h2>
+
+        <table>
+            <tr>
+                <th>问题现象</th>
+                <th>解决方法</th>
+            </tr>
+            <tr>
+                <td>希沃白板第一次启动慢</td>
+                <td>耐心等待，不要连续点击（内存小）。</td>
+            </tr>
+            <tr>
+                <td>安装的软件重启后消失</td>
+                <td>解冻状态下重装 → 重新冻结（见第二章）。</td>
+            </tr>
+            <tr>
+                <td>触摸没反应/误触偏移</td>
+                <td>关机拔电源，用湿抹布清洁<span class="highlight">四周边框</span>。</td>
+            </tr>
+            <tr>
+                <td>喇叭没声音</td>
+                <td>检查音量静音状态 → 右键音量图标选择正确播放设备。</td>
+            </tr>
+            <tr>
+                <td>希沃白板打不开</td>
+                <td>尝试重启电脑 → 如仍不行，联系老师。</td>
+            </tr>
+        </table>
+        <p><strong>重要联系方式：</strong>希沃官方客服：<code>400-186-2505</code>。</p>
+
+        <h2 id="appendix">附录：常用快捷键表</h2>
+        <table>
+            <tr>
+                <th>功能</th>
+                <th>快捷键</th>
+            </tr>
+            <tr>
+                <td>显示桌面（一键最小化）</td>
+                <td><code>Win + D</code></td>
+            </tr>
+            <tr>
+                <td>打开文件资源管理器</td>
+                <td><code>Win + E</code></td>
+            </tr>
+            <tr>
+                <td>打开任务管理器（卡死时用）</td>
+                <td><code>Ctrl + Shift + Esc</code></td>
+            </tr>
+            <tr>
+                <td>撤销操作 (希沃/系统)</td>
+                <td><code>Ctrl + Z</code></td>
+            </tr>
+            <tr>
+                <td>任意区域截图</td>
+                <td><code>Win + Shift + S</code></td>
+            </tr>
+        </table>
+
+        <div class="tip-box" id="suggestions">
+            <h3>致新管理员的建议</h3>
+            <ol>
+                <li>不要慌：遇到问题先查手册，再百度。</li>
+                <li>勤备份：重要资料存U盘或网盘，不要只存桌面。</li>
+                <li>有耐心：设备内存较小，多等两秒钟，不要急着狂点。</li>
+            </ol>
+            <p style="margin-top: 20px; font-style: italic; color: #7f8c8d; text-align: right;">— 助你工作顺利！</p>
+        </div>
+
+    </div>
+</main>
+
+</body>
+</html>
