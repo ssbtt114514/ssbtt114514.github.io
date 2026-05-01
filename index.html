@@ -4,9 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>ssbtt · 个人主页</title>
+    <!-- Font Awesome 6 图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* ========== 全局样式 ========== */
+        /* ============================================
+           GLOBAL STYLES & CSS VARIABLES
+           全局样式与CSS变量定义
+        ============================================ */
         * {
             margin: 0;
             padding: 0;
@@ -20,6 +24,7 @@
             --smooth-easing: cubic-bezier(0.4, 0, 0.2, 1);
         }
 
+        /* ========== BODY 背景与主题 ========== */
         body {
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             min-height: 100vh;
@@ -36,6 +41,7 @@
             background: radial-gradient(circle at 20% 30%, #0f1724, #03060c);
         }
 
+        /* ========== 主容器 - 毛玻璃效果 ========== */
         .glass-container {
             max-width: 680px;
             width: 100%;
@@ -54,6 +60,91 @@
             box-shadow: 0 20px 50px rgba(0,0,0,0.3);
         }
 
+        /* ========== 深色模式全局字体颜色 ========== */
+        body.dark,
+        body.dark .glass-container,
+        body.dark .card,
+        body.dark .dir-chip,
+        body.dark .game-chip,
+        body.dark .repo-card,
+        body.dark .contact-btn-link,
+        body.dark footer,
+        body.dark p,
+        body.dark li,
+        body.dark .card-header,
+        body.dark .avatar-zone p,
+        body.dark .filter-chip,
+        body.dark .search-box input {
+            color: #ffffff !important;
+        }
+
+        body.dark .dir-chip:hover,
+        body.dark .filter-chip:hover {
+            color: white !important;
+        }
+
+        body.dark .clickable-badge {
+            color: #ffffff !important;
+            background: rgba(108, 141, 255, 0.25);
+        }
+
+        body.dark .clickable-badge:hover {
+            color: white !important;
+        }
+
+        body.dark .game-chip:hover {
+            color: white !important;
+        }
+
+        body.dark .repo-card:hover {
+            color: white !important;
+        }
+
+        body.dark .contact-btn-link {
+            background: #1e293b;
+            color: white !important;
+        }
+
+        body.dark .contact-btn-link:hover {
+            background: var(--primary-accent);
+            color: white !important;
+        }
+
+        body.dark #identitySec li,
+        body.dark #expSec li {
+            color: #ffffff !important;
+        }
+
+        body.dark footer p {
+            color: rgba(255, 255, 255, 0.7) !important;
+        }
+
+        body.dark .avatar-zone p {
+            color: rgba(255, 255, 255, 0.85) !important;
+        }
+
+        body.dark .dir-chip,
+        body.dark .filter-chip {
+            background: rgba(255, 255, 255, 0.12);
+            color: #ffffff !important;
+        }
+
+        body.dark .dir-chip:hover,
+        body.dark .filter-chip:hover {
+            background: var(--primary-accent);
+            color: white !important;
+        }
+
+        body.dark .search-box input {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        body.dark .search-box input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* ========== 顶部导航栏 ========== */
         .top-bar {
             display: flex;
             justify-content: flex-end;
@@ -62,10 +153,20 @@
             border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         }
 
+        body.dark .top-bar {
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* ========== 目录导航区域 ========== */
         .directory-wrapper {
             background: rgba(240, 245, 255, 0.4);
             overflow: hidden;
             max-height: 500px;
+        }
+
+        body.dark .directory-wrapper {
+            background: rgba(0, 0, 0, 0.2);
         }
 
         .directory-panel {
@@ -75,13 +176,13 @@
             gap: 10px;
         }
 
-        .dir-chip {
+        .dir-chip, .filter-chip {
             background: rgba(0, 0, 0, 0.05);
             padding: 8px 16px;
             border-radius: 20px;
             font-size: 0.85rem;
             color: #1f2a3e;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 6px;
             cursor: pointer;
@@ -89,21 +190,68 @@
             user-select: none;
         }
 
-        body.dark .dir-chip {
-            background: rgba(255, 255, 255, 0.08);
-            color: #eef3ff;
-        }
-
-        .dir-chip:hover {
+        .dir-chip:hover, .filter-chip:hover {
             background: var(--primary-accent);
             color: white;
             transform: translateY(-2px);
         }
 
-        .dir-chip:active {
+        .dir-chip:active, .filter-chip:active {
             transform: scale(0.96);
         }
 
+        /* 筛选器激活状态 */
+        .filter-chip.active {
+            background: var(--primary-accent);
+            color: white;
+            box-shadow: 0 2px 8px rgba(108, 141, 255, 0.4);
+        }
+
+        /* ========== 语言筛选器区域（自动换行，不超出屏幕） ========== */
+        .github-header-row {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .filter-label {
+            font-size: 0.85rem;
+            opacity: 0.7;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filter-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        /* 搜索框样式 */
+        .search-box {
+            margin-bottom: 16px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 28px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            border-color: var(--primary-accent);
+            box-shadow: 0 0 0 2px rgba(108, 141, 255, 0.2);
+        }
+
+        /* ========== 头像区域 ========== */
         .avatar-zone {
             display: flex;
             flex-direction: column;
@@ -144,7 +292,6 @@
             display: block;
         }
 
-        /* ========== 修复：ssbtt 文字深色模式背景块问题 ========== */
         .waste-title {
             margin-top: 15px;
             font-size: 2rem;
@@ -158,17 +305,18 @@
         }
 
         body.dark .waste-title {
-            background: linear-gradient(135deg, #eef3fc, #6c8dff);
+            background: linear-gradient(135deg, #ffffff, #c0d0ff);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            color: #eef3fc;
+            color: #ffffff;
         }
 
         .scroll-area {
             padding: 0 24px 40px;
         }
 
+        /* ========== 卡片通用样式 ========== */
         .card {
             background: rgba(255, 255, 255, 0.4);
             backdrop-filter: blur(10px);
@@ -185,8 +333,8 @@
         }
 
         body.dark .card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .card-header {
@@ -199,6 +347,11 @@
             gap: 10px;
         }
 
+        body.dark .card-header {
+            color: #aac8ff !important;
+        }
+
+        /* ========== 技能标签样式 ========== */
         .clickable-badge {
             background: rgba(108, 141, 255, 0.1);
             padding: 8px 16px;
@@ -213,17 +366,13 @@
             transition: all 0.25s var(--spring-easing);
         }
 
-        body.dark .clickable-badge { 
-            color: #cbd5e1; 
-            background: rgba(108, 141, 255, 0.15); 
-        }
-
         .clickable-badge:hover {
             background: var(--primary-accent);
             color: white;
             transform: translateY(-2px);
         }
 
+        /* ========== 游戏标签样式 ========== */
         .game-chip {
             background: rgba(0,0,0,0.04);
             padding: 6px 14px;
@@ -235,44 +384,80 @@
             transition: all 0.25s var(--spring-easing);
         }
 
-        body.dark .game-chip { 
-            background: rgba(255,255,255,0.05); 
-        }
-
         .game-chip:hover {
             background: var(--primary-accent);
             color: white;
             transform: translateY(-2px);
         }
 
+        /* ========== GitHub 仓库区域 ========== */
+        /* 仓库网格 - 移动端自动横向滚动 */
         #repo-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            overflow-y: hidden;
+            gap: 12px;
+            padding-bottom: 8px;
+            -webkit-overflow-scrolling: touch;
+            scroll-snap-type: x mandatory;
+        }
+
+        #repo-container::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        #repo-container::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.05);
+            border-radius: 4px;
+        }
+
+        #repo-container::-webkit-scrollbar-thumb {
+            background: var(--primary-accent);
+            border-radius: 4px;
         }
 
         .repo-card {
+            flex: 0 0 auto;
+            width: 280px;
             background: rgba(0,0,0,0.03);
-            padding: 12px;
-            border-radius: 12px;
+            padding: 14px;
+            border-radius: 16px;
             text-decoration: none;
             color: inherit;
             font-size: 0.85rem;
             border: 1px solid rgba(0,0,0,0.05);
             transition: all 0.2s ease;
+            scroll-snap-align: start;
         }
 
-        body.dark .repo-card { 
-            background: rgba(255,255,255,0.03); 
-            border: 1px solid rgba(255,255,255,0.05); 
+        .repo-card:hover {
+            background: var(--primary-accent);
+            color: white;
+            transform: translateY(-3px);
         }
 
-        .repo-card:hover { 
-            background: var(--primary-accent); 
-            color: white; 
-            transform: translateY(-2px);
+        body.dark .repo-card {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
+        /* 桌面端显示两列网格，移动端横向滚动 */
+        @media (min-width: 641px) {
+            #repo-container {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                overflow-x: visible;
+                flex-wrap: wrap;
+            }
+            .repo-card {
+                width: auto;
+                flex: 1;
+            }
+        }
+
+        /* ========== 联系方式按钮 ========== */
         .contact-row {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -294,17 +479,13 @@
             display: block;
         }
 
-        body.dark .contact-btn-link { 
-            background: #1e293b; 
-            color: white; 
-        }
-
         .contact-btn-link:hover {
             background: var(--primary-accent);
             color: white;
             transform: scale(1.03);
         }
 
+        /* ========== 页脚 ========== */
         footer {
             text-align: center;
             padding: 20px;
@@ -312,21 +493,17 @@
             opacity: 0.6;
         }
 
-        ::-webkit-scrollbar { 
-            width: 0px; 
-            background: transparent; 
-        }
-
+        /* ========== 移动端响应式适配 ========== */
         @media (max-width: 480px) {
-            .contact-row, #repo-container { 
-                grid-template-columns: 1fr; 
+            .contact-row {
+                grid-template-columns: 1fr;
             }
-            .glass-container { 
-                border-radius: 0; 
-                min-height: 100vh; 
+            .glass-container {
+                border-radius: 0;
+                min-height: 100vh;
             }
-            body { 
-                padding: 0; 
+            body {
+                padding: 0;
             }
         }
     </style>
@@ -334,12 +511,14 @@
 <body>
 
 <div class="glass-container">
+    <!-- 顶部栏：主题切换按钮 -->
     <div class="top-bar">
         <button class="theme-toggle" id="themeSwitch" style="background:none; border:none; font-size: 1.2rem; cursor:pointer;">
             <i class="fas fa-moon"></i>
         </button>
     </div>
 
+    <!-- 目录导航区 -->
     <div class="directory-wrapper">
         <div class="directory-panel">
             <div class="dir-chip" data-target="skillSec"><i class="fas fa-code"></i> 技能</div>
@@ -351,7 +530,10 @@
         </div>
     </div>
 
+    <!-- 主要内容区域 -->
     <div class="scroll-area">
+        
+        <!-- 头像区域 -->
         <div class="avatar-zone">
             <div class="avatar-circle" id="avatarCircle">
                 <img id="qq-avatar" class="avatar-img" src="" alt="QQ头像">
@@ -364,6 +546,7 @@
             <p style="opacity: 0.7; margin-top: 8px;">你来这儿要干嘛</p>
         </div>
 
+        <!-- 技能卡片 -->
         <div id="skillSec" class="card">
             <div class="card-header"><i class="fas fa-terminal"></i> 爱好与技能</div>
             <div style="display: flex; flex-wrap: wrap; gap: 10px;">
@@ -374,26 +557,29 @@
             </div>
         </div>
 
+        <!-- 游戏卡片 -->
         <div id="gameSec" class="card">
             <div class="card-header"><i class="fas fa-ghost"></i> 游戏热忱</div>
             <div style="display: flex; flex-wrap: wrap; gap: 8px;">
                 <a href="https://www.minecraft.net/" target="_blank" class="game-chip">Minecraft</a>
                 <a href="https://anuke.itch.io/mindustry" target="_blank" class="game-chip">Mindustry</a>
                 <a href="https://deltarune.com/" target="_blank" class="game-chip">三角符文</a>
-                <a href="https://aqtw.qq.com/" target="_blank" class="game-chip">暗区突围</a>
+                <a href="https://aqtk.qq.com/" target="_blank" class="game-chip">暗区突围</a>
                 <a href="https://www.half-life.com/" target="_blank" class="game-chip">半条命</a>
             </div>
         </div>
 
+        <!-- 身份标识卡片 -->
         <div id="identitySec" class="card">
             <div class="card-header"><i class="fas fa-fingerprint"></i> 身份标识</div>
             <ul style="list-style: none; line-height: 2;">
                 <li><i class="fas fa-leaf" style="color: #4caf50; width: 25px;"></i> 中国共青团团员</li>
                 <li><i class="fas fa-desktop" style="color: #ff9800; width: 25px;"></i> 希沃白板管理员</li>
-                <li><i class="fas fa-microchip" style="color: #2196f3; width: 25px;"></i> 数字原住民</li>
+                <li><i class="fas fa-microchip" style="color: #2196f3; width: 25px;"></i> 视频创作者</li>
             </ul>
         </div>
 
+        <!-- 折腾经历卡片 -->
         <div id="expSec" class="card">
             <div class="card-header"><i class="fas fa-history"></i> 折腾经历</div>
             <ul style="list-style: none; line-height: 2; font-size: 0.95rem; opacity: 0.9;">
@@ -402,13 +588,31 @@
             </ul>
         </div>
 
+        <!-- GitHub 仓库卡片（动态加载，含搜索、筛选和横向滚动） -->
         <div id="githubSec" class="card">
             <div class="card-header"><i class="fab fa-github-alt"></i> 所有仓库 (实时)</div>
+            
+            <!-- 搜索框 -->
+            <div class="search-box">
+                <input type="text" id="repoSearch" placeholder="🔍 搜索仓库名称或描述..." autocomplete="off">
+            </div>
+            
+            <!-- 语言筛选器（自动换行，不超出屏幕） -->
+            <div class="github-header-row">
+                <div class="filter-label">
+                    <i class="fas fa-filter"></i> 按语言筛选：
+                </div>
+                <div class="filter-wrapper" id="language-filters">
+                    <!-- 动态生成语言筛选按钮，包括"全部" -->
+                </div>
+            </div>
+            
             <div id="repo-container">
                 <div style="grid-column: span 2; text-align: center; opacity: 0.5; font-size: 0.8rem;">正在同步 GitHub 数据...</div>
             </div>
         </div>
 
+        <!-- 社交联系卡片 -->
         <div id="contactSec" class="card">
             <div class="card-header"><i class="fas fa-link"></i> 社交联系</div>
             <div class="contact-row">
@@ -419,6 +623,7 @@
             </div>
         </div>
 
+        <!-- 页脚 -->
         <footer>
             <p>© 2026 Crafted by ssbtt</p>
             <p style="margin-top: 5px;">Smooth Motion & Glassmorphism</p>
@@ -427,50 +632,190 @@
 </div>
 
 <script>
+    // ============================================
+    // 配置常量区
+    // ============================================
     const CONFIG = {
         QQ_NUMBER: '1973737092',
         BILI_UID: '3546557150399113',
         WECHAT_ID: 'ssbtt114514',
-        GITHUB_API_URL: 'https://api.github.com/users/ssbtt114514/repos?sort=updated',
+        GITHUB_API_URL: 'https://api.github.com/users/ssbtt114514/repos?sort=updated&per_page=100',
         GITHUB_HOMEPAGE: 'https://github.com/ssbtt114514',
         QQ_ZONE_URL: 'https://user.qzone.qq.com/',
         BILI_SPACE_URL: 'https://space.bilibili.com/'
     };
 
-    async function fetchAndRenderRepos() {
+    // 全局变量
+    let allRepos = [];
+    let currentLanguage = 'all';
+    let currentSearch = '';
+
+    // ========== GitHub 仓库拉取模块 ==========
+    async function fetchRepos() {
         const container = document.getElementById('repo-container');
-        const countChip = document.getElementById('repo-count-chip');
-        if (container) container.innerHTML = '<div style="grid-column: span 2; text-align: center; opacity: 0.5;"><i class="fas fa-spinner fa-pulse"></i> 正在同步 GitHub 数据...</div>';
+        
+        if (container) {
+            container.innerHTML = '<div style="grid-column: span 2; text-align: center; opacity: 0.5;"><i class="fas fa-spinner fa-pulse"></i> 正在同步 GitHub 数据...</div>';
+        }
+        
         try {
             const response = await fetch(CONFIG.GITHUB_API_URL);
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const repos = await response.json();
-            if (countChip) countChip.innerHTML = `<i class="fab fa-github"></i> 仓库 (${repos.length})`;
-            if (container) {
-                container.innerHTML = '';
-                repos.forEach(repo => {
-                    const card = document.createElement('a');
-                    card.className = 'repo-card';
-                    card.href = repo.html_url;
-                    card.target = '_blank';
-                    card.rel = 'noopener noreferrer';
-                    card.innerHTML = `<div style="font-weight:600; margin-bottom:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(repo.name)}</div><div style="font-size:0.7rem; opacity:0.8;">⭐ ${repo.stargazers_count} | ${repo.language || 'Mixed'}</div>`;
-                    container.appendChild(card);
-                });
+            allRepos = repos;
+            
+            // 更新目录中的仓库数量显示
+            const countChip = document.getElementById('repo-count-chip');
+            if (countChip) {
+                countChip.innerHTML = `<i class="fab fa-github"></i> 仓库 (${allRepos.length})`;
             }
+            
+            // 生成语言筛选按钮
+            generateLanguageFilters();
+            
+            // 渲染仓库列表
+            renderRepos();
+            
         } catch (error) {
-            if (container) container.innerHTML = '<div style="grid-column: span 2; text-align: center; opacity: 0.5;">仓库加载失败，请检查网络</div>';
-            if (countChip) countChip.innerHTML = `<i class="fab fa-github"></i> 仓库 (加载失败)`;
+            console.error('GitHub API 错误:', error);
+            const container = document.getElementById('repo-container');
+            if (container) {
+                container.innerHTML = '<div style="grid-column: span 2; text-align: center; opacity: 0.5;">仓库加载失败，请检查网络</div>';
+            }
+            const countChip = document.getElementById('repo-count-chip');
+            if (countChip) {
+                countChip.innerHTML = `<i class="fab fa-github"></i> 仓库 (加载失败)`;
+            }
         }
     }
     
-    function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'); }
+    // 生成语言筛选按钮（自动换行布局，包含"全部"按钮）
+    function generateLanguageFilters() {
+        const languages = new Set();
+        languages.add('all');  // 确保"全部"在最前面
+        
+        allRepos.forEach(repo => {
+            if (repo.language) {
+                languages.add(repo.language);
+            } else {
+                languages.add('Mixed');
+            }
+        });
+        
+        const filterContainer = document.getElementById('language-filters');
+        if (!filterContainer) return;
+        
+        filterContainer.innerHTML = '';
+        
+        // 按语言名称排序，但确保"all"始终在第一个
+        const sortedLangs = Array.from(languages).sort((a, b) => {
+            if (a === 'all') return -1;
+            if (b === 'all') return 1;
+            return a.localeCompare(b);
+        });
+        
+        sortedLangs.forEach(lang => {
+            const displayLang = lang === 'all' ? '全部' : lang;
+            const chip = document.createElement('span');
+            chip.className = 'filter-chip' + (currentLanguage === lang ? ' active' : '');
+            chip.setAttribute('data-lang', lang);
+            chip.innerHTML = lang === 'all' ? '<i class="fas fa-globe"></i> 全部' : `<i class="fas fa-code"></i> ${escapeHtml(displayLang)}`;
+            chip.addEventListener('click', () => {
+                document.querySelectorAll('#language-filters .filter-chip').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                currentLanguage = lang;
+                renderRepos();
+            });
+            filterContainer.appendChild(chip);
+        });
+    }
+    
+    // 过滤并渲染仓库
+    function renderRepos() {
+        const container = document.getElementById('repo-container');
+        if (!container) return;
+        
+        let filteredRepos = allRepos;
+        
+        // 按语言筛选
+        if (currentLanguage !== 'all') {
+            filteredRepos = filteredRepos.filter(repo => {
+                const repoLang = repo.language || 'Mixed';
+                return repoLang === currentLanguage;
+            });
+        }
+        
+        // 按搜索关键词筛选
+        if (currentSearch.trim()) {
+            const searchLower = currentSearch.toLowerCase().trim();
+            filteredRepos = filteredRepos.filter(repo => {
+                const nameMatch = repo.name.toLowerCase().includes(searchLower);
+                const descMatch = repo.description && repo.description.toLowerCase().includes(searchLower);
+                return nameMatch || descMatch;
+            });
+        }
+        
+        if (filteredRepos.length === 0) {
+            container.innerHTML = '<div style="grid-column: span 2; text-align: center; opacity: 0.6; padding: 40px;"><i class="fas fa-search"></i> 没有找到匹配的仓库</div>';
+            return;
+        }
+        
+        container.innerHTML = '';
+        filteredRepos.forEach(repo => {
+            const card = document.createElement('a');
+            card.className = 'repo-card';
+            card.href = repo.html_url;
+            card.target = '_blank';
+            card.rel = 'noopener noreferrer';
+            
+            const lastUpdated = new Date(repo.updated_at).toLocaleDateString('zh-CN');
+            const description = repo.description 
+                ? repo.description.substring(0, 80) + (repo.description.length > 80 ? '...' : '') 
+                : '暂无描述';
+            
+            card.innerHTML = `
+                <div style="font-weight:600; margin-bottom:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                    <i class="fab fa-github"></i> ${escapeHtml(repo.name)}
+                </div>
+                <div style="font-size:0.7rem; opacity:0.85; margin-bottom:8px; line-height:1.4; word-break:break-word;">
+                    📝 ${escapeHtml(description)}
+                </div>
+                <div style="font-size:0.65rem; opacity:0.7; display: flex; gap: 12px; flex-wrap: wrap;">
+                    <span><i class="far fa-star"></i> ⭐ ${repo.stargazers_count}</span>
+                    <span><i class="far fa-calendar-alt"></i> ${lastUpdated}</span>
+                    <span><i class="fas fa-tag"></i> ${repo.language || 'Mixed'}</span>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+    
+    // 搜索框事件绑定
+    function initSearchFilter() {
+        const searchInput = document.getElementById('repoSearch');
+        if (!searchInput) return;
+        
+        searchInput.addEventListener('input', (e) => {
+            currentSearch = e.target.value;
+            renderRepos();
+        });
+    }
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
+    }
 
+    // ========== 社交平台跳转模块 ==========
     function openQQHomepage(qq) {
         const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|Windows Phone/i.test(navigator.userAgent);
         if (isMobile) {
             window.location.href = `mqq://card/show_pslcard?uin=${qq}`;
-            setTimeout(() => { if (confirm('无法唤起QQ，是否复制QQ号？')) navigator.clipboard.writeText(qq).then(() => alert(`QQ号 ${qq} 已复制`)); }, 800);
+            setTimeout(() => {
+                if (confirm('无法唤起QQ，是否复制QQ号？')) {
+                    navigator.clipboard.writeText(qq).then(() => alert(`QQ号 ${qq} 已复制`));
+                }
+            }, 800);
         } else {
             window.open(`${CONFIG.QQ_ZONE_URL}${qq}`, '_blank', 'noopener,noreferrer');
         }
@@ -480,32 +825,72 @@
         const ua = navigator.userAgent;
         const isInApp = /bilibili/i.test(ua);
         const isMobile = /Android|iPhone|iPad/i.test(ua);
-        if (isInApp) window.location.href = `bilibili://space/${uid}`;
-        else if (isMobile) { window.location.href = `bilibili://space/${uid}`; setTimeout(() => { window.location.href = `${CONFIG.BILI_SPACE_URL}${uid}`; }, 800); }
-        else window.open(`${CONFIG.BILI_SPACE_URL}${uid}`, '_blank', 'noopener,noreferrer');
+        if (isInApp) {
+            window.location.href = `bilibili://space/${uid}`;
+        } else if (isMobile) {
+            window.location.href = `bilibili://space/${uid}`;
+            setTimeout(() => {
+                window.location.href = `${CONFIG.BILI_SPACE_URL}${uid}`;
+            }, 800);
+        } else {
+            window.open(`${CONFIG.BILI_SPACE_URL}${uid}`, '_blank', 'noopener,noreferrer');
+        }
     }
     
     function copyWechatId() {
-        navigator.clipboard.writeText(CONFIG.WECHAT_ID).then(() => alert(`微信号 ${CONFIG.WECHAT_ID} 已复制，请去微信搜索`)).catch(() => { const ta = document.createElement('textarea'); ta.value = CONFIG.WECHAT_ID; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); alert(`微信号 ${CONFIG.WECHAT_ID} 已复制，请去微信搜索`); });
+        navigator.clipboard.writeText(CONFIG.WECHAT_ID).then(() => {
+            alert(`微信号 ${CONFIG.WECHAT_ID} 已复制，请去微信搜索`);
+        }).catch(() => {
+            const ta = document.createElement('textarea');
+            ta.value = CONFIG.WECHAT_ID;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            alert(`微信号 ${CONFIG.WECHAT_ID} 已复制，请去微信搜索`);
+        });
     }
 
+    // ========== UI 交互模块 ==========
     function initThemeToggle() {
         const themeBtn = document.getElementById('themeSwitch');
         if (!themeBtn) return;
-        if (localStorage.getItem('theme') === 'dark') { document.body.classList.add('dark'); themeBtn.innerHTML = '<i class="fas fa-sun" style="color:#ffdf8c"></i>'; }
-        themeBtn.addEventListener('click', () => { const isDark = document.body.classList.toggle('dark'); themeBtn.innerHTML = isDark ? '<i class="fas fa-sun" style="color:#ffdf8c"></i>' : '<i class="fas fa-moon"></i>'; localStorage.setItem('theme', isDark ? 'dark' : 'light'); });
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark');
+            themeBtn.innerHTML = '<i class="fas fa-sun" style="color:#ffdf8c"></i>';
+        }
+        themeBtn.addEventListener('click', () => {
+            const isDark = document.body.classList.toggle('dark');
+            themeBtn.innerHTML = isDark ? '<i class="fas fa-sun" style="color:#ffdf8c"></i>' : '<i class="fas fa-moon"></i>';
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        });
     }
     
     function initDirectoryScroll() {
         document.querySelectorAll('.dir-chip').forEach(chip => {
             const targetId = chip.getAttribute('data-target');
             if (!targetId) return;
-            chip.addEventListener('click', (e) => { e.preventDefault(); const target = document.getElementById(targetId); if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); target.style.transition = 'box-shadow 0.3s'; target.style.boxShadow = '0 0 0 3px var(--primary-accent)'; setTimeout(() => { target.style.boxShadow = ''; }, 600); } });
+            chip.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = document.getElementById(targetId);
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    target.style.transition = 'box-shadow 0.3s';
+                    target.style.boxShadow = '0 0 0 3px var(--primary-accent)';
+                    setTimeout(() => { target.style.boxShadow = ''; }, 600);
+                }
+            });
         });
     }
     
     function initSkillBadges() {
-        document.querySelectorAll('.clickable-badge').forEach(badge => { badge.addEventListener('click', (e) => { e.stopPropagation(); const url = badge.getAttribute('data-url'); if (url) window.open(url, '_blank', 'noopener,noreferrer'); }); });
+        document.querySelectorAll('.clickable-badge').forEach(badge => {
+            badge.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const url = badge.getAttribute('data-url');
+                if (url) window.open(url, '_blank', 'noopener,noreferrer');
+            });
+        });
     }
     
     function initContactButtons() {
@@ -527,9 +912,23 @@
         });
     }
     
-    function addSecurityAttributes() { document.querySelectorAll('a[target="_blank"]').forEach(link => link.setAttribute('rel', 'noopener noreferrer')); }
+    function addSecurityAttributes() {
+        document.querySelectorAll('a[target="_blank"]').forEach(link => {
+            link.setAttribute('rel', 'noopener noreferrer');
+        });
+    }
 
-    function init() { fetchAndRenderRepos(); initThemeToggle(); initDirectoryScroll(); initSkillBadges(); initContactButtons(); initAvatarAnimation(); addSecurityAttributes(); }
+    // ========== 页面初始化入口 ==========
+    function init() {
+        fetchRepos();
+        initSearchFilter();
+        initThemeToggle();
+        initDirectoryScroll();
+        initSkillBadges();
+        initContactButtons();
+        initAvatarAnimation();
+        addSecurityAttributes();
+    }
     
     document.addEventListener('DOMContentLoaded', init);
 </script>
