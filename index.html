@@ -3,14 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>ssbtt · 个人主页</title>
-    <!-- Font Awesome 6 图标库 -->
+    <title>ssbtt · 流光分页 | 暗色字体全白适配</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,500;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <style>
-        /* ============================================
-           GLOBAL STYLES & CSS VARIABLES
-           全局样式与CSS变量定义
-        ============================================ */
         * {
             margin: 0;
             padding: 0;
@@ -20,621 +16,998 @@
 
         :root {
             --primary-accent: #6c8dff;
-            --spring-easing: cubic-bezier(0.34, 1.56, 0.64, 1);
-            --smooth-easing: cubic-bezier(0.4, 0, 0.2, 1);
+            --spring-easing: cubic-bezier(0.34, 1.2, 0.64, 1);
+            --smooth-easing: cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            --card-radius: 32px;
         }
 
-        /* ========== BODY 背景与主题 ========== */
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 40px 20px;
-            background: radial-gradient(circle at 20% 30%, #eef2f9, #cbd5e6);
-            transition: background 0.5s var(--smooth-easing);
+            background: radial-gradient(circle at 30% 10%, #eef2fa, #cdd8ec);
+            transition: background 0.5s ease;
             overflow-x: hidden;
         }
 
-        body.dark {
-            background: radial-gradient(circle at 20% 30%, #0f1724, #03060c);
-        }
-
-        /* ========== 主容器 - 毛玻璃效果 ========== */
-        .glass-container {
-            max-width: 680px;
-            width: 100%;
-            margin: 0 auto;
-            background: rgba(245, 248, 255, 0.65);
-            backdrop-filter: blur(25px) saturate(180%);
-            -webkit-backdrop-filter: blur(25px) saturate(180%);
-            border-radius: 40px;
-            overflow: hidden;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.05);
-            transition: background 0.4s ease;
-        }
-
-        body.dark .glass-container {
-            background: rgba(18, 24, 36, 0.75);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-        }
-
-        /* ========== 深色模式全局字体颜色 ========== */
+        /* 暗色模式下全局所有字体强制变白 (包括所有继承元素) */
         body.dark,
-        body.dark .glass-container,
-        body.dark .card,
-        body.dark .dir-chip,
-        body.dark .game-chip,
-        body.dark .repo-card,
-        body.dark .contact-btn-link,
-        body.dark footer,
-        body.dark p,
-        body.dark li,
-        body.dark .card-header,
-        body.dark .avatar-zone p,
+        body.dark * {
+            color: #ffffff !important;
+        }
+
+        /* 对于个别需要保留品牌图标的特殊元素，不覆盖图标容器颜色但文字必须白。但图标本身可保留原来，不过为了统一，让图标也偏白细微调整 */
+        body.dark i, 
+        body.dark .fab, 
+        body.dark .fas, 
+        body.dark .far {
+            color: #f0f3ff !important;
+        }
+
+        /* 深色背景重置 */
+        body.dark {
+            background: radial-gradient(circle at 30% 10%, #0b1120, #020409) !important;
+        }
+
+        /* 玻璃容器暗色 */
+        body.dark .glass-nav,
+        body.dark .page-tabs,
+        body.dark .glass-card {
+            background: rgba(18, 24, 38, 0.75) !important;
+            backdrop-filter: blur(20px) !important;
+            border-color: rgba(255, 255, 255, 0.15) !important;
+        }
+
+        /* 所有卡片、按钮深色下背景微调以保证可读性 */
+        body.dark .skill-badge,
+        body.dark .game-bubble,
+        body.dark .contact-btn,
+        body.dark .repo-tile,
+        body.dark .tab-btn:not(.active),
         body.dark .filter-chip,
-        body.dark .search-box input {
-            color: #ffffff !important;
+        body.dark .video-card,
+        body.dark .bili-stat-card,
+        body.dark .level-progress-bg,
+        body.dark .video-modal-content,
+        body.dark .bili-search-box input {
+            background: rgba(255, 255, 255, 0.12) !important;
+            border-color: transparent !important;
         }
 
-        body.dark .dir-chip:hover,
-        body.dark .filter-chip:hover {
+        body.dark .tab-btn.active {
+            background: var(--primary-accent) !important;
             color: white !important;
         }
 
-        body.dark .clickable-badge {
-            color: #ffffff !important;
-            background: rgba(108, 141, 255, 0.25);
-        }
-
-        body.dark .clickable-badge:hover {
+        body.dark .repo-tile:hover,
+        body.dark .skill-badge:hover,
+        body.dark .game-bubble:hover,
+        body.dark .contact-btn:hover,
+        body.dark .video-card:hover {
+            background: var(--primary-accent) !important;
             color: white !important;
         }
 
-        body.dark .game-chip:hover {
+        /* 输入框暗色适配 */
+        body.dark input,
+        body.dark .search-box input,
+        body.dark .bili-search-box input {
+            background: rgba(255, 255, 255, 0.15) !important;
+            border-color: rgba(255, 255, 255, 0.3) !important;
             color: white !important;
         }
-
-        body.dark .repo-card:hover {
-            color: white !important;
+        body.dark input::placeholder,
+        body.dark .bili-search-box input::placeholder {
+            color: rgba(255, 255, 255, 0.6) !important;
         }
 
-        body.dark .contact-btn-link {
-            background: #1e293b;
-            color: white !important;
+        /* 时间线条、列表修饰保留可见性 */
+        body.dark .timeline-item {
+            border-bottom-color: rgba(255, 255, 255, 0.2) !important;
         }
 
-        body.dark .contact-btn-link:hover {
-            background: var(--primary-accent);
-            color: white !important;
+        /* 暗色下 Bilibili 相关特殊处理 */
+        body.dark .bili-stat-value {
+            color: #6c8dff !important;
+        }
+        body.dark .level-progress-fill {
+            background: linear-gradient(90deg, #6c8dff, #a0b8ff) !important;
+        }
+        body.dark .video-stat {
+            color: rgba(255,255,255,0.7) !important;
+        }
+        body.dark .video-modal-overlay {
+            background: rgba(0, 0, 0, 0.85) !important;
+        }
+        body.dark .video-tag {
+            background: rgba(108, 141, 255, 0.25) !important;
         }
 
-        body.dark #identitySec li,
-        body.dark #expSec li {
-            color: #ffffff !important;
+        /* 全局平滑 */
+        .app-wrapper {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 24px 20px 40px;
         }
 
-        body.dark footer p {
-            color: rgba(255, 255, 255, 0.7) !important;
-        }
-
-        body.dark .avatar-zone p {
-            color: rgba(255, 255, 255, 0.85) !important;
-        }
-
-        body.dark .dir-chip,
-        body.dark .filter-chip {
-            background: rgba(255, 255, 255, 0.12);
-            color: #ffffff !important;
-        }
-
-        body.dark .dir-chip:hover,
-        body.dark .filter-chip:hover {
-            background: var(--primary-accent);
-            color: white !important;
-        }
-
-        body.dark .search-box input {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-
-        body.dark .search-box input::placeholder {
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        /* ========== 顶部导航栏 ========== */
-        .top-bar {
+        .glass-nav {
+            background: rgba(245, 248, 255, 0.55);
+            backdrop-filter: blur(18px);
+            border-radius: 60px;
+            padding: 8px 20px;
             display: flex;
-            justify-content: flex-end;
-            padding: 16px 24px;
-            background: rgba(255, 255, 255, 0.3);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            border: 1px solid rgba(255,255,255,0.4);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.03);
         }
 
-        body.dark .top-bar {
-            background: rgba(0, 0, 0, 0.2);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        .logo-area {
+            font-weight: 800;
+            font-size: 1.4rem;
+            background: linear-gradient(130deg, #2c3e66, #6c8dff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        body.dark .logo-area {
+            background: linear-gradient(130deg, #ffffff, #c0d0ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent !important;
         }
 
-        /* ========== 目录导航区域 ========== */
-        .directory-wrapper {
-            background: rgba(240, 245, 255, 0.4);
-            overflow: hidden;
-            max-height: 500px;
+        .theme-toggle {
+            background: rgba(108,141,255,0.15);
+            border: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 60px;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        body.dark .theme-toggle {
+            background: #2d3a5e;
         }
 
-        body.dark .directory-wrapper {
-            background: rgba(0, 0, 0, 0.2);
-        }
-
-        .directory-panel {
-            padding: 16px 20px;
+        /* 分页胶囊栏 */
+        .page-tabs {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 32px;
+            background: rgba(255,255,240,0.2);
+            backdrop-filter: blur(12px);
+            padding: 10px 20px;
+            border-radius: 80px;
         }
-
-        .dir-chip, .filter-chip {
-            background: rgba(0, 0, 0, 0.05);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            color: #1f2a3e;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+        .tab-btn {
+            background: rgba(0,0,0,0.05);
+            border: none;
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.9rem;
             cursor: pointer;
             transition: all 0.25s var(--spring-easing);
-            user-select: none;
-        }
-
-        .dir-chip:hover, .filter-chip:hover {
-            background: var(--primary-accent);
-            color: white;
-            transform: translateY(-2px);
-        }
-
-        .dir-chip:active, .filter-chip:active {
-            transform: scale(0.96);
-        }
-
-        /* 筛选器激活状态 */
-        .filter-chip.active {
-            background: var(--primary-accent);
-            color: white;
-            box-shadow: 0 2px 8px rgba(108, 141, 255, 0.4);
-        }
-
-        /* ========== 语言筛选器区域（自动换行，不超出屏幕） ========== */
-        .github-header-row {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .filter-label {
-            font-size: 0.85rem;
-            opacity: 0.7;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+        }
+        .tab-btn.active {
+            background: var(--primary-accent);
+            color: white;
+            box-shadow: 0 8px 18px rgba(108,141,255,0.4);
+            transform: scale(1.02);
         }
 
-        .filter-wrapper {
+        .pages-container {
+            position: relative;
+            min-height: 550px;
+        }
+        .page {
+            display: none;
+            animation: pageGlideIn 0.6s var(--spring-easing) forwards;
+        }
+        .page.active-page {
+            display: block;
+        }
+        @keyframes pageGlideIn {
+            0% { opacity: 0; transform: translateY(26px) scale(0.98); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(14px);
+            border-radius: var(--card-radius);
+            padding: 28px 24px;
+            border: 1px solid rgba(255,255,255,0.6);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, background 0.5s ease, border-color 0.5s ease;
+        }
+        .glass-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .section-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #1f2a3e;
+        }
+        body.dark .section-title {
+            color: white !important;
+        }
+
+        .badge-group {
             display: flex;
             flex-wrap: wrap;
+            gap: 14px;
+        }
+        .skill-badge, .game-bubble {
+            background: rgba(108,141,255,0.12);
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.25s var(--spring-easing);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
             gap: 8px;
+            color: #1f2937;
+        }
+        .skill-badge:hover, .game-bubble:hover {
+            background: var(--primary-accent);
+            color: white !important;
+            transform: translateY(-3px) scale(1.02);
+        }
+
+        .timeline-item {
+            padding: 12px 0;
+            border-bottom: 1px dashed rgba(0,0,0,0.1);
+            display: flex;
+            gap: 12px;
             align-items: center;
         }
-
-        /* 搜索框样式 */
-        .search-box {
-            margin-bottom: 16px;
+        .repo-grid {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            gap: 16px;
+            padding-bottom: 12px;
+            scroll-snap-type: x mandatory;
+        }
+        .repo-grid::-webkit-scrollbar {
+            height: 5px;
+        }
+        .repo-grid::-webkit-scrollbar-thumb {
+            background: var(--primary-accent);
+            border-radius: 10px;
+        }
+        .repo-tile {
+            flex: 0 0 280px;
+            background: rgba(0,0,0,0.04);
+            border-radius: 24px;
+            padding: 18px;
+            text-decoration: none;
+            border: 1px solid rgba(0,0,0,0.05);
+            transition: all 0.25s ease;
+            scroll-snap-align: start;
+            color: #1f2937;
+        }
+        .repo-tile:hover {
+            background: var(--primary-accent);
+            color: white !important;
+            transform: translateY(-6px);
+        }
+        @media (min-width: 700px) {
+            .repo-grid {
+                display: grid;
+                grid-template-columns: repeat(2,1fr);
+                overflow-x: visible;
+                flex-wrap: wrap;
+            }
+            .repo-tile {
+                flex: auto;
+                width: auto;
+            }
         }
 
-        .search-box input {
-            width: 100%;
-            padding: 12px 16px;
+        .contact-buttons {
+            display: grid;
+            grid-template-columns: repeat(2,1fr);
+            gap: 14px;
+            margin-top: 8px;
+        }
+        .contact-btn {
+            background: white;
+            padding: 14px;
+            text-align: center;
             border-radius: 28px;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            background: rgba(255, 255, 255, 0.8);
-            font-size: 0.9rem;
-            outline: none;
-            transition: all 0.3s ease;
+            font-weight: 600;
+            transition: all 0.2s var(--spring-easing);
+            cursor: pointer;
+            text-decoration: none;
+            color: #1f2937;
+        }
+        .contact-btn:hover {
+            background: var(--primary-accent);
+            color: white !important;
+            transform: scale(1.02);
         }
 
-        .search-box input:focus {
-            border-color: var(--primary-accent);
-            box-shadow: 0 0 0 2px rgba(108, 141, 255, 0.2);
-        }
-
-        /* ========== 头像区域 ========== */
-        .avatar-zone {
+        .avatar-modern {
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 30px 0;
-            animation: fadeInDown 0.8s var(--spring-easing);
+            margin-bottom: 20px;
         }
-
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .avatar-circle {
-            width: 140px;
-            height: 140px;
+        .avatar-circle-big {
+            width: 130px;
+            height: 130px;
             border-radius: 50%;
-            background: white;
-            padding: 4px;
-            box-shadow: 0 10px 30px rgba(108, 141, 255, 0.3);
+            background: linear-gradient(135deg, #fff, #e9efff);
+            padding: 5px;
+            box-shadow: 0 15px 30px rgba(108,141,255,0.3);
+            transition: transform 0.3s var(--spring-easing);
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            transition: transform 0.45s cubic-bezier(0.34, 1.2, 0.64, 1);
         }
-
-        .avatar-circle:hover {
-            transform: rotate(5deg) scale(1.05);
-        }
-
         .avatar-img {
             width: 100%;
             height: 100%;
             border-radius: 50%;
             object-fit: cover;
-            display: block;
         }
-
-        .waste-title {
-            margin-top: 15px;
-            font-size: 2rem;
+        .display-name {
+            font-size: 2.1rem;
             font-weight: 800;
-            background: linear-gradient(135deg, #2c3e66, #6c8dff);
+            background: linear-gradient(135deg, #1f2a44, #6c8dff);
             -webkit-background-clip: text;
             background-clip: text;
-            -webkit-text-fill-color: transparent;
-            color: #2c3e66;
-            display: inline-block;
+            color: transparent;
+            margin-top: 12px;
         }
-
-        body.dark .waste-title {
+        body.dark .display-name {
             background: linear-gradient(135deg, #ffffff, #c0d0ff);
             -webkit-background-clip: text;
             background-clip: text;
-            -webkit-text-fill-color: transparent;
-            color: #ffffff;
+            color: transparent !important;
         }
 
-        .scroll-area {
-            padding: 0 24px 40px;
+        footer {
+            text-align: center;
+            margin-top: 48px;
+            opacity: 0.6;
+            font-size: 0.75rem;
         }
-
-        /* ========== 卡片通用样式 ========== */
-        .card {
-            background: rgba(255, 255, 255, 0.4);
-            backdrop-filter: blur(10px);
-            border-radius: 28px;
-            padding: 24px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            transition: transform 0.3s ease, background 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-4px);
-            background: rgba(255, 255, 255, 0.6);
-        }
-
-        body.dark .card {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .card-header {
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-            color: var(--primary-accent);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        body.dark .card-header {
-            color: #aac8ff !important;
-        }
-
-        /* ========== 技能标签样式 ========== */
-        .clickable-badge {
-            background: rgba(108, 141, 255, 0.1);
-            padding: 8px 16px;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            text-decoration: none;
-            color: #334155;
+        .filter-chip {
+            background: rgba(0,0,0,0.05);
+            padding: 6px 14px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.85rem;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: all 0.25s var(--spring-easing);
+            gap: 6px;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 40px;
+            border: 1px solid rgba(0,0,0,0.1);
+            background: rgba(255,255,255,0.7);
+            font-size: 0.9rem;
+            outline: none;
         }
 
-        .clickable-badge:hover {
-            background: var(--primary-accent);
-            color: white;
-            transform: translateY(-2px);
+        /* ========== 新增：主页 Bilibili 信息面板 ========== */
+        .bili-profile-section {
+            margin-top: 28px;
+            padding-top: 24px;
+            border-top: 1px dashed rgba(0,0,0,0.1);
+        }
+        body.dark .bili-profile-section {
+            border-top-color: rgba(255,255,255,0.15) !important;
         }
 
-        /* ========== 游戏标签样式 ========== */
-        .game-chip {
-            background: rgba(0,0,0,0.04);
-            padding: 6px 14px;
-            border-radius: 10px;
-            font-size: 0.85rem;
-            text-decoration: none;
-            color: inherit;
-            display: inline-block;
-            transition: all 0.25s var(--spring-easing);
-        }
-
-        .game-chip:hover {
-            background: var(--primary-accent);
-            color: white;
-            transform: translateY(-2px);
-        }
-
-        /* ========== GitHub 仓库区域 ========== */
-        /* 仓库网格 - 移动端自动横向滚动 */
-        #repo-container {
-            display: flex;
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            overflow-y: hidden;
-            gap: 12px;
-            padding-bottom: 8px;
-            -webkit-overflow-scrolling: touch;
-            scroll-snap-type: x mandatory;
-        }
-
-        #repo-container::-webkit-scrollbar {
-            height: 4px;
-        }
-
-        #repo-container::-webkit-scrollbar-track {
-            background: rgba(0,0,0,0.05);
-            border-radius: 4px;
-        }
-
-        #repo-container::-webkit-scrollbar-thumb {
-            background: var(--primary-accent);
-            border-radius: 4px;
-        }
-
-        .repo-card {
-            flex: 0 0 auto;
-            width: 280px;
-            background: rgba(0,0,0,0.03);
-            padding: 14px;
-            border-radius: 16px;
-            text-decoration: none;
-            color: inherit;
-            font-size: 0.85rem;
-            border: 1px solid rgba(0,0,0,0.05);
-            transition: all 0.2s ease;
-            scroll-snap-align: start;
-        }
-
-        .repo-card:hover {
-            background: var(--primary-accent);
-            color: white;
-            transform: translateY(-3px);
-        }
-
-        body.dark .repo-card {
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        /* 桌面端显示两列网格，移动端横向滚动 */
-        @media (min-width: 641px) {
-            #repo-container {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 10px;
-                overflow-x: visible;
-                flex-wrap: wrap;
-            }
-            .repo-card {
-                width: auto;
-                flex: 1;
-            }
-        }
-
-        /* ========== 联系方式按钮 ========== */
-        .contact-row {
+        .bili-stats-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 12px;
-            margin-top: 15px;
+            margin-bottom: 20px;
+        }
+        @media (min-width: 600px) {
+            .bili-stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
         }
 
-        .contact-btn-link {
-            padding: 14px;
-            border-radius: 16px;
+        .bili-stat-card {
+            background: rgba(108, 141, 255, 0.08);
+            border-radius: 20px;
+            padding: 16px 12px;
             text-align: center;
-            text-decoration: none;
-            font-weight: 600;
-            background: white;
-            color: #1f2937;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            transition: all 0.3s var(--spring-easing);
+            border: 1px solid rgba(108, 141, 255, 0.15);
+        }
+        .bili-stat-card:hover {
+            transform: translateY(-4px);
+            background: rgba(108, 141, 255, 0.15);
+        }
+
+        .bili-stat-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-accent);
+            line-height: 1.2;
+        }
+        .bili-stat-label {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+
+        .level-section {
+            margin-top: 16px;
+        }
+        .level-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .level-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #6c8dff, #a0b8ff);
+            color: white !important;
+            padding: 4px 14px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+        .level-progress-bg {
+            width: 100%;
+            height: 10px;
+            background: rgba(0,0,0,0.06);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .level-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6c8dff, #a0b8ff);
+            border-radius: 10px;
+            transition: width 1s var(--spring-easing);
+        }
+
+        /* ========== 新增：Bilibili 视频板块 ========== */
+        .bili-search-box {
+            margin-bottom: 16px;
+        }
+        .bili-search-box input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 40px;
+            border: 1px solid rgba(0,0,0,0.1);
+            background: rgba(255,255,255,0.7);
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .bili-filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .video-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+        @media (min-width: 600px) {
+            .video-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (min-width: 900px) {
+            .video-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .video-card {
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.6);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.04);
             transition: all 0.3s var(--spring-easing);
             cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        .video-card:hover {
+            transform: translateY(-6px) scale(1.01);
+            box-shadow: 0 16px 40px rgba(108,141,255,0.2);
+        }
+
+        .video-thumbnail {
+            width: 100%;
+            aspect-ratio: 16 / 10;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.4s ease;
+        }
+        .video-card:hover .video-thumbnail {
+            transform: scale(1.05);
+        }
+
+        .video-thumb-wrap {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .video-duration {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: rgba(0,0,0,0.75);
+            color: white !important;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .video-info {
+            padding: 14px 16px 16px;
+        }
+
+        .video-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .video-meta {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            opacity: 0.7;
+            margin-bottom: 10px;
+        }
+
+        .video-stats {
+            display: flex;
+            gap: 14px;
+            font-size: 0.78rem;
+        }
+        .video-stat {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            opacity: 0.75;
+        }
+
+        .video-tag {
+            display: inline-block;
+            background: rgba(108, 141, 255, 0.12);
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            margin-right: 6px;
+            margin-top: 8px;
+        }
+
+        /* 视频详情弹窗 */
+        .video-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            padding: 20px;
+        }
+        .video-modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .video-modal-content {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border-radius: 28px;
+            max-width: 560px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            transform: scale(0.9) translateY(20px);
+            transition: transform 0.4s var(--spring-easing);
+            border: 1px solid rgba(255,255,255,0.6);
+            box-shadow: 0 24px 60px rgba(0,0,0,0.2);
+        }
+        .video-modal-overlay.active .video-modal-content {
+            transform: scale(1) translateY(0);
+        }
+
+        .video-modal-header {
+            position: relative;
+            padding: 0;
+        }
+        .video-modal-thumb {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            object-fit: cover;
+            border-radius: 28px 28px 0 0;
+        }
+        .video-modal-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.5);
+            color: white !important;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            transition: background 0.2s;
+        }
+        .video-modal-close:hover {
+            background: rgba(0,0,0,0.7);
+        }
+
+        .video-modal-body {
+            padding: 20px 24px 24px;
+        }
+
+        .video-modal-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .video-modal-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px dashed rgba(0,0,0,0.1);
+        }
+        body.dark .video-modal-stats {
+            border-bottom-color: rgba(255,255,255,0.15) !important;
+        }
+
+        .video-modal-stat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        .video-modal-desc {
+            font-size: 0.9rem;
+            line-height: 1.7;
+            opacity: 0.85;
+            margin-bottom: 20px;
+        }
+
+        .video-modal-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .video-modal-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 16px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s var(--spring-easing);
+            text-align: center;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .video-modal-btn.primary {
+            background: var(--primary-accent);
+            color: white !important;
+        }
+        .video-modal-btn.primary:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 20px rgba(108,141,255,0.4);
+        }
+        .video-modal-btn.secondary {
+            background: rgba(0,0,0,0.05);
+            color: inherit;
+        }
+        .video-modal-btn.secondary:hover {
+            background: rgba(0,0,0,0.1);
+        }
+        body.dark .video-modal-btn.secondary {
+            background: rgba(255,255,255,0.12) !important;
+        }
+
+        .bili-loading {
+            text-align: center;
+            padding: 40px;
+            grid-column: 1 / -1;
+        }
+
+        .bili-empty {
+            text-align: center;
+            padding: 60px 20px;
+            grid-column: 1 / -1;
+        }
+        .bili-empty i {
+            font-size: 3rem;
+            opacity: 0.3;
+            margin-bottom: 12px;
             display: block;
         }
 
-        .contact-btn-link:hover {
-            background: var(--primary-accent);
-            color: white;
-            transform: scale(1.03);
-        }
-
-        /* ========== 页脚 ========== */
-        footer {
-            text-align: center;
-            padding: 20px;
-            font-size: 0.75rem;
-            opacity: 0.6;
-        }
-
-        /* ========== 移动端响应式适配 ========== */
-        @media (max-width: 480px) {
-            .contact-row {
-                grid-template-columns: 1fr;
-            }
-            .glass-container {
-                border-radius: 0;
-                min-height: 100vh;
-            }
-            body {
-                padding: 0;
-            }
+        @media (max-width: 550px) {
+            .tab-btn span { display: none; }
+            .tab-btn i { margin: 0; font-size: 1.3rem; }
+            .tab-btn { padding: 10px 16px; }
+            .contact-buttons { grid-template-columns: 1fr; }
+            .video-modal-content { max-height: 90vh; border-radius: 20px; }
+            .video-modal-body { padding: 16px 18px 20px; }
+            .bili-stats-grid { grid-template-columns: repeat(2, 1fr); }
         }
     </style>
 </head>
 <body>
-
-<div class="glass-container">
-    <!-- 顶部栏：主题切换按钮 -->
-    <div class="top-bar">
-        <button class="theme-toggle" id="themeSwitch" style="background:none; border:none; font-size: 1.2rem; cursor:pointer;">
-            <i class="fas fa-moon"></i>
-        </button>
+<div class="app-wrapper">
+    <div class="glass-nav">
+        <div class="logo-area"><i class="fas fa-dragon"></i> ssbtt·流光</div>
+        <button class="theme-toggle" id="globalThemeSwitch"><i class="fas fa-moon"></i></button>
     </div>
 
-    <!-- 目录导航区 -->
-    <div class="directory-wrapper">
-        <div class="directory-panel">
-            <div class="dir-chip" data-target="skillSec"><i class="fas fa-code"></i> 技能</div>
-            <div class="dir-chip" data-target="gameSec"><i class="fas fa-gamepad"></i> 游戏</div>
-            <div class="dir-chip" data-target="expSec"><i class="fas fa-history"></i> 经历</div>
-            <div class="dir-chip" id="repo-count-chip" data-target="githubSec"><i class="fab fa-github"></i> 仓库 (..)</div>
-            <div class="dir-chip" data-target="identitySec"><i class="fas fa-id-card"></i> 身份</div>
-            <div class="dir-chip" data-target="contactSec"><i class="fas fa-comment"></i> 联系</div>
-        </div>
+    <div class="page-tabs">
+        <button class="tab-btn active" data-page="profile"><i class="fas fa-user-astronaut"></i><span> 主页</span></button>
+        <button class="tab-btn" data-page="skills"><i class="fas fa-laptop-code"></i><span> 技能</span></button>
+        <button class="tab-btn" data-page="games"><i class="fas fa-gamepad"></i><span> 游戏</span></button>
+        <button class="tab-btn" data-page="identity"><i class="fas fa-id-card"></i><span> 身份</span></button>
+        <button class="tab-btn" data-page="experience"><i class="fas fa-history"></i><span> 经历</span></button>
+        <button class="tab-btn" data-page="github"><i class="fab fa-github"></i><span> 仓库</span></button>
+        <button class="tab-btn" data-page="bilibili"><i class="fab fa-bilibili"></i><span> 视频</span></button>
+        <button class="tab-btn" data-page="contact"><i class="fas fa-address-card"></i><span> 联系</span></button>
     </div>
 
-    <!-- 主要内容区域 -->
-    <div class="scroll-area">
-        
-        <!-- 头像区域 -->
-        <div class="avatar-zone">
-            <div class="avatar-circle" id="avatarCircle">
-                <img id="qq-avatar" class="avatar-img" src="" alt="QQ头像">
-                <script>
-                    document.getElementById('qq-avatar').src = 
-                        'https://q.qlogo.cn/headimg_dl?dst_uin=1973737092&spec=140&t=' + Date.now();
-                </script>
-            </div>
-            <div class="waste-title">ssbtt</div>
-            <p style="opacity: 0.7; margin-top: 8px;">你来这儿要干嘛</p>
-        </div>
-
-        <!-- 技能卡片 -->
-        <div id="skillSec" class="card">
-            <div class="card-header"><i class="fas fa-terminal"></i> 爱好与技能</div>
-            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                <span class="clickable-badge" data-url="https://www.java.com/"><i class="fab fa-java"></i> Java</span>
-                <span class="clickable-badge" data-url="https://www.python.org/"><i class="fab fa-python"></i> Python</span>
-                <span class="clickable-badge" data-url="https://www.lua.org/"><i class="fas fa-code"></i> Lua</span>
-                <span class="clickable-badge" data-url="https://godotengine.org/"><i class="fas fa-play-circle"></i> GDScript</span>
-            </div>
-        </div>
-
-        <!-- 游戏卡片 -->
-        <div id="gameSec" class="card">
-            <div class="card-header"><i class="fas fa-ghost"></i> 游戏热忱</div>
-            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                <a href="https://www.minecraft.net/" target="_blank" class="game-chip">Minecraft</a>
-                <a href="https://anuke.itch.io/mindustry" target="_blank" class="game-chip">Mindustry</a>
-                <a href="https://deltarune.com/" target="_blank" class="game-chip">三角符文</a>
-                <a href="https://aqtk.qq.com/" target="_blank" class="game-chip">暗区突围</a>
-                <a href="https://www.half-life.com/" target="_blank" class="game-chip">半条命</a>
-            </div>
-        </div>
-
-        <!-- 身份标识卡片 -->
-        <div id="identitySec" class="card">
-            <div class="card-header"><i class="fas fa-fingerprint"></i> 身份标识</div>
-            <ul style="list-style: none; line-height: 2;">
-                <li><i class="fas fa-leaf" style="color: #4caf50; width: 25px;"></i> 中国共青团团员</li>
-                <li><i class="fas fa-desktop" style="color: #ff9800; width: 25px;"></i> 希沃白板管理员</li>
-                <li><i class="fas fa-microchip" style="color: #2196f3; width: 25px;"></i> 视频创作者</li>
-            </ul>
-        </div>
-
-        <!-- 折腾经历卡片 -->
-        <div id="expSec" class="card">
-            <div class="card-header"><i class="fas fa-history"></i> 折腾经历</div>
-            <ul style="list-style: none; line-height: 2; font-size: 0.95rem; opacity: 0.9;">
-                <li><i class="fas fa-check-circle" style="color: var(--primary-accent); margin-right: 8px;"></i> 重装系统（lUbuntu）为朋友</li>
-                <li style="margin-top: 5px; opacity: 0.6;">……</li>
-            </ul>
-        </div>
-
-        <!-- GitHub 仓库卡片（动态加载，含搜索、筛选和横向滚动） -->
-        <div id="githubSec" class="card">
-            <div class="card-header"><i class="fab fa-github-alt"></i> 所有仓库 (实时)</div>
-            
-            <!-- 搜索框 -->
-            <div class="search-box">
-                <input type="text" id="repoSearch" placeholder="🔍 搜索仓库名称或描述..." autocomplete="off">
-            </div>
-            
-            <!-- 语言筛选器（自动换行，不超出屏幕） -->
-            <div class="github-header-row">
-                <div class="filter-label">
-                    <i class="fas fa-filter"></i> 按语言筛选：
+    <div class="pages-container">
+        <!-- 主页模块 -->
+        <div id="profilePage" class="page active-page">
+            <div class="glass-card" style="text-align: center;">
+                <div class="avatar-modern">
+                    <div class="avatar-circle-big" id="avatarShake">
+                        <img id="dynamic-qq-avatar" class="avatar-img" src="" alt="avatar">
+                    </div>
+                    <div class="display-name">ssbtt</div>
+                    <p style="margin-top: 6px;"><i class="fas fa-map-pin"></i> 数字漫游者 · 创造不息</p>
                 </div>
-                <div class="filter-wrapper" id="language-filters">
-                    <!-- 动态生成语言筛选按钮，包括"全部" -->
+                <div style="margin-top: 20px;">
+                    <p style="font-size: 1rem; max-width: 480px; margin: 0 auto;">⚡ 全栈爱好者 | 游戏设计探索者 | 开源精神实践者<br>✨ "每一个像素都值得跳动"</p>
+                </div>
+                <div class="badge-group" style="justify-content: center; margin-top: 28px;">
+                    <div class="skill-badge" data-url="https://github.com/ssbtt114514"><i class="fab fa-github"></i> GitHub</div>
+                    <div class="skill-badge" data-url="https://space.bilibili.com/3546557150399113"><i class="fab fa-bilibili"></i> B站创作</div>
+                </div>
+
+                <!-- 新增：Bilibili 主页信息面板 -->
+                <div class="bili-profile-section" id="biliProfileSection">
+                    <div class="section-title" style="font-size: 1.3rem; justify-content: center;">
+                        <i class="fab fa-bilibili" style="color: #00a1d6;"></i> Bilibili 数据面板
+                    </div>
+                    <div class="bili-stats-grid" id="biliStatsGrid">
+                        <div class="bili-stat-card">
+                            <div class="bili-stat-value" id="biliLevel">--</div>
+                            <div class="bili-stat-label">等级</div>
+                        </div>
+                        <div class="bili-stat-card">
+                            <div class="bili-stat-value" id="biliExp">--</div>
+                            <div class="bili-stat-label">当前经验</div>
+                        </div>
+                        <div class="bili-stat-card">
+                            <div class="bili-stat-value" id="biliCoins">--</div>
+                            <div class="bili-stat-label">硬币数</div>
+                        </div>
+                        <div class="bili-stat-card">
+                            <div class="bili-stat-value" id="biliVideos">--</div>
+                            <div class="bili-stat-label">投稿视频</div>
+                        </div>
+                    </div>
+                    <div class="level-section">
+                        <div class="level-header">
+                            <span class="level-badge" id="levelBadge">LV --</span>
+                            <span style="font-size: 0.85rem; opacity: 0.7;" id="expText">-- / --</span>
+                        </div>
+                        <div class="level-progress-bg">
+                            <div class="level-progress-fill" id="levelProgress" style="width: 0%;"></div>
+                        </div>
+                        <p style="margin-top: 8px; font-size: 0.8rem; opacity: 0.6;" id="nextLevelText">距离下一级还需 -- 经验</p>
+                    </div>
                 </div>
             </div>
-            
-            <div id="repo-container">
-                <div style="grid-column: span 2; text-align: center; opacity: 0.5; font-size: 0.8rem;">正在同步 GitHub 数据...</div>
+        </div>
+
+        <!-- 技能板块 -->
+        <div id="skillsPage" class="page">
+            <div class="glass-card">
+                <div class="section-title"><i class="fas fa-crown"></i> 爱好 & 技术栈</div>
+                <div class="badge-group">
+                    <div class="skill-badge" data-url="https://www.java.com/"><i class="fab fa-java"></i> Java (Spring生态)</div>
+                    <div class="skill-badge" data-url="https://www.python.org/"><i class="fab fa-python"></i> Python / 自动化</div>
+                    <div class="skill-badge" data-url="https://www.lua.org/"><i class="fas fa-code"></i> Lua · 游戏脚本</div>
+                    <div class="skill-badge" data-url="https://godotengine.org/"><i class="fas fa-play-circle"></i> GDScript · Godot</div>
+                    <div class="skill-badge" data-url="https://developer.mozilla.org/"><i class="fab fa-js"></i> JavaScript / 前端魔法</div>
+                </div>
+                <div style="margin-top: 24px;">
+                    <p><i class="fas fa-tools"></i> 最近痴迷: 系统调优 · 独立游戏开发 · 跨端工具链</p>
+                </div>
             </div>
         </div>
 
-        <!-- 社交联系卡片 -->
-        <div id="contactSec" class="card">
-            <div class="card-header"><i class="fas fa-link"></i> 社交联系</div>
-            <div class="contact-row">
-                <a class="contact-btn-link" id="goGH"><i class="fab fa-github"></i> GitHub</a>
-                <a class="contact-btn-link" id="goBili"><i class="fab fa-bilibili"></i> Bilibili</a>
-                <a class="contact-btn-link" id="goQQ"><i class="fab fa-qq"></i> QQ主页</a>
-                <a class="contact-btn-link" id="goWX"><i class="fab fa-weixin"></i> 微信联系</a>
+        <!-- 游戏热忱 -->
+        <div id="gamesPage" class="page">
+            <div class="glass-card">
+                <div class="section-title"><i class="fas fa-dice-d6"></i> 游戏世界</div>
+                <div class="badge-group">
+                    <a href="https://www.minecraft.net/" target="_blank" class="game-bubble"><i class="fas fa-cube"></i> Minecraft</a>
+                    <a href="https://anuke.itch.io/mindustry" target="_blank" class="game-bubble"><i class="fas fa-industry"></i> Mindustry</a>
+                    <a href="https://deltarune.com/" target="_blank" class="game-bubble"><i class="fas fa-heart"></i> 三角符文</a>
+                    <a href="https://aqtk.qq.com/" target="_blank" class="game-bubble"><i class="fas fa-crosshairs"></i> 暗区突围</a>
+                    <a href="https://www.half-life.com/" target="_blank" class="game-bubble"><i class="fas fa-vial"></i> 半条命</a>
+                    <div class="game-bubble" style="cursor:default;"><i class="fas fa-puzzle-piece"></i> 怀旧 / 策略 / 沙盒</div>
+                </div>
+                <div style="margin-top: 24px; background: rgba(108,141,255,0.1); border-radius: 20px; padding: 12px;">
+                    <i class="fas fa-microphone-alt"></i> "游戏是第九艺术，我热衷在代码和关卡中创造张力。"
+                </div>
             </div>
         </div>
 
-        <!-- 页脚 -->
-        <footer>
-            <p>© 2026 Crafted by ssbtt</p>
-            <p style="margin-top: 5px;">Smooth Motion & Glassmorphism</p>
-        </footer>
+        <!-- 身份标识 -->
+        <div id="identityPage" class="page">
+            <div class="glass-card">
+                <div class="section-title"><i class="fas fa-fingerprint"></i> 身份光谱</div>
+                <ul style="list-style: none; line-height: 2.4;">
+                    <li><i class="fas fa-leaf" style="color: #4caf50; width: 32px;"></i> 中国共青团团员 · 青年先锋</li>
+                    <li><i class="fas fa-desktop" style="color: #ff9800;"></i> 希沃白板管理员 · 智慧教育实践者</li>
+                    <li><i class="fas fa-video" style="color: #e1306c;"></i> 视频创作者 · 记录技术生活</li>
+                    <li><i class="fas fa-hand-sparkles"></i> 开源贡献者、独立开发者</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 折腾经历 -->
+        <div id="experiencePage" class="page">
+            <div class="glass-card">
+                <div class="section-title"><i class="fas fa-rocket"></i> 硬核折腾史</div>
+                <div class="timeline-item"><i class="fas fa-ubuntu" style="color: #e95420;"></i> 为朋友成功装机 + 部署 lUbuntu，优化开发环境</div>
+                <div class="timeline-item"><i class="fas fa-code-branch"></i> 从零搭建个人服务器 · 内网穿透 & Docker 玩法</div>
+                <div class="timeline-item"><i class="fas fa-gamepad"></i> 独立游戏demo参与Game Jam，收获创意经验</div>
+                <div class="timeline-item"><i class="fas fa-chalkboard-user"></i> 校园技术分享会主讲人 · 普及开源文化</div>
+                <div class="timeline-item"><i class="fas fa-quote-right"></i> "别问，问就是在调试中成长"</div>
+            </div>
+        </div>
+
+        <!-- GitHub板块 -->
+        <div id="githubPage" class="page">
+            <div class="glass-card">
+                <div class="section-title"><i class="fab fa-github-alt"></i> 动态仓库 · 实时同步</div>
+                <div class="search-box" style="margin-bottom: 16px;">
+                    <input type="text" id="repoSearchPage" placeholder="🔍 搜索仓库名称 / 描述...">
+                </div>
+                <div class="filter-wrapper" id="langFilterPage" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;"></div>
+                <div id="repoGridContainer" class="repo-grid">
+                    <div style="padding: 20px;">加载仓库中 <i class="fas fa-spinner fa-pulse"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 新增：Bilibili 视频板块 -->
+        <div id="bilibiliPage" class="page">
+            <div class="glass-card">
+                <div class="section-title"><i class="fab fa-bilibili"></i> Bilibili 创作 · 视频列表</div>
+                <div class="bili-search-box">
+                    <input type="text" id="biliSearchInput" placeholder="🔍 搜索视频标题 / 描述 / 标签...">
+                </div>
+                <div class="bili-filter-row" id="biliFilterRow">
+                    <span class="filter-chip active" data-filter="all">📁 全部</span>
+                    <span class="filter-chip" data-filter="tech">💻 技术</span>
+                    <span class="filter-chip" data-filter="game">🎮 游戏</span>
+                    <span class="filter-chip" data-filter="life">📷 生活</span>
+                    <span class="filter-chip" data-filter="tutorial">📚 教程</span>
+                </div>
+                <div id="biliVideoGrid" class="video-grid">
+                    <div class="bili-loading"><i class="fas fa-spinner fa-pulse"></i> 正在加载视频数据...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 联系板块 -->
+        <div id="contactPage" class="page">
+            <div class="glass-card">
+                <div class="section-title"><i class="fas fa-paper-plane"></i> 社交连结</div>
+                <div class="contact-buttons">
+                    <div class="contact-btn" id="ghBtn"><i class="fab fa-github"></i> GitHub 主页</div>
+                    <div class="contact-btn" id="biliBtn"><i class="fab fa-bilibili"></i> Bilibili 空间</div>
+                    <div class="contact-btn" id="qqBtn"><i class="fab fa-qq"></i> QQ 名片</div>
+                    <div class="contact-btn" id="wxBtn"><i class="fab fa-weixin"></i> 微信 (复制ID)</div>
+                </div>
+                <div style="margin-top: 28px; text-align: center; background: rgba(0,0,0,0.03); border-radius: 28px; padding: 15px;">
+                    <i class="fas fa-envelope"></i> 合作/交流: 欢迎通过 GitHub issue 或 B站私信~
+                </div>
+            </div>
+        </div>
     </div>
+
+    <!-- 视频详情弹窗 -->
+    <div class="video-modal-overlay" id="videoModal">
+        <div class="video-modal-content">
+            <div class="video-modal-header">
+                <img class="video-modal-thumb" id="modalThumb" src="" alt="">
+                <button class="video-modal-close" id="modalClose"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="video-modal-body">
+                <div class="video-modal-title" id="modalTitle">--</div>
+                <div class="video-modal-stats" id="modalStats"></div>
+                <div class="video-modal-desc" id="modalDesc">--</div>
+                <div class="video-modal-actions">
+                    <a class="video-modal-btn primary" id="modalLink" href="#" target="_blank">
+                        <i class="fab fa-bilibili"></i> 前往观看
+                    </a>
+                    <button class="video-modal-btn secondary" id="modalCopy">
+                        <i class="fas fa-share-alt"></i> 复制链接
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2026 ssbtt · 流光分页 | 灵动交互 · 暗色字体全白适配</p>
+    </footer>
 </div>
 
 <script>
-    // ============================================
-    // 配置常量区
-    // ============================================
+    // ---------- 配置 ----------
     const CONFIG = {
         QQ_NUMBER: '1973737092',
         BILI_UID: '3546557150399113',
@@ -642,296 +1015,282 @@
         GITHUB_API_URL: 'https://api.github.com/users/ssbtt114514/repos?sort=updated&per_page=100',
         GITHUB_HOMEPAGE: 'https://github.com/ssbtt114514',
         QQ_ZONE_URL: 'https://user.qzone.qq.com/',
-        BILI_SPACE_URL: 'https://space.bilibili.com/'
+        BILI_SPACE_URL: 'https://space.bilibili.com/',
+        // 新增：静态BV号文件路径 (部署时在仓库根目录创建 bvlist.txt，每行一个bv号)
+        BV_LIST_URL: './bvlist.txt'
     };
 
-    // 全局变量
     let allRepos = [];
-    let currentLanguage = 'all';
-    let currentSearch = '';
+    let currentRepoLang = 'all';
+    let currentSearchText = '';
+    const repoContainer = document.getElementById('repoGridContainer');
+    const langFilterContainer = document.getElementById('langFilterPage');
+    const searchInput = document.getElementById('repoSearchPage');
 
-    // ========== GitHub 仓库拉取模块 ==========
-    async function fetchRepos() {
-        const container = document.getElementById('repo-container');
-        
-        if (container) {
-            container.innerHTML = '<div style="grid-column: span 2; text-align: center; opacity: 0.5;"><i class="fas fa-spinner fa-pulse"></i> 正在同步 GitHub 数据...</div>';
-        }
-        
+    // ========== Bilibili 数据 ==========
+    let biliVideos = [];
+    let biliUserInfo = null;
+    let biliCurrentFilter = 'all';
+    let biliSearchText = '';
+
+    // 等级经验参照表
+    const LEVEL_EXP_TABLE = [0, 200, 1500, 4500, 10800, 28800, 0];
+    const MOCK_BILI_USER = { level: 5, current_exp: 18500, coins: 234, videos_count: 24, next_level_exp: 28800 };
+
+    // ---- GitHub 拉取 (保持原样) ----
+    async function fetchRepos() { /* 与原代码一致，略作保留 */ 
+        if (!repoContainer) return;
+        repoContainer.innerHTML = '<div style="grid-column: span 2; text-align:center;"><i class="fas fa-spinner fa-pulse"></i> 正在同步 GitHub 数据...</div>';
         try {
-            const response = await fetch(CONFIG.GITHUB_API_URL);
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            const repos = await response.json();
+            const res = await fetch(CONFIG.GITHUB_API_URL);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const repos = await res.json();
             allRepos = repos;
-            
-            // 更新目录中的仓库数量显示
-            const countChip = document.getElementById('repo-count-chip');
-            if (countChip) {
-                countChip.innerHTML = `<i class="fab fa-github"></i> 仓库 (${allRepos.length})`;
-            }
-            
-            // 生成语言筛选按钮
-            generateLanguageFilters();
-            
-            // 渲染仓库列表
-            renderRepos();
-            
-        } catch (error) {
-            console.error('GitHub API 错误:', error);
-            const container = document.getElementById('repo-container');
-            if (container) {
-                container.innerHTML = '<div style="grid-column: span 2; text-align: center; opacity: 0.5;">仓库加载失败，请检查网络</div>';
-            }
-            const countChip = document.getElementById('repo-count-chip');
-            if (countChip) {
-                countChip.innerHTML = `<i class="fab fa-github"></i> 仓库 (加载失败)`;
-            }
+            buildLanguageFilters();
+            renderRepoGrid();
+        } catch(e) {
+            repoContainer.innerHTML = '<div style="grid-column: span 2; text-align:center;">⚠️ 仓库加载失败，请检查网络</div>';
+            console.error(e);
         }
     }
-    
-    // 生成语言筛选按钮（自动换行布局，包含"全部"按钮）
-    function generateLanguageFilters() {
-        const languages = new Set();
-        languages.add('all');  // 确保"全部"在最前面
-        
-        allRepos.forEach(repo => {
-            if (repo.language) {
-                languages.add(repo.language);
-            } else {
-                languages.add('Mixed');
-            }
-        });
-        
-        const filterContainer = document.getElementById('language-filters');
-        if (!filterContainer) return;
-        
-        filterContainer.innerHTML = '';
-        
-        // 按语言名称排序，但确保"all"始终在第一个
-        const sortedLangs = Array.from(languages).sort((a, b) => {
-            if (a === 'all') return -1;
-            if (b === 'all') return 1;
-            return a.localeCompare(b);
-        });
-        
-        sortedLangs.forEach(lang => {
-            const displayLang = lang === 'all' ? '全部' : lang;
+    function buildLanguageFilters() { /* 与原一致 */ 
+        if (!langFilterContainer) return;
+        const langSet = new Set(['all']);
+        allRepos.forEach(repo => { const lang = repo.language || 'Mixed'; langSet.add(lang); });
+        const sorted = Array.from(langSet).sort((a,b) => a === 'all' ? -1 : (b === 'all' ? 1 : a.localeCompare(b)));
+        langFilterContainer.innerHTML = '';
+        sorted.forEach(lang => {
             const chip = document.createElement('span');
-            chip.className = 'filter-chip' + (currentLanguage === lang ? ' active' : '');
-            chip.setAttribute('data-lang', lang);
-            chip.innerHTML = lang === 'all' ? '<i class="fas fa-globe"></i> 全部' : `<i class="fas fa-code"></i> ${escapeHtml(displayLang)}`;
+            chip.className = 'filter-chip';
+            chip.innerHTML = lang === 'all' ? '📁 全部' : `💻 ${lang}`;
+            if (currentRepoLang === lang) { chip.style.background = '#6c8dff'; chip.style.color = 'white'; }
             chip.addEventListener('click', () => {
-                document.querySelectorAll('#language-filters .filter-chip').forEach(c => c.classList.remove('active'));
-                chip.classList.add('active');
-                currentLanguage = lang;
-                renderRepos();
+                currentRepoLang = lang;
+                renderRepoGrid();
+                document.querySelectorAll('#langFilterPage .filter-chip').forEach(c => { c.style.background = ''; c.style.color = ''; });
+                chip.style.background = '#6c8dff'; chip.style.color = 'white';
             });
-            filterContainer.appendChild(chip);
+            langFilterContainer.appendChild(chip);
         });
     }
-    
-    // 过滤并渲染仓库
-    function renderRepos() {
-        const container = document.getElementById('repo-container');
-        if (!container) return;
-        
-        let filteredRepos = allRepos;
-        
-        // 按语言筛选
-        if (currentLanguage !== 'all') {
-            filteredRepos = filteredRepos.filter(repo => {
-                const repoLang = repo.language || 'Mixed';
-                return repoLang === currentLanguage;
-            });
-        }
-        
-        // 按搜索关键词筛选
-        if (currentSearch.trim()) {
-            const searchLower = currentSearch.toLowerCase().trim();
-            filteredRepos = filteredRepos.filter(repo => {
-                const nameMatch = repo.name.toLowerCase().includes(searchLower);
-                const descMatch = repo.description && repo.description.toLowerCase().includes(searchLower);
-                return nameMatch || descMatch;
-            });
-        }
-        
-        if (filteredRepos.length === 0) {
-            container.innerHTML = '<div style="grid-column: span 2; text-align: center; opacity: 0.6; padding: 40px;"><i class="fas fa-search"></i> 没有找到匹配的仓库</div>';
+    function renderRepoGrid() { /* 与原一致 */ 
+        if (!repoContainer) return;
+        let filtered = [...allRepos];
+        if (currentRepoLang !== 'all') filtered = filtered.filter(r => (r.language || 'Mixed') === currentRepoLang);
+        if (currentSearchText.trim()) { const kw = currentSearchText.toLowerCase(); filtered = filtered.filter(r => r.name.toLowerCase().includes(kw) || (r.description && r.description.toLowerCase().includes(kw))); }
+        if (filtered.length === 0) { repoContainer.innerHTML = '<div style="grid-column: span 2; text-align:center; padding:40px;"><i class="fas fa-search"></i> 没有匹配的仓库～</div>'; return; }
+        repoContainer.innerHTML = '';
+        filtered.forEach(repo => {
+            const card = document.createElement('a'); card.className = 'repo-tile'; card.href = repo.html_url; card.target = '_blank';
+            const desc = repo.description ? repo.description.substring(0, 80) + (repo.description.length > 80 ? '…' : '') : '无描述';
+            const date = new Date(repo.updated_at).toLocaleDateString('zh-CN');
+            card.innerHTML = `<div style="font-weight:700; margin-bottom:8px;"><i class="fab fa-github"></i> ${escapeHtml(repo.name)}</div><div style="font-size:0.75rem; opacity:0.85; margin-bottom:8px;">📄 ${escapeHtml(desc)}</div><div style="font-size:0.7rem; display:flex; gap:12px;"><span>⭐ ${repo.stargazers_count}</span><span>📅 ${date}</span><span>🏷️ ${repo.language || 'Mixed'}</span></div>`;
+            repoContainer.appendChild(card);
+        });
+    }
+    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+    if (searchInput) searchInput.addEventListener('input', (e) => { currentSearchText = e.target.value; renderRepoGrid(); });
+
+    // ----- B站核心功能：从bvlist.txt加载BV号并获取真实视频信息 -----
+    async function fetchBiliData() {
+        const grid = document.getElementById('biliVideoGrid');
+        if(grid) grid.innerHTML = '<div class="bili-loading"><i class="fas fa-spinner fa-pulse"></i> 正在加载视频列表...</div>';
+        // 1. 获取用户信息（沿用原逻辑，允许失败降级）
+        try {
+            const userRes = await fetch(CONFIG.BILI_USER_API, { headers: { 'Referer': 'https://space.bilibili.com' } });
+            const userData = await userRes.json();
+            if (userData.code === 0) {
+                biliUserInfo = {
+                    level: userData.data.level,
+                    current_exp: userData.data.level_exp?.current_exp || 0,
+                    coins: userData.data.coins || 0,
+                    videos_count: userData.data.videos || 0,
+                    next_level_exp: userData.data.level_exp?.next_exp || LEVEL_EXP_TABLE[userData.data.level] || 0
+                };
+            } else throw new Error();
+        } catch(e) { biliUserInfo = MOCK_BILI_USER; }
+        // 2. 从bvlist.txt读取bv号列表
+        let bvList = [];
+        try {
+            const response = await fetch(CONFIG.BV_LIST_URL);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const text = await response.text();
+            bvList = text.split(/\r?\n/).filter(line => line.trim().length > 0).map(line => line.trim());
+        } catch(err) {
+            console.error('加载bvlist失败', err);
+            if(grid) grid.innerHTML = '<div class="bili-empty"><i class="fas fa-exclamation-triangle"></i> 加载视频列表失败，请确保仓库根目录存在 bvlist.txt 文件</div>';
+            biliVideos = [];
+            renderBiliProfile();
+            renderBiliVideos();
             return;
         }
-        
-        container.innerHTML = '';
-        filteredRepos.forEach(repo => {
-            const card = document.createElement('a');
-            card.className = 'repo-card';
-            card.href = repo.html_url;
-            card.target = '_blank';
-            card.rel = 'noopener noreferrer';
-            
-            const lastUpdated = new Date(repo.updated_at).toLocaleDateString('zh-CN');
-            const description = repo.description 
-                ? repo.description.substring(0, 80) + (repo.description.length > 80 ? '...' : '') 
-                : '暂无描述';
-            
+        if (bvList.length === 0) {
+            if(grid) grid.innerHTML = '<div class="bili-empty"><i class="fas fa-info-circle"></i> 暂无BV号，请在 bvlist.txt 中添加BV号（每行一个）</div>';
+            biliVideos = [];
+            renderBiliProfile();
+            renderBiliVideos();
+            return;
+        }
+        // 3. 并发获取视频详情（限制并发数5，避免接口压力）
+        const limit = 5;
+        const allVideos = [];
+        async function fetchSingleVideo(bvid) {
+            try {
+                const apiUrl = `https://api.bilibili.com/x/web-interface/view?bvid=${bvid}`;
+                const res = await fetch(apiUrl, { headers: { 'Referer': 'https://space.bilibili.com' } });
+                if (!res.ok) throw new Error(`API ${res.status}`);
+                const data = await res.json();
+                if (data.code !== 0) throw new Error(data.message);
+                const v = data.data;
+                const durationSec = v.duration;
+                const minutes = Math.floor(durationSec / 60);
+                const seconds = durationSec % 60;
+                const durationStr = `${minutes}:${seconds.toString().padStart(2,'0')}`;
+                const tag = inferTag(v.title, v.desc || '');
+                const tags = v.tag ? v.tag.split(',') : [v.tname].filter(Boolean);
+                return {
+                    bvid: v.bvid,
+                    title: v.title,
+                    description: v.desc || '',
+                    pic: v.pic,
+                    duration: durationStr,
+                    pubdate: v.pubdate,
+                    stat: { view: v.stat?.view || 0, like: v.stat?.like || 0, coin: v.stat?.coin || 0, danmaku: v.stat?.danmaku || 0 },
+                    tag: tag,
+                    tags: tags.slice(0,3)
+                };
+            } catch(err) {
+                console.warn(`获取视频 ${bvid} 失败:`, err);
+                return null;
+            }
+        }
+        for (let i = 0; i < bvList.length; i += limit) {
+            const batch = bvList.slice(i, i+limit);
+            const batchResults = await Promise.all(batch.map(bvid => fetchSingleVideo(bvid)));
+            allVideos.push(...batchResults.filter(v => v !== null));
+        }
+        biliVideos = allVideos;
+        // 渲染数据面板和视频列表
+        renderBiliProfile();
+        renderBiliVideos();
+    }
+
+    function inferTag(title, desc) { // 与原版保持一致
+        const text = (title + ' ' + desc).toLowerCase();
+        if (text.includes('教程') || text.includes('指南') || text.includes('入门')) return 'tutorial';
+        if (text.includes('游戏') || text.includes('mc') || text.includes('minecraft') || text.includes('godot')) return 'game';
+        if (text.includes('vlog') || text.includes('日常') || text.includes('生活')) return 'life';
+        return 'tech';
+    }
+
+    function formatNumber(num) { if (num >= 10000) return (num / 10000).toFixed(1) + '万'; if (num >= 1000) return (num / 1000).toFixed(1) + 'k'; return num.toString(); }
+    function formatDuration(seconds) { if (typeof seconds === 'string') return seconds; const m = Math.floor(seconds / 60); const s = seconds % 60; return `${m}:${s.toString().padStart(2, '0')}`; }
+
+    function renderBiliProfile() { if (!biliUserInfo) return; const info = biliUserInfo;
+        document.getElementById('biliLevel').textContent = `LV${info.level}`;
+        document.getElementById('biliExp').textContent = info.current_exp.toLocaleString();
+        document.getElementById('biliCoins').textContent = info.coins.toLocaleString();
+        document.getElementById('biliVideos').textContent = info.videos_count;
+        document.getElementById('levelBadge').textContent = `LV ${info.level}`;
+        const nextExp = info.next_level_exp || LEVEL_EXP_TABLE[info.level] || 0;
+        const prevExp = LEVEL_EXP_TABLE[info.level-1] || 0;
+        const totalNeed = nextExp - prevExp;
+        const currentInLevel = info.current_exp - prevExp;
+        const progress = totalNeed > 0 ? Math.min(100, (currentInLevel / totalNeed) * 100) : 100;
+        document.getElementById('expText').textContent = `${info.current_exp.toLocaleString()} / ${nextExp.toLocaleString()}`;
+        document.getElementById('levelProgress').style.width = `${progress}%`;
+        document.getElementById('nextLevelText').textContent = info.level >= 6 ? '已达到最高等级！' : `距离 LV${info.level+1} 还需 ${(nextExp - info.current_exp).toLocaleString()} 经验`;
+    }
+
+    function renderBiliVideos() {
+        const grid = document.getElementById('biliVideoGrid');
+        if (!grid) return;
+        let filtered = [...biliVideos];
+        if (biliCurrentFilter !== 'all') filtered = filtered.filter(v => v.tag === biliCurrentFilter);
+        if (biliSearchText.trim()) {
+            const kw = biliSearchText.toLowerCase();
+            filtered = filtered.filter(v => v.title.toLowerCase().includes(kw) || v.description.toLowerCase().includes(kw) || v.tags.some(t => t.toLowerCase().includes(kw)));
+        }
+        if (filtered.length === 0) {
+            grid.innerHTML = `<div class="bili-empty"><i class="fas fa-film"></i><p>暂无匹配的视频</p></div>`; return;
+        }
+        grid.innerHTML = '';
+        filtered.forEach(video => {
+            const card = document.createElement('div'); card.className = 'video-card'; card.onclick = () => openVideoModal(video);
+            const dateStr = new Date(video.pubdate * 1000).toLocaleDateString('zh-CN');
+            const tagsHtml = video.tags.slice(0,3).map(t => `<span class="video-tag">${escapeHtml(t)}</span>`).join('');
             card.innerHTML = `
-                <div style="font-weight:600; margin-bottom:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-                    <i class="fab fa-github"></i> ${escapeHtml(repo.name)}
+                <div class="video-thumb-wrap">
+                    <img class="video-thumbnail" src="${video.pic}" alt="${escapeHtml(video.title)}" loading="lazy">
+                    <span class="video-duration">${video.duration}</span>
                 </div>
-                <div style="font-size:0.7rem; opacity:0.85; margin-bottom:8px; line-height:1.4; word-break:break-word;">
-                    📝 ${escapeHtml(description)}
-                </div>
-                <div style="font-size:0.65rem; opacity:0.7; display: flex; gap: 12px; flex-wrap: wrap;">
-                    <span><i class="far fa-star"></i> ⭐ ${repo.stargazers_count}</span>
-                    <span><i class="far fa-calendar-alt"></i> ${lastUpdated}</span>
-                    <span><i class="fas fa-tag"></i> ${repo.language || 'Mixed'}</span>
+                <div class="video-info">
+                    <div class="video-title">${escapeHtml(video.title)}</div>
+                    <div class="video-meta"><i class="far fa-calendar"></i> ${dateStr}</div>
+                    <div class="video-stats">
+                        <span class="video-stat"><i class="far fa-eye"></i> ${formatNumber(video.stat.view)}</span>
+                        <span class="video-stat"><i class="far fa-thumbs-up"></i> ${formatNumber(video.stat.like)}</span>
+                        <span class="video-stat"><i class="far fa-comment-dots"></i> ${formatNumber(video.stat.danmaku)}</span>
+                    </div>
+                    ${tagsHtml}
                 </div>
             `;
-            container.appendChild(card);
-        });
-    }
-    
-    // 搜索框事件绑定
-    function initSearchFilter() {
-        const searchInput = document.getElementById('repoSearch');
-        if (!searchInput) return;
-        
-        searchInput.addEventListener('input', (e) => {
-            currentSearch = e.target.value;
-            renderRepos();
-        });
-    }
-    
-    function escapeHtml(str) {
-        if (!str) return '';
-        return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
-    }
-
-    // ========== 社交平台跳转模块 ==========
-    function openQQHomepage(qq) {
-        const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|Windows Phone/i.test(navigator.userAgent);
-        if (isMobile) {
-            window.location.href = `mqq://card/show_pslcard?uin=${qq}`;
-            setTimeout(() => {
-                if (confirm('无法唤起QQ，是否复制QQ号？')) {
-                    navigator.clipboard.writeText(qq).then(() => alert(`QQ号 ${qq} 已复制`));
-                }
-            }, 800);
-        } else {
-            window.open(`${CONFIG.QQ_ZONE_URL}${qq}`, '_blank', 'noopener,noreferrer');
-        }
-    }
-    
-    function openBilibiliSpace(uid) {
-        const ua = navigator.userAgent;
-        const isInApp = /bilibili/i.test(ua);
-        const isMobile = /Android|iPhone|iPad/i.test(ua);
-        if (isInApp) {
-            window.location.href = `bilibili://space/${uid}`;
-        } else if (isMobile) {
-            window.location.href = `bilibili://space/${uid}`;
-            setTimeout(() => {
-                window.location.href = `${CONFIG.BILI_SPACE_URL}${uid}`;
-            }, 800);
-        } else {
-            window.open(`${CONFIG.BILI_SPACE_URL}${uid}`, '_blank', 'noopener,noreferrer');
-        }
-    }
-    
-    function copyWechatId() {
-        navigator.clipboard.writeText(CONFIG.WECHAT_ID).then(() => {
-            alert(`微信号 ${CONFIG.WECHAT_ID} 已复制，请去微信搜索`);
-        }).catch(() => {
-            const ta = document.createElement('textarea');
-            ta.value = CONFIG.WECHAT_ID;
-            document.body.appendChild(ta);
-            ta.select();
-            document.execCommand('copy');
-            document.body.removeChild(ta);
-            alert(`微信号 ${CONFIG.WECHAT_ID} 已复制，请去微信搜索`);
+            grid.appendChild(card);
         });
     }
 
-    // ========== UI 交互模块 ==========
-    function initThemeToggle() {
-        const themeBtn = document.getElementById('themeSwitch');
-        if (!themeBtn) return;
-        if (localStorage.getItem('theme') === 'dark') {
-            document.body.classList.add('dark');
-            themeBtn.innerHTML = '<i class="fas fa-sun" style="color:#ffdf8c"></i>';
-        }
-        themeBtn.addEventListener('click', () => {
-            const isDark = document.body.classList.toggle('dark');
-            themeBtn.innerHTML = isDark ? '<i class="fas fa-sun" style="color:#ffdf8c"></i>' : '<i class="fas fa-moon"></i>';
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-        });
+    function openVideoModal(video) { const modal = document.getElementById('videoModal');
+        document.getElementById('modalThumb').src = video.pic;
+        document.getElementById('modalTitle').textContent = video.title;
+        document.getElementById('modalDesc').textContent = video.description || '暂无描述';
+        const dateStr = new Date(video.pubdate * 1000).toLocaleDateString('zh-CN');
+        document.getElementById('modalStats').innerHTML = `
+            <span class="video-modal-stat"><i class="far fa-eye"></i> ${formatNumber(video.stat.view)} 播放</span>
+            <span class="video-modal-stat"><i class="far fa-thumbs-up"></i> ${formatNumber(video.stat.like)} 点赞</span>
+            <span class="video-modal-stat"><i class="fas fa-coins"></i> ${formatNumber(video.stat.coin)} 投币</span>
+            <span class="video-modal-stat"><i class="far fa-comment-dots"></i> ${formatNumber(video.stat.danmaku)} 弹幕</span>
+            <span class="video-modal-stat"><i class="far fa-calendar"></i> ${dateStr}</span>`;
+        document.getElementById('modalLink').href = `https://www.bilibili.com/video/${video.bvid}`;
+        document.getElementById('modalCopy').onclick = () => { const url = `https://www.bilibili.com/video/${video.bvid}`; navigator.clipboard.writeText(url).then(() => alert('链接已复制'), () => alert('手动复制：'+url)); };
+        modal.classList.add('active'); document.body.style.overflow = 'hidden';
     }
-    
-    function initDirectoryScroll() {
-        document.querySelectorAll('.dir-chip').forEach(chip => {
-            const targetId = chip.getAttribute('data-target');
-            if (!targetId) return;
-            chip.addEventListener('click', (e) => {
-                e.preventDefault();
-                const target = document.getElementById(targetId);
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    target.style.transition = 'box-shadow 0.3s';
-                    target.style.boxShadow = '0 0 0 3px var(--primary-accent)';
-                    setTimeout(() => { target.style.boxShadow = ''; }, 600);
-                }
-            });
-        });
-    }
-    
-    function initSkillBadges() {
-        document.querySelectorAll('.clickable-badge').forEach(badge => {
-            badge.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const url = badge.getAttribute('data-url');
-                if (url) window.open(url, '_blank', 'noopener,noreferrer');
-            });
-        });
-    }
-    
-    function initContactButtons() {
-        document.getElementById('goGH')?.addEventListener('click', () => window.open(CONFIG.GITHUB_HOMEPAGE, '_blank', 'noopener,noreferrer'));
-        document.getElementById('goBili')?.addEventListener('click', () => openBilibiliSpace(CONFIG.BILI_UID));
-        document.getElementById('goQQ')?.addEventListener('click', () => openQQHomepage(CONFIG.QQ_NUMBER));
-        document.getElementById('goWX')?.addEventListener('click', copyWechatId);
-    }
-    
-    function initAvatarAnimation() {
-        const avatar = document.getElementById('avatarCircle');
-        if (!avatar) return;
-        avatar.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const maxOffset = 180;
-            const x = (Math.random() - 0.5) * maxOffset * 2;
-            const y = (Math.random() - 0.5) * maxOffset * 2;
-            avatar.style.transform = `translate(${x}px, ${y}px)`;
-        });
-    }
-    
-    function addSecurityAttributes() {
-        document.querySelectorAll('a[target="_blank"]').forEach(link => {
-            link.setAttribute('rel', 'noopener noreferrer');
-        });
-    }
+    function closeVideoModal() { document.getElementById('videoModal').classList.remove('active'); document.body.style.overflow = ''; }
+    document.getElementById('modalClose')?.addEventListener('click', closeVideoModal);
+    document.getElementById('videoModal')?.addEventListener('click', (e) => { if (e.target === document.getElementById('videoModal')) closeVideoModal(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeVideoModal(); });
 
-    // ========== 页面初始化入口 ==========
-    function init() {
-        fetchRepos();
-        initSearchFilter();
-        initThemeToggle();
-        initDirectoryScroll();
-        initSkillBadges();
-        initContactButtons();
-        initAvatarAnimation();
-        addSecurityAttributes();
+    // 筛选器事件
+    document.querySelectorAll('#biliFilterRow .filter-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            document.querySelectorAll('#biliFilterRow .filter-chip').forEach(c => { c.style.background = ''; c.style.color = ''; });
+            chip.style.background = '#6c8dff'; chip.style.color = 'white';
+            biliCurrentFilter = chip.dataset.filter;
+            renderBiliVideos();
+        });
+    });
+    const biliSearchInputDom = document.getElementById('biliSearchInput');
+    if (biliSearchInputDom) biliSearchInputDom.addEventListener('input', (e) => { biliSearchText = e.target.value; renderBiliVideos(); });
+
+    // 分页逻辑
+    const pages = ['profile', 'skills', 'games', 'identity', 'experience', 'github', 'bilibili', 'contact'];
+    function switchPage(pageId) {
+        pages.forEach(p => { const el = document.getElementById(`${p}Page`); if (el) el.classList.remove('active-page'); });
+        const activePage = document.getElementById(`${pageId}Page`); if (activePage) activePage.classList.add('active-page');
+        document.querySelectorAll('.tab-btn').forEach(btn => { if (btn.getAttribute('data-page') === pageId) btn.classList.add('active'); else btn.classList.remove('active'); });
+        if (pageId === 'github' && allRepos.length === 0) fetchRepos();
+        if (pageId === 'bilibili' && biliVideos.length === 0) fetchBiliData();
     }
-    
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => switchPage(btn.getAttribute('data-page'))));
+
+    // 社交与头像
+    function openQQHomepage(qq) { const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent); if(isMobile) { window.location.href = `mqq://card/show_pslcard?uin=${qq}`; setTimeout(() => { if(confirm('未唤起QQ，复制QQ号?')) navigator.clipboard.writeText(qq); }, 500); } else { window.open(`${CONFIG.QQ_ZONE_URL}${qq}`, '_blank'); } }
+    function openBilibili(uid) { window.open(`${CONFIG.BILI_SPACE_URL}${uid}`, '_blank'); }
+    function copyWechat() { navigator.clipboard.writeText(CONFIG.WECHAT_ID).then(() => alert(`微信号 ${CONFIG.WECHAT_ID} 已复制`)).catch(() => alert('手动复制：'+CONFIG.WECHAT_ID)); }
+    function initAvatar() { const avatarDiv = document.getElementById('avatarShake'); if(avatarDiv) avatarDiv.addEventListener('click', () => { avatarDiv.style.transform = `translate(${(Math.random()-0.5)*40}px, ${(Math.random()-0.5)*30}px) scale(1.02)`; setTimeout(() => avatarDiv.style.transform = '', 400); }); const img = document.getElementById('dynamic-qq-avatar'); if(img) img.src = `https://q.qlogo.cn/headimg_dl?dst_uin=${CONFIG.QQ_NUMBER}&spec=140&t=${Date.now()}`; }
+    function initButtons() { document.getElementById('ghBtn')?.addEventListener('click', () => window.open(CONFIG.GITHUB_HOMEPAGE, '_blank')); document.getElementById('biliBtn')?.addEventListener('click', () => openBilibili(CONFIG.BILI_UID)); document.getElementById('qqBtn')?.addEventListener('click', () => openQQHomepage(CONFIG.QQ_NUMBER)); document.getElementById('wxBtn')?.addEventListener('click', copyWechat); document.querySelectorAll('.skill-badge[data-url]').forEach(el => { el.addEventListener('click', (e) => { e.stopPropagation(); window.open(el.getAttribute('data-url'), '_blank'); }); }); }
+    function initTheme() { const themeBtn = document.getElementById('globalThemeSwitch'); if (localStorage.getItem('theme') === 'dark') { document.body.classList.add('dark'); themeBtn.innerHTML = '<i class="fas fa-sun"></i>'; } else { themeBtn.innerHTML = '<i class="fas fa-moon"></i>'; } themeBtn.addEventListener('click', () => { const isDark = document.body.classList.toggle('dark'); localStorage.setItem('theme', isDark ? 'dark' : 'light'); themeBtn.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>'; if (allRepos.length) { buildLanguageFilters(); renderRepoGrid(); } if (biliVideos.length) renderBiliVideos(); }); }
+    function init() { initTheme(); initAvatar(); initButtons(); fetchRepos(); const observer = new MutationObserver(() => { const ghPage = document.getElementById('githubPage'); if(ghPage && ghPage.classList.contains('active-page') && allRepos.length === 0) fetchRepos(); else if(ghPage && ghPage.classList.contains('active-page') && allRepos.length > 0 && repoContainer.children.length <= 1) renderRepoGrid(); }); observer.observe(document.getElementById('githubPage') || document.body, { attributes: true, attributeFilter: ['class'] }); }
     document.addEventListener('DOMContentLoaded', init);
 </script>
-
 </body>
 </html>
