@@ -7,790 +7,118 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,500;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        :root {
-            --primary-accent: #6c8dff;
-            --spring-easing: cubic-bezier(0.34, 1.2, 0.64, 1);
-            --smooth-easing: cubic-bezier(0.2, 0.9, 0.4, 1.1);
-            --card-radius: 32px;
-        }
-
-        body {
-            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-            min-height: 100vh;
-            background: radial-gradient(circle at 30% 10%, #eef2fa, #cdd8ec);
-            transition: background 0.5s ease;
-            overflow-x: hidden;
-        }
-
-        /* 暗色模式下全局所有字体强制变白 (包括所有继承元素) */
-        body.dark,
-        body.dark * {
-            color: #ffffff !important;
-        }
-
-        /* 对于个别需要保留品牌图标的特殊元素，不覆盖图标容器颜色但文字必须白。但图标本身可保留原来，不过为了统一，让图标也偏白细微调整 */
-        body.dark i, 
-        body.dark .fab, 
-        body.dark .fas, 
-        body.dark .far {
-            color: #f0f3ff !important;
-        }
-
-        /* 深色背景重置 */
-        body.dark {
-            background: radial-gradient(circle at 30% 10%, #0b1120, #020409) !important;
-        }
-
-        /* 玻璃容器暗色 */
-        body.dark .glass-nav,
-        body.dark .page-tabs,
-        body.dark .glass-card {
-            background: rgba(18, 24, 38, 0.75) !important;
-            backdrop-filter: blur(20px) !important;
-            border-color: rgba(255, 255, 255, 0.15) !important;
-        }
-
-        /* 所有卡片、按钮深色下背景微调以保证可读性 */
-        body.dark .skill-badge,
-        body.dark .game-bubble,
-        body.dark .contact-btn,
-        body.dark .repo-tile,
-        body.dark .tab-btn:not(.active),
-        body.dark .filter-chip,
-        body.dark .video-card,
-        body.dark .bili-stat-card,
-        body.dark .level-progress-bg,
-        body.dark .video-modal-content,
-        body.dark .bili-search-box input {
-            background: rgba(255, 255, 255, 0.12) !important;
-            border-color: transparent !important;
-        }
-
-        body.dark .tab-btn.active {
-            background: var(--primary-accent) !important;
-            color: white !important;
-        }
-
-        body.dark .repo-tile:hover,
-        body.dark .skill-badge:hover,
-        body.dark .game-bubble:hover,
-        body.dark .contact-btn:hover,
-        body.dark .video-card:hover {
-            background: var(--primary-accent) !important;
-            color: white !important;
-        }
-
-        /* 输入框暗色适配 */
-        body.dark input,
-        body.dark .search-box input,
-        body.dark .bili-search-box input {
-            background: rgba(255, 255, 255, 0.15) !important;
-            border-color: rgba(255, 255, 255, 0.3) !important;
-            color: white !important;
-        }
-        body.dark input::placeholder,
-        body.dark .bili-search-box input::placeholder {
-            color: rgba(255, 255, 255, 0.6) !important;
-        }
-
-        /* 时间线条、列表修饰保留可见性 */
-        body.dark .timeline-item {
-            border-bottom-color: rgba(255, 255, 255, 0.2) !important;
-        }
-
-        /* 暗色下 Bilibili 相关特殊处理 */
-        body.dark .bili-stat-value {
-            color: #6c8dff !important;
-        }
-        body.dark .level-progress-fill {
-            background: linear-gradient(90deg, #6c8dff, #a0b8ff) !important;
-        }
-        body.dark .video-stat {
-            color: rgba(255,255,255,0.7) !important;
-        }
-        body.dark .video-modal-overlay {
-            background: rgba(0, 0, 0, 0.85) !important;
-        }
-        body.dark .video-tag {
-            background: rgba(108, 141, 255, 0.25) !important;
-        }
-
-        /* 全局平滑 */
-        .app-wrapper {
-            max-width: 1300px;
-            margin: 0 auto;
-            padding: 24px 20px 40px;
-        }
-
-        .glass-nav {
-            background: rgba(245, 248, 255, 0.55);
-            backdrop-filter: blur(18px);
-            border-radius: 60px;
-            padding: 8px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 32px;
-            border: 1px solid rgba(255,255,255,0.4);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.03);
-        }
-
-        .logo-area {
-            font-weight: 800;
-            font-size: 1.4rem;
-            background: linear-gradient(130deg, #2c3e66, #6c8dff);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        body.dark .logo-area {
-            background: linear-gradient(130deg, #ffffff, #c0d0ff);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent !important;
-        }
-
-        .theme-toggle {
-            background: rgba(108,141,255,0.15);
-            border: none;
-            width: 42px;
-            height: 42px;
-            border-radius: 60px;
-            font-size: 1.3rem;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-        }
-        body.dark .theme-toggle {
-            background: #2d3a5e;
-        }
-
-        /* 分页胶囊栏 */
-        .page-tabs {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 12px;
-            margin-bottom: 32px;
-            background: rgba(255,255,240,0.2);
-            backdrop-filter: blur(12px);
-            padding: 10px 20px;
-            border-radius: 80px;
-        }
-        .tab-btn {
-            background: rgba(0,0,0,0.05);
-            border: none;
-            padding: 10px 24px;
-            border-radius: 40px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.25s var(--spring-easing);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .tab-btn.active {
-            background: var(--primary-accent);
-            color: white;
-            box-shadow: 0 8px 18px rgba(108,141,255,0.4);
-            transform: scale(1.02);
-        }
-
-        .pages-container {
-            position: relative;
-            min-height: 550px;
-        }
-        .page {
-            display: none;
-            animation: pageGlideIn 0.6s var(--spring-easing) forwards;
-        }
-        .page.active-page {
-            display: block;
-        }
-        @keyframes pageGlideIn {
-            0% { opacity: 0; transform: translateY(26px) scale(0.98); }
-            100% { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        .glass-card {
-            background: rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(14px);
-            border-radius: var(--card-radius);
-            padding: 28px 24px;
-            border: 1px solid rgba(255,255,255,0.6);
-            box-shadow: 0 12px 28px rgba(0,0,0,0.05);
-            transition: transform 0.3s ease, background 0.5s ease, border-color 0.5s ease;
-        }
-        .glass-card:hover {
-            transform: translateY(-3px);
-        }
-
-        .section-title {
-            font-size: 1.6rem;
-            font-weight: 700;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: #1f2a3e;
-        }
-        body.dark .section-title {
-            color: white !important;
-        }
-
-        .badge-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 14px;
-        }
-        .skill-badge, .game-bubble {
-            background: rgba(108,141,255,0.12);
-            padding: 10px 20px;
-            border-radius: 40px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.25s var(--spring-easing);
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            color: #1f2937;
-        }
-        .skill-badge:hover, .game-bubble:hover {
-            background: var(--primary-accent);
-            color: white !important;
-            transform: translateY(-3px) scale(1.02);
-        }
-
-        .timeline-item {
-            padding: 12px 0;
-            border-bottom: 1px dashed rgba(0,0,0,0.1);
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-        .repo-grid {
-            display: flex;
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            gap: 16px;
-            padding-bottom: 12px;
-            scroll-snap-type: x mandatory;
-        }
-        .repo-grid::-webkit-scrollbar {
-            height: 5px;
-        }
-        .repo-grid::-webkit-scrollbar-thumb {
-            background: var(--primary-accent);
-            border-radius: 10px;
-        }
-        .repo-tile {
-            flex: 0 0 280px;
-            background: rgba(0,0,0,0.04);
-            border-radius: 24px;
-            padding: 18px;
-            text-decoration: none;
-            border: 1px solid rgba(0,0,0,0.05);
-            transition: all 0.25s ease;
-            scroll-snap-align: start;
-            color: #1f2937;
-        }
-        .repo-tile:hover {
-            background: var(--primary-accent);
-            color: white !important;
-            transform: translateY(-6px);
-        }
-        @media (min-width: 700px) {
-            .repo-grid {
-                display: grid;
-                grid-template-columns: repeat(2,1fr);
-                overflow-x: visible;
-                flex-wrap: wrap;
-            }
-            .repo-tile {
-                flex: auto;
-                width: auto;
-            }
-        }
-
-        .contact-buttons {
-            display: grid;
-            grid-template-columns: repeat(2,1fr);
-            gap: 14px;
-            margin-top: 8px;
-        }
-        .contact-btn {
-            background: white;
-            padding: 14px;
-            text-align: center;
-            border-radius: 28px;
-            font-weight: 600;
-            transition: all 0.2s var(--spring-easing);
-            cursor: pointer;
-            text-decoration: none;
-            color: #1f2937;
-        }
-        .contact-btn:hover {
-            background: var(--primary-accent);
-            color: white !important;
-            transform: scale(1.02);
-        }
-
-        .avatar-modern {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .avatar-circle-big {
-            width: 130px;
-            height: 130px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #fff, #e9efff);
-            padding: 5px;
-            box-shadow: 0 15px 30px rgba(108,141,255,0.3);
-            transition: transform 0.3s var(--spring-easing);
-            cursor: pointer;
-        }
-        .avatar-img {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-        .display-name {
-            font-size: 2.1rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #1f2a44, #6c8dff);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-top: 12px;
-        }
-        body.dark .display-name {
-            background: linear-gradient(135deg, #ffffff, #c0d0ff);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent !important;
-        }
-
-        footer {
-            text-align: center;
-            margin-top: 48px;
-            opacity: 0.6;
-            font-size: 0.75rem;
-        }
-        .filter-chip {
-            background: rgba(0,0,0,0.05);
-            padding: 6px 14px;
-            border-radius: 40px;
-            cursor: pointer;
-            transition: 0.2s;
-            font-size: 0.85rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .search-box input {
-            width: 100%;
-            padding: 12px 16px;
-            border-radius: 40px;
-            border: 1px solid rgba(0,0,0,0.1);
-            background: rgba(255,255,255,0.7);
-            font-size: 0.9rem;
-            outline: none;
-        }
-
-        /* ========== 新增：主页 Bilibili 信息面板 ========== */
-        .bili-profile-section {
-            margin-top: 28px;
-            padding-top: 24px;
-            border-top: 1px dashed rgba(0,0,0,0.1);
-        }
-        body.dark .bili-profile-section {
-            border-top-color: rgba(255,255,255,0.15) !important;
-        }
-
-        .bili-stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        @media (min-width: 600px) {
-            .bili-stats-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-
-        .bili-stat-card {
-            background: rgba(108, 141, 255, 0.08);
-            border-radius: 20px;
-            padding: 16px 12px;
-            text-align: center;
-            transition: all 0.3s var(--spring-easing);
-            border: 1px solid rgba(108, 141, 255, 0.15);
-        }
-        .bili-stat-card:hover {
-            transform: translateY(-4px);
-            background: rgba(108, 141, 255, 0.15);
-        }
-
-        .bili-stat-value {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--primary-accent);
-            line-height: 1.2;
-        }
-        .bili-stat-label {
-            font-size: 0.75rem;
-            opacity: 0.7;
-            margin-top: 4px;
-        }
-
-        .level-section {
-            margin-top: 16px;
-        }
-        .level-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        .level-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: linear-gradient(135deg, #6c8dff, #a0b8ff);
-            color: white !important;
-            padding: 4px 14px;
-            border-radius: 40px;
-            font-weight: 700;
-            font-size: 0.85rem;
-        }
-        .level-progress-bg {
-            width: 100%;
-            height: 10px;
-            background: rgba(0,0,0,0.06);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        .level-progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #6c8dff, #a0b8ff);
-            border-radius: 10px;
-            transition: width 1s var(--spring-easing);
-        }
-
-        /* ========== 新增：Bilibili 视频板块 ========== */
-        .bili-search-box {
-            margin-bottom: 16px;
-        }
-        .bili-search-box input {
-            width: 100%;
-            padding: 12px 16px;
-            border-radius: 40px;
-            border: 1px solid rgba(0,0,0,0.1);
-            background: rgba(255,255,255,0.7);
-            font-size: 0.9rem;
-            outline: none;
-        }
-
-        .bili-filter-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-
-        .video-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 16px;
-        }
-        @media (min-width: 600px) {
-            .video-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        @media (min-width: 900px) {
-            .video-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        .video-card {
-            background: rgba(255, 255, 255, 0.6);
-            border-radius: 24px;
-            overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.6);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.04);
-            transition: all 0.3s var(--spring-easing);
-            cursor: pointer;
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
-        .video-card:hover {
-            transform: translateY(-6px) scale(1.01);
-            box-shadow: 0 16px 40px rgba(108,141,255,0.2);
-        }
-
-        .video-thumbnail {
-            width: 100%;
-            aspect-ratio: 16 / 10;
-            object-fit: cover;
-            display: block;
-            transition: transform 0.4s ease;
-        }
-        .video-card:hover .video-thumbnail {
-            transform: scale(1.05);
-        }
-
-        .video-thumb-wrap {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .video-duration {
-            position: absolute;
-            bottom: 8px;
-            right: 8px;
-            background: rgba(0,0,0,0.75);
-            color: white !important;
-            padding: 2px 8px;
-            border-radius: 6px;
-            font-size: 0.7rem;
-            font-weight: 600;
-        }
-
-        .video-info {
-            padding: 14px 16px 16px;
-        }
-
-        .video-title {
-            font-weight: 700;
-            font-size: 0.95rem;
-            line-height: 1.4;
-            margin-bottom: 8px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .video-meta {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.8rem;
-            opacity: 0.7;
-            margin-bottom: 10px;
-        }
-
-        .video-stats {
-            display: flex;
-            gap: 14px;
-            font-size: 0.78rem;
-        }
-        .video-stat {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            opacity: 0.75;
-        }
-
-        .video-tag {
-            display: inline-block;
-            background: rgba(108, 141, 255, 0.12);
-            padding: 2px 10px;
-            border-radius: 20px;
-            font-size: 0.72rem;
-            margin-right: 6px;
-            margin-top: 8px;
-        }
-
-        /* 视频详情弹窗 */
-        .video-modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(8px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-            padding: 20px;
-        }
-        .video-modal-overlay.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        .video-modal-content {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(20px);
-            border-radius: 28px;
-            max-width: 560px;
-            width: 100%;
-            max-height: 85vh;
-            overflow-y: auto;
-            transform: scale(0.9) translateY(20px);
-            transition: transform 0.4s var(--spring-easing);
-            border: 1px solid rgba(255,255,255,0.6);
-            box-shadow: 0 24px 60px rgba(0,0,0,0.2);
-        }
-        .video-modal-overlay.active .video-modal-content {
-            transform: scale(1) translateY(0);
-        }
-
-        .video-modal-header {
-            position: relative;
-            padding: 0;
-        }
-        .video-modal-thumb {
-            width: 100%;
-            aspect-ratio: 16 / 9;
-            object-fit: cover;
-            border-radius: 28px 28px 0 0;
-        }
-        .video-modal-close {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: rgba(0,0,0,0.5);
-            color: white !important;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
-            transition: background 0.2s;
-        }
-        .video-modal-close:hover {
-            background: rgba(0,0,0,0.7);
-        }
-
-        .video-modal-body {
-            padding: 20px 24px 24px;
-        }
-
-        .video-modal-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin-bottom: 12px;
-            line-height: 1.4;
-        }
-
-        .video-modal-stats {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
-            margin-bottom: 16px;
-            padding-bottom: 16px;
-            border-bottom: 1px dashed rgba(0,0,0,0.1);
-        }
-        body.dark .video-modal-stats {
-            border-bottom-color: rgba(255,255,255,0.15) !important;
-        }
-
-        .video-modal-stat {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.85rem;
-            opacity: 0.8;
-        }
-
-        .video-modal-desc {
-            font-size: 0.9rem;
-            line-height: 1.7;
-            opacity: 0.85;
-            margin-bottom: 20px;
-        }
-
-        .video-modal-actions {
-            display: flex;
-            gap: 10px;
-        }
-        .video-modal-btn {
-            flex: 1;
-            padding: 12px;
-            border-radius: 16px;
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s var(--spring-easing);
-            text-align: center;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
-        .video-modal-btn.primary {
-            background: var(--primary-accent);
-            color: white !important;
-        }
-        .video-modal-btn.primary:hover {
-            transform: scale(1.03);
-            box-shadow: 0 8px 20px rgba(108,141,255,0.4);
-        }
-        .video-modal-btn.secondary {
-            background: rgba(0,0,0,0.05);
-            color: inherit;
-        }
-        .video-modal-btn.secondary:hover {
-            background: rgba(0,0,0,0.1);
-        }
-        body.dark .video-modal-btn.secondary {
-            background: rgba(255,255,255,0.12) !important;
-        }
-
-        .bili-loading {
-            text-align: center;
-            padding: 40px;
-            grid-column: 1 / -1;
-        }
-
-        .bili-empty {
-            text-align: center;
-            padding: 60px 20px;
-            grid-column: 1 / -1;
-        }
-        .bili-empty i {
-            font-size: 3rem;
-            opacity: 0.3;
-            margin-bottom: 12px;
-            display: block;
-        }
-
-        @media (max-width: 550px) {
-            .tab-btn span { display: none; }
-            .tab-btn i { margin: 0; font-size: 1.3rem; }
-            .tab-btn { padding: 10px 16px; }
-            .contact-buttons { grid-template-columns: 1fr; }
-            .video-modal-content { max-height: 90vh; border-radius: 20px; }
-            .video-modal-body { padding: 16px 18px 20px; }
-            .bili-stats-grid { grid-template-columns: repeat(2, 1fr); }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root { --primary-accent: #6c8dff; --spring-easing: cubic-bezier(0.34, 1.2, 0.64, 1); --card-radius: 32px; }
+        body { font-family: 'Inter', 'Segoe UI', sans-serif; min-height: 100vh; background: radial-gradient(circle at 30% 10%, #eef2fa, #cdd8ec); transition: background 0.5s ease; overflow-x: hidden; }
+        body.dark, body.dark * { color: #ffffff !important; }
+        body.dark i, body.dark .fab, body.dark .fas, body.dark .far { color: #f0f3ff !important; }
+        body.dark { background: radial-gradient(circle at 30% 10%, #0b1120, #020409) !important; }
+        body.dark .glass-nav, body.dark .page-tabs, body.dark .glass-card { background: rgba(18, 24, 38, 0.75) !important; backdrop-filter: blur(20px) !important; border-color: rgba(255, 255, 255, 0.15) !important; }
+        body.dark .skill-badge, body.dark .game-bubble, body.dark .contact-btn, body.dark .repo-tile, body.dark .tab-btn:not(.active), body.dark .filter-chip, body.dark .video-card, body.dark .bili-stat-card, body.dark .level-progress-bg, body.dark .video-modal-content, body.dark .bili-search-box input { background: rgba(255, 255, 255, 0.12) !important; border-color: transparent !important; }
+        body.dark .tab-btn.active { background: var(--primary-accent) !important; color: white !important; }
+        body.dark .repo-tile:hover, body.dark .skill-badge:hover, body.dark .game-bubble:hover, body.dark .contact-btn:hover, body.dark .video-card:hover { background: var(--primary-accent) !important; color: white !important; }
+        body.dark input, body.dark .search-box input, body.dark .bili-search-box input { background: rgba(255, 255, 255, 0.15) !important; border-color: rgba(255, 255, 255, 0.3) !important; color: white !important; }
+        body.dark input::placeholder, body.dark .bili-search-box input::placeholder { color: rgba(255, 255, 255, 0.6) !important; }
+        body.dark .timeline-item { border-bottom-color: rgba(255, 255, 255, 0.2) !important; }
+        body.dark .bili-stat-value { color: #6c8dff !important; }
+        body.dark .level-progress-fill { background: linear-gradient(90deg, #6c8dff, #a0b8ff) !important; }
+        body.dark .video-stat { color: rgba(255,255,255,0.7) !important; }
+        body.dark .video-modal-overlay { background: rgba(0, 0, 0, 0.85) !important; }
+        body.dark .video-tag { background: rgba(108, 141, 255, 0.25) !important; }
+        .app-wrapper { max-width: 1300px; margin: 0 auto; padding: 24px 20px 40px; }
+        .glass-nav { background: rgba(245, 248, 255, 0.55); backdrop-filter: blur(18px); border-radius: 60px; padding: 8px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 8px 20px rgba(0,0,0,0.03); }
+        .logo-area { font-weight: 800; font-size: 1.4rem; background: linear-gradient(130deg, #2c3e66, #6c8dff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        body.dark .logo-area { background: linear-gradient(130deg, #ffffff, #c0d0ff); -webkit-background-clip: text; background-clip: text; color: transparent !important; }
+        .theme-toggle { background: rgba(108,141,255,0.15); border: none; width: 42px; height: 42px; border-radius: 60px; font-size: 1.3rem; cursor: pointer; transition: transform 0.2s ease; }
+        body.dark .theme-toggle { background: #2d3a5e; }
+        .page-tabs { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-bottom: 32px; background: rgba(255,255,240,0.2); backdrop-filter: blur(12px); padding: 10px 20px; border-radius: 80px; }
+        .tab-btn { background: rgba(0,0,0,0.05); border: none; padding: 10px 24px; border-radius: 40px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.25s var(--spring-easing); display: flex; align-items: center; gap: 8px; }
+        .tab-btn.active { background: var(--primary-accent); color: white; box-shadow: 0 8px 18px rgba(108,141,255,0.4); transform: scale(1.02); }
+        .pages-container { position: relative; min-height: 550px; }
+        .page { display: none; animation: pageGlideIn 0.6s var(--spring-easing) forwards; }
+        .page.active-page { display: block; }
+        @keyframes pageGlideIn { 0% { opacity: 0; transform: translateY(26px) scale(0.98); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+        .glass-card { background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(14px); border-radius: var(--card-radius); padding: 28px 24px; border: 1px solid rgba(255,255,255,0.6); box-shadow: 0 12px 28px rgba(0,0,0,0.05); transition: transform 0.3s ease, background 0.5s ease, border-color 0.5s ease; }
+        .glass-card:hover { transform: translateY(-3px); }
+        .section-title { font-size: 1.6rem; font-weight: 700; margin-bottom: 24px; display: flex; align-items: center; gap: 12px; color: #1f2a3e; }
+        body.dark .section-title { color: white !important; }
+        .badge-group { display: flex; flex-wrap: wrap; gap: 14px; }
+        .skill-badge, .game-bubble { background: rgba(108,141,255,0.12); padding: 10px 20px; border-radius: 40px; font-weight: 500; cursor: pointer; transition: all 0.25s var(--spring-easing); text-decoration: none; display: inline-flex; align-items: center; gap: 8px; color: #1f2937; }
+        .skill-badge:hover, .game-bubble:hover { background: var(--primary-accent); color: white !important; transform: translateY(-3px) scale(1.02); }
+        .timeline-item { padding: 12px 0; border-bottom: 1px dashed rgba(0,0,0,0.1); display: flex; gap: 12px; align-items: center; }
+        .repo-grid { display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 16px; padding-bottom: 12px; scroll-snap-type: x mandatory; }
+        .repo-grid::-webkit-scrollbar { height: 5px; }
+        .repo-grid::-webkit-scrollbar-thumb { background: var(--primary-accent); border-radius: 10px; }
+        .repo-tile { flex: 0 0 280px; background: rgba(0,0,0,0.04); border-radius: 24px; padding: 18px; text-decoration: none; border: 1px solid rgba(0,0,0,0.05); transition: all 0.25s ease; scroll-snap-align: start; color: #1f2937; }
+        .repo-tile:hover { background: var(--primary-accent); color: white !important; transform: translateY(-6px); }
+        @media (min-width: 700px) { .repo-grid { display: grid; grid-template-columns: repeat(2,1fr); overflow-x: visible; flex-wrap: wrap; } .repo-tile { flex: auto; width: auto; } }
+        .contact-buttons { display: grid; grid-template-columns: repeat(2,1fr); gap: 14px; margin-top: 8px; }
+        .contact-btn { background: white; padding: 14px; text-align: center; border-radius: 28px; font-weight: 600; transition: all 0.2s var(--spring-easing); cursor: pointer; text-decoration: none; color: #1f2937; }
+        .contact-btn:hover { background: var(--primary-accent); color: white !important; transform: scale(1.02); }
+        .avatar-modern { display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; }
+        .avatar-circle-big { width: 130px; height: 130px; border-radius: 50%; background: linear-gradient(135deg, #fff, #e9efff); padding: 5px; box-shadow: 0 15px 30px rgba(108,141,255,0.3); transition: transform 0.3s var(--spring-easing); cursor: pointer; }
+        .avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        .display-name { font-size: 2.1rem; font-weight: 800; background: linear-gradient(135deg, #1f2a44, #6c8dff); -webkit-background-clip: text; background-clip: text; color: transparent; margin-top: 12px; }
+        body.dark .display-name { background: linear-gradient(135deg, #ffffff, #c0d0ff); -webkit-background-clip: text; background-clip: text; color: transparent !important; }
+        footer { text-align: center; margin-top: 48px; opacity: 0.6; font-size: 0.75rem; }
+        .filter-chip { background: rgba(0,0,0,0.05); padding: 6px 14px; border-radius: 40px; cursor: pointer; transition: 0.2s; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px; }
+        .search-box input { width: 100%; padding: 12px 16px; border-radius: 40px; border: 1px solid rgba(0,0,0,0.1); background: rgba(255,255,255,0.7); font-size: 0.9rem; outline: none; }
+        .bili-profile-section { margin-top: 28px; padding-top: 24px; border-top: 1px dashed rgba(0,0,0,0.1); }
+        body.dark .bili-profile-section { border-top-color: rgba(255,255,255,0.15) !important; }
+        .bili-stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
+        @media (min-width: 600px) { .bili-stats-grid { grid-template-columns: repeat(4, 1fr); } }
+        .bili-stat-card { background: rgba(108, 141, 255, 0.08); border-radius: 20px; padding: 16px 12px; text-align: center; transition: all 0.3s var(--spring-easing); border: 1px solid rgba(108, 141, 255, 0.15); }
+        .bili-stat-card:hover { transform: translateY(-4px); background: rgba(108, 141, 255, 0.15); }
+        .bili-stat-value { font-size: 1.5rem; font-weight: 800; color: var(--primary-accent); line-height: 1.2; }
+        .bili-stat-label { font-size: 0.75rem; opacity: 0.7; margin-top: 4px; }
+        .level-section { margin-top: 16px; }
+        .level-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .level-badge { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #6c8dff, #a0b8ff); color: white !important; padding: 4px 14px; border-radius: 40px; font-weight: 700; font-size: 0.85rem; }
+        .level-progress-bg { width: 100%; height: 10px; background: rgba(0,0,0,0.06); border-radius: 10px; overflow: hidden; }
+        .level-progress-fill { height: 100%; background: linear-gradient(90deg, #6c8dff, #a0b8ff); border-radius: 10px; transition: width 1s var(--spring-easing); }
+        .bili-search-box { margin-bottom: 16px; }
+        .bili-search-box input { width: 100%; padding: 12px 16px; border-radius: 40px; border: 1px solid rgba(0,0,0,0.1); background: rgba(255,255,255,0.7); font-size: 0.9rem; outline: none; }
+        .bili-filter-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+        .video-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+        @media (min-width: 600px) { .video-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 900px) { .video-grid { grid-template-columns: repeat(3, 1fr); } }
+        .video-card { background: rgba(255, 255, 255, 0.6); border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.6); box-shadow: 0 8px 20px rgba(0,0,0,0.04); transition: all 0.3s var(--spring-easing); cursor: pointer; text-decoration: none; color: inherit; display: block; }
+        .video-card:hover { transform: translateY(-6px) scale(1.01); box-shadow: 0 16px 40px rgba(108,141,255,0.2); }
+        .video-thumbnail { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; display: block; transition: transform 0.4s ease; }
+        .video-card:hover .video-thumbnail { transform: scale(1.05); }
+        .video-thumb-wrap { position: relative; overflow: hidden; }
+        .video-duration { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.75); color: white !important; padding: 2px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 600; }
+        .video-info { padding: 14px 16px 16px; }
+        .video-title { font-weight: 700; font-size: 0.95rem; line-height: 1.4; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .video-meta { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; opacity: 0.7; margin-bottom: 10px; }
+        .video-stats { display: flex; gap: 14px; font-size: 0.78rem; }
+        .video-stat { display: inline-flex; align-items: center; gap: 4px; opacity: 0.75; }
+        .video-tag { display: inline-block; background: rgba(108, 141, 255, 0.12); padding: 2px 10px; border-radius: 20px; font-size: 0.72rem; margin-right: 6px; margin-top: 8px; }
+        .video-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; padding: 20px; }
+        .video-modal-overlay.active { opacity: 1; pointer-events: all; }
+        .video-modal-content { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px); border-radius: 28px; max-width: 560px; width: 100%; max-height: 85vh; overflow-y: auto; transform: scale(0.9) translateY(20px); transition: transform 0.4s var(--spring-easing); border: 1px solid rgba(255,255,255,0.6); box-shadow: 0 24px 60px rgba(0,0,0,0.2); }
+        .video-modal-overlay.active .video-modal-content { transform: scale(1) translateY(0); }
+        .video-modal-header { position: relative; padding: 0; }
+        .video-modal-thumb { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 28px 28px 0 0; }
+        .video-modal-close { position: absolute; top: 12px; right: 12px; width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.5); color: white !important; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: background 0.2s; }
+        .video-modal-close:hover { background: rgba(0,0,0,0.7); }
+        .video-modal-body { padding: 20px 24px 24px; }
+        .video-modal-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 12px; line-height: 1.4; }
+        .video-modal-stats { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px dashed rgba(0,0,0,0.1); }
+        body.dark .video-modal-stats { border-bottom-color: rgba(255,255,255,0.15) !important; }
+        .video-modal-stat { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; opacity: 0.8; }
+        .video-modal-desc { font-size: 0.9rem; line-height: 1.7; opacity: 0.85; margin-bottom: 20px; }
+        .video-modal-actions { display: flex; gap: 10px; }
+        .video-modal-btn { flex: 1; padding: 12px; border-radius: 16px; border: none; font-weight: 600; cursor: pointer; transition: all 0.2s var(--spring-easing); text-align: center; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+        .video-modal-btn.primary { background: var(--primary-accent); color: white !important; }
+        .video-modal-btn.primary:hover { transform: scale(1.03); box-shadow: 0 8px 20px rgba(108,141,255,0.4); }
+        .video-modal-btn.secondary { background: rgba(0,0,0,0.05); color: inherit; }
+        .video-modal-btn.secondary:hover { background: rgba(0,0,0,0.1); }
+        body.dark .video-modal-btn.secondary { background: rgba(255,255,255,0.12) !important; }
+        .bili-loading { text-align: center; padding: 40px; grid-column: 1 / -1; }
+        .bili-empty { text-align: center; padding: 60px 20px; grid-column: 1 / -1; }
+        .bili-empty i { font-size: 3rem; opacity: 0.3; margin-bottom: 12px; display: block; }
+        @media (max-width: 550px) { .tab-btn span { display: none; } .tab-btn i { margin: 0; font-size: 1.3rem; } .tab-btn { padding: 10px 16px; } .contact-buttons { grid-template-columns: 1fr; } .video-modal-content { max-height: 90vh; border-radius: 20px; } .video-modal-body { padding: 16px 18px 20px; } .bili-stats-grid { grid-template-columns: repeat(2, 1fr); } }
     </style>
 </head>
 <body>
@@ -807,12 +135,11 @@
         <button class="tab-btn" data-page="identity"><i class="fas fa-id-card"></i><span> 身份</span></button>
         <button class="tab-btn" data-page="experience"><i class="fas fa-history"></i><span> 经历</span></button>
         <button class="tab-btn" data-page="github"><i class="fab fa-github"></i><span> 仓库</span></button>
-        <button class="tab-btn" data-page="bilibili"><i class="fab fa-bilibili"></i><span> 视频</span></button>
+        <button class="tab-btn" data-page="bilibili"><i class="fas fa-code-branch"></i><span> 项目</span></button>
         <button class="tab-btn" data-page="contact"><i class="fas fa-address-card"></i><span> 联系</span></button>
     </div>
 
     <div class="pages-container">
-        <!-- 主页模块 -->
         <div id="profilePage" class="page active-page">
             <div class="glass-card" style="text-align: center;">
                 <div class="avatar-modern">
@@ -830,44 +157,25 @@
                     <div class="skill-badge" data-url="https://space.bilibili.com/3546557150399113"><i class="fab fa-bilibili"></i> B站创作</div>
                 </div>
 
-                <!-- 新增：Bilibili 主页信息面板 -->
                 <div class="bili-profile-section" id="biliProfileSection">
                     <div class="section-title" style="font-size: 1.3rem; justify-content: center;">
                         <i class="fab fa-bilibili" style="color: #00a1d6;"></i> Bilibili 数据面板
                     </div>
                     <div class="bili-stats-grid" id="biliStatsGrid">
-                        <div class="bili-stat-card">
-                            <div class="bili-stat-value" id="biliLevel">--</div>
-                            <div class="bili-stat-label">等级</div>
-                        </div>
-                        <div class="bili-stat-card">
-                            <div class="bili-stat-value" id="biliExp">--</div>
-                            <div class="bili-stat-label">当前经验</div>
-                        </div>
-                        <div class="bili-stat-card">
-                            <div class="bili-stat-value" id="biliCoins">--</div>
-                            <div class="bili-stat-label">硬币数</div>
-                        </div>
-                        <div class="bili-stat-card">
-                            <div class="bili-stat-value" id="biliVideos">--</div>
-                            <div class="bili-stat-label">投稿视频</div>
-                        </div>
+                        <div class="bili-stat-card"><div class="bili-stat-value" id="biliLevel">--</div><div class="bili-stat-label">等级</div></div>
+                        <div class="bili-stat-card"><div class="bili-stat-value" id="biliExp">--</div><div class="bili-stat-label">当前经验</div></div>
+                        <div class="bili-stat-card"><div class="bili-stat-value" id="biliCoins">--</div><div class="bili-stat-label">硬币数</div></div>
+                        <div class="bili-stat-card"><div class="bili-stat-value" id="biliVideos">--</div><div class="bili-stat-label">投稿视频</div></div>
                     </div>
                     <div class="level-section">
-                        <div class="level-header">
-                            <span class="level-badge" id="levelBadge">LV --</span>
-                            <span style="font-size: 0.85rem; opacity: 0.7;" id="expText">-- / --</span>
-                        </div>
-                        <div class="level-progress-bg">
-                            <div class="level-progress-fill" id="levelProgress" style="width: 0%;"></div>
-                        </div>
+                        <div class="level-header"><span class="level-badge" id="levelBadge">LV --</span><span style="font-size: 0.85rem; opacity: 0.7;" id="expText">-- / --</span></div>
+                        <div class="level-progress-bg"><div class="level-progress-fill" id="levelProgress" style="width: 0%;"></div></div>
                         <p style="margin-top: 8px; font-size: 0.8rem; opacity: 0.6;" id="nextLevelText">距离下一级还需 -- 经验</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- 技能板块 -->
         <div id="skillsPage" class="page">
             <div class="glass-card">
                 <div class="section-title"><i class="fas fa-crown"></i> 爱好 & 技术栈</div>
@@ -878,13 +186,10 @@
                     <div class="skill-badge" data-url="https://godotengine.org/"><i class="fas fa-play-circle"></i> GDScript · Godot</div>
                     <div class="skill-badge" data-url="https://developer.mozilla.org/"><i class="fab fa-js"></i> JavaScript / 前端魔法</div>
                 </div>
-                <div style="margin-top: 24px;">
-                    <p><i class="fas fa-tools"></i> 最近痴迷: 系统调优 · 独立游戏开发 · 跨端工具链</p>
-                </div>
+                <div style="margin-top: 24px;"><p><i class="fas fa-tools"></i> 最近痴迷: 系统调优 · 独立游戏开发 · 跨端工具链</p></div>
             </div>
         </div>
 
-        <!-- 游戏热忱 -->
         <div id="gamesPage" class="page">
             <div class="glass-card">
                 <div class="section-title"><i class="fas fa-dice-d6"></i> 游戏世界</div>
@@ -902,7 +207,6 @@
             </div>
         </div>
 
-        <!-- 身份标识 -->
         <div id="identityPage" class="page">
             <div class="glass-card">
                 <div class="section-title"><i class="fas fa-fingerprint"></i> 身份光谱</div>
@@ -915,7 +219,6 @@
             </div>
         </div>
 
-        <!-- 折腾经历 -->
         <div id="experiencePage" class="page">
             <div class="glass-card">
                 <div class="section-title"><i class="fas fa-rocket"></i> 硬核折腾史</div>
@@ -927,41 +230,34 @@
             </div>
         </div>
 
-        <!-- GitHub板块 -->
         <div id="githubPage" class="page">
             <div class="glass-card">
                 <div class="section-title"><i class="fab fa-github-alt"></i> 动态仓库 · 实时同步</div>
-                <div class="search-box" style="margin-bottom: 16px;">
-                    <input type="text" id="repoSearchPage" placeholder="🔍 搜索仓库名称 / 描述...">
-                </div>
+                <div class="search-box" style="margin-bottom: 16px;"><input type="text" id="repoSearchPage" placeholder="🔍 搜索仓库名称 / 描述..."></div>
                 <div class="filter-wrapper" id="langFilterPage" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;"></div>
-                <div id="repoGridContainer" class="repo-grid">
-                    <div style="padding: 20px;">加载仓库中 <i class="fas fa-spinner fa-pulse"></i></div>
-                </div>
+                <div id="repoGridContainer" class="repo-grid"><div style="padding: 20px;">加载仓库中 <i class="fas fa-spinner fa-pulse"></i></div></div>
             </div>
         </div>
 
-        <!-- 新增：Bilibili 视频板块 -->
         <div id="bilibiliPage" class="page">
             <div class="glass-card">
-                <div class="section-title"><i class="fab fa-bilibili"></i> Bilibili 创作 · 视频列表</div>
+                <div class="section-title"><i class="fas fa-code-branch"></i> 著名项目 · Showcase</div>
                 <div class="bili-search-box">
-                    <input type="text" id="biliSearchInput" placeholder="🔍 搜索视频标题 / 描述 / 标签...">
+                    <input type="text" id="projectSearchInput" placeholder="🔍 搜索项目名称 / 描述 / 技术栈...">
                 </div>
-                <div class="bili-filter-row" id="biliFilterRow">
+                <div class="bili-filter-row" id="projectFilterRow">
                     <span class="filter-chip active" data-filter="all">📁 全部</span>
-                    <span class="filter-chip" data-filter="tech">💻 技术</span>
-                    <span class="filter-chip" data-filter="game">🎮 游戏</span>
-                    <span class="filter-chip" data-filter="life">📷 生活</span>
-                    <span class="filter-chip" data-filter="tutorial">📚 教程</span>
+                    <span class="filter-chip" data-filter="Engine">⚙️ 引擎</span>
+                    <span class="filter-chip" data-filter="Web">🌐 网页</span>
+                    <span class="filter-chip" data-filter="Tool">🛠️ 工具</span>
+                    <span class="filter-chip" data-filter="Game">🎮 游戏</span>
                 </div>
-                <div id="biliVideoGrid" class="video-grid">
-                    <div class="bili-loading"><i class="fas fa-spinner fa-pulse"></i> 正在加载视频数据...</div>
+                <div id="projectGrid" class="video-grid">
+                    <div class="bili-loading"><i class="fas fa-spinner fa-pulse"></i> 正在从 program.txt 同步项目数据...</div>
                 </div>
             </div>
         </div>
 
-        <!-- 联系板块 -->
         <div id="contactPage" class="page">
             <div class="glass-card">
                 <div class="section-title"><i class="fas fa-paper-plane"></i> 社交连结</div>
@@ -978,36 +274,26 @@
         </div>
     </div>
 
-    <!-- 视频详情弹窗 -->
     <div class="video-modal-overlay" id="videoModal">
         <div class="video-modal-content">
-            <div class="video-modal-header">
-                <img class="video-modal-thumb" id="modalThumb" src="" alt="">
-                <button class="video-modal-close" id="modalClose"><i class="fas fa-times"></i></button>
-            </div>
+            <div class="video-modal-header"><img class="video-modal-thumb" id="modalThumb" src="" alt=""><button class="video-modal-close" id="modalClose"><i class="fas fa-times"></i></button></div>
             <div class="video-modal-body">
                 <div class="video-modal-title" id="modalTitle">--</div>
                 <div class="video-modal-stats" id="modalStats"></div>
                 <div class="video-modal-desc" id="modalDesc">--</div>
                 <div class="video-modal-actions">
-                    <a class="video-modal-btn primary" id="modalLink" href="#" target="_blank">
-                        <i class="fab fa-bilibili"></i> 前往观看
-                    </a>
-                    <button class="video-modal-btn secondary" id="modalCopy">
-                        <i class="fas fa-share-alt"></i> 复制链接
-                    </button>
+                    <a class="video-modal-btn primary" id="modalLink" href="#" target="_blank"><i class="fab fa-github"></i> 访问项目</a>
+                    <button class="video-modal-btn secondary" id="modalCopy"><i class="fas fa-share-alt"></i> 复制链接</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <footer>
-        <p>© 2026 ssbtt · 流光分页 | 灵动交互 · 暗色字体全白适配</p>
-    </footer>
+    <footer><p>© 2026 ssbtt · 流光分页 | 灵动交互 · 暗色字体全白适配</p></footer>
 </div>
 
 <script>
-    // ---------- 配置 ----------
+    // ========== 配置区域 ==========
     const CONFIG = {
         QQ_NUMBER: '1973737092',
         BILI_UID: '3546557150399113',
@@ -1016,29 +302,32 @@
         GITHUB_HOMEPAGE: 'https://github.com/ssbtt114514',
         QQ_ZONE_URL: 'https://user.qzone.qq.com/',
         BILI_SPACE_URL: 'https://space.bilibili.com/',
-        // 新增：静态BV号文件路径 (部署时在仓库根目录创建 bvlist.txt，每行一个bv号)
-        BV_LIST_URL: './bvlist.txt'
+        BILI_USER_API: 'https://api.bilibili.com/x/space/acc/info?mid=3546557150399113',
+        CORS_PROXY: 'https://cors-anywhere.herokuapp.com/'
     };
 
+    // 全局变量
     let allRepos = [];
     let currentRepoLang = 'all';
     let currentSearchText = '';
+    
+    // 新增：项目相关变量
+    let featuredProjects = [];
+    let projectSearchText = '';
+    let projectFilter = 'all';
+
     const repoContainer = document.getElementById('repoGridContainer');
     const langFilterContainer = document.getElementById('langFilterPage');
     const searchInput = document.getElementById('repoSearchPage');
-
-    // ========== Bilibili 数据 ==========
-    let biliVideos = [];
-    let biliUserInfo = null;
-    let biliCurrentFilter = 'all';
-    let biliSearchText = '';
-
-    // 等级经验参照表
     const LEVEL_EXP_TABLE = [0, 200, 1500, 4500, 10800, 28800, 0];
     const MOCK_BILI_USER = { level: 5, current_exp: 18500, coins: 234, videos_count: 24, next_level_exp: 28800 };
 
-    // ---- GitHub 拉取 (保持原样) ----
-    async function fetchRepos() { /* 与原代码一致，略作保留 */ 
+    // 辅助函数
+    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+    function formatNumber(num) { if (num >= 10000) return (num / 10000).toFixed(1) + '万'; if (num >= 1000) return (num / 1000).toFixed(1) + 'k'; return num.toString(); }
+
+    // ========== GitHub 功能 ==========
+    async function fetchRepos() {
         if (!repoContainer) return;
         repoContainer.innerHTML = '<div style="grid-column: span 2; text-align:center;"><i class="fas fa-spinner fa-pulse"></i> 正在同步 GitHub 数据...</div>';
         try {
@@ -1053,7 +342,8 @@
             console.error(e);
         }
     }
-    function buildLanguageFilters() { /* 与原一致 */ 
+
+    function buildLanguageFilters() {
         if (!langFilterContainer) return;
         const langSet = new Set(['all']);
         allRepos.forEach(repo => { const lang = repo.language || 'Mixed'; langSet.add(lang); });
@@ -1073,7 +363,8 @@
             langFilterContainer.appendChild(chip);
         });
     }
-    function renderRepoGrid() { /* 与原一致 */ 
+
+    function renderRepoGrid() {
         if (!repoContainer) return;
         let filtered = [...allRepos];
         if (currentRepoLang !== 'all') filtered = filtered.filter(r => (r.language || 'Mixed') === currentRepoLang);
@@ -1088,105 +379,170 @@
             repoContainer.appendChild(card);
         });
     }
-    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
     if (searchInput) searchInput.addEventListener('input', (e) => { currentSearchText = e.target.value; renderRepoGrid(); });
 
-    // ----- B站核心功能：从bvlist.txt加载BV号并获取真实视频信息 -----
-    async function fetchBiliData() {
-        const grid = document.getElementById('biliVideoGrid');
-        if(grid) grid.innerHTML = '<div class="bili-loading"><i class="fas fa-spinner fa-pulse"></i> 正在加载视频列表...</div>';
-        // 1. 获取用户信息（沿用原逻辑，允许失败降级）
+    // ========== 著名项目板块核心逻辑 (替代原B站功能) ==========
+    async function fetchProgramList() {
+        const grid = document.getElementById('projectGrid');
+        if(!grid) return;
+        grid.innerHTML = '<div class="bili-loading"><i class="fas fa-spinner fa-pulse"></i> 正在读取项目列表...</div>';
+        
         try {
-            const userRes = await fetch(CONFIG.BILI_USER_API, { headers: { 'Referer': 'https://space.bilibili.com' } });
+            // 1. 读取同级 program.txt
+            const response = await fetch('program.txt');
+            if (!response.ok) throw new Error('无法读取 program.txt，请确保文件存在。');
+            const text = await response.text();
+            
+            // 2. 解析链接
+            const repoUrls = text.split('\n').map(l => l.trim()).filter(l => l.startsWith('http'));
+            
+            if (repoUrls.length === 0) {
+                grid.innerHTML = '<div class="bili-empty"><i class="fas fa-file-alt"></i><p>program.txt 中没有有效的项目链接</p></div>';
+                return;
+            }
+
+            // 3. 并发获取 GitHub API 详情
+            const projectData = await Promise.all(repoUrls.map(async (url) => {
+                try {
+                    const parts = new URL(url).pathname.split('/').filter(Boolean);
+                    const owner = parts[0];
+                    const repo = parts[1];
+                    const apiRes = await fetch(`https://api.github.com/repos/${owner}/${repo}`);
+                    if (!apiRes.ok) return null;
+                    const data = await apiRes.json();
+                    
+                    // 智能分类
+                    let category = 'Tool';
+                    const n = data.name.toLowerCase();
+                    const d = (data.description || "").toLowerCase();
+                    if (n.includes('engine') || d.includes('engine') || n.includes('source')) category = 'Engine';
+                    else if (n.includes('web') || n.includes('github.io') || d.includes('website')) category = 'Web';
+                    else if (n.includes('game') || d.includes('game')) category = 'Game';
+
+                    return { ...data, category };
+                } catch (e) { return null; }
+            }));
+
+            featuredProjects = projectData.filter(p => p !== null);
+            renderProjects();
+        } catch (e) {
+            grid.innerHTML = `<div class="bili-empty"><i class="fas fa-exclamation-triangle"></i><p>${e.message}</p></div>`;
+        }
+    }
+
+    function renderProjects() {
+        const grid = document.getElementById('projectGrid');
+        if (!grid) return;
+
+        let filtered = featuredProjects.filter(p => {
+            const matchSearch = p.name.toLowerCase().includes(projectSearchText.toLowerCase()) || 
+                               (p.description && p.description.toLowerCase().includes(projectSearchText.toLowerCase()));
+            const matchFilter = projectFilter === 'all' || p.category === projectFilter;
+            return matchSearch && matchFilter;
+        });
+
+        if (filtered.length === 0) {
+            grid.innerHTML = `<div class="bili-empty"><i class="fas fa-search"></i><p>未找到匹配的项目</p></div>`;
+            return;
+        }
+
+        grid.innerHTML = '';
+        filtered.forEach(p => {
+            const card = document.createElement('div');
+            card.className = 'video-card';
+            card.onclick = () => openProjectModal(p);
+            
+            // 生成 GitHub Open Graph 预览图
+            const previewImg = `https://opengraph.githubassets.com/1/${p.full_name}`;
+            
+            card.innerHTML = `
+                <div class="video-thumb-wrap">
+                    <img class="video-thumbnail" src="${previewImg}" alt="${p.name}" loading="lazy" onerror="this.src='https://github.githubassets.com/images/modules/open_graph/github-logo.png'">
+                    <span class="video-duration">${p.language || 'Mixed'}</span>
+                </div>
+                <div class="video-info">
+                    <div class="video-title">${p.name}</div>
+                    <div class="video-meta"><i class="fas fa-star"></i> Stars: ${p.stargazers_count} | <i class="fas fa-code-branch"></i> Forks: ${p.forks_count}</div>
+                    <div class="video-stats">
+                        <span class="video-stat">${p.description ? p.description.substring(0, 45) + '...' : '暂无项目描述'}</span>
+                    </div>
+                    <span class="video-tag">${p.category.toUpperCase()}</span>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    function openProjectModal(p) { 
+        const modal = document.getElementById('videoModal');
+        document.getElementById('modalThumb').src = `https://opengraph.githubassets.com/1/${p.full_name}`;
+        document.getElementById('modalTitle').textContent = p.name;
+        
+        const dateStr = new Date(p.updated_at).toLocaleDateString('zh-CN');
+        document.getElementById('modalStats').innerHTML = `
+            <span class="video-modal-stat"><i class="fas fa-star"></i> ${p.stargazers_count} Stars</span>
+            <span class="video-modal-stat"><i class="fas fa-code-branch"></i> ${p.forks_count} Forks</span>
+            <span class="video-modal-stat"><i class="fas fa-exclamation-circle"></i> ${p.open_issues_count} Issues</span>
+            <span class="video-modal-stat"><i class="far fa-calendar-alt"></i> 更新: ${dateStr}</span>`;
+        
+        document.getElementById('modalDesc').innerHTML = `
+            <p style="margin-bottom:12px;">${p.description || '暂无详细描述'}</p>
+            <p style="font-size:0.8rem; opacity:0.7;"><i class="fas fa-balance-scale"></i> 许可协议: ${p.license ? p.license.spdx_id : '未设置'}</p>
+        `;
+        
+        const linkBtn = document.getElementById('modalLink');
+        linkBtn.href = p.html_url;
+        linkBtn.innerHTML = '<i class="fab fa-github"></i> 前往 GitHub 仓库';
+        
+        document.getElementById('modalCopy').onclick = () => { navigator.clipboard.writeText(p.html_url).then(() => alert('链接已复制')); };
+        
+        modal.classList.add('active'); 
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closeVideoModal() { document.getElementById('videoModal').classList.remove('active'); document.body.style.overflow = ''; }
+    document.getElementById('modalClose')?.addEventListener('click', closeVideoModal);
+    document.getElementById('videoModal')?.addEventListener('click', (e) => { if (e.target === document.getElementById('videoModal')) closeVideoModal(); });
+
+    // 板块搜索和筛选绑定
+    document.getElementById('projectSearchInput')?.addEventListener('input', (e) => {
+        projectSearchText = e.target.value;
+        renderProjects();
+    });
+
+    document.querySelectorAll('#projectFilterRow .filter-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            document.querySelectorAll('#projectFilterRow .filter-chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            projectFilter = chip.dataset.filter;
+            renderProjects();
+        });
+    });
+
+    // ========== B站用户信息功能 (保留主页数据展示) ==========
+    async function fetchBiliData() {
+        try {
+            const proxyUrl = CONFIG.CORS_PROXY;
+            const userRes = await fetch(proxyUrl + CONFIG.BILI_USER_API, { 
+                headers: { 'Referer': 'https://space.bilibili.com' } 
+            });
             const userData = await userRes.json();
             if (userData.code === 0) {
-                biliUserInfo = {
+                const info = {
                     level: userData.data.level,
                     current_exp: userData.data.level_exp?.current_exp || 0,
                     coins: userData.data.coins || 0,
                     videos_count: userData.data.videos || 0,
                     next_level_exp: userData.data.level_exp?.next_exp || LEVEL_EXP_TABLE[userData.data.level] || 0
                 };
+                renderBiliProfile(info);
             } else throw new Error();
-        } catch(e) { biliUserInfo = MOCK_BILI_USER; }
-        // 2. 从bvlist.txt读取bv号列表
-        let bvList = [];
-        try {
-            const response = await fetch(CONFIG.BV_LIST_URL);
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            const text = await response.text();
-            bvList = text.split(/\r?\n/).filter(line => line.trim().length > 0).map(line => line.trim());
-        } catch(err) {
-            console.error('加载bvlist失败', err);
-            if(grid) grid.innerHTML = '<div class="bili-empty"><i class="fas fa-exclamation-triangle"></i> 加载视频列表失败，请确保仓库根目录存在 bvlist.txt 文件</div>';
-            biliVideos = [];
-            renderBiliProfile();
-            renderBiliVideos();
-            return;
+        } catch(e) { 
+            renderBiliProfile(MOCK_BILI_USER); 
         }
-        if (bvList.length === 0) {
-            if(grid) grid.innerHTML = '<div class="bili-empty"><i class="fas fa-info-circle"></i> 暂无BV号，请在 bvlist.txt 中添加BV号（每行一个）</div>';
-            biliVideos = [];
-            renderBiliProfile();
-            renderBiliVideos();
-            return;
-        }
-        // 3. 并发获取视频详情（限制并发数5，避免接口压力）
-        const limit = 5;
-        const allVideos = [];
-        async function fetchSingleVideo(bvid) {
-            try {
-                const apiUrl = `https://api.bilibili.com/x/web-interface/view?bvid=${bvid}`;
-                const res = await fetch(apiUrl, { headers: { 'Referer': 'https://space.bilibili.com' } });
-                if (!res.ok) throw new Error(`API ${res.status}`);
-                const data = await res.json();
-                if (data.code !== 0) throw new Error(data.message);
-                const v = data.data;
-                const durationSec = v.duration;
-                const minutes = Math.floor(durationSec / 60);
-                const seconds = durationSec % 60;
-                const durationStr = `${minutes}:${seconds.toString().padStart(2,'0')}`;
-                const tag = inferTag(v.title, v.desc || '');
-                const tags = v.tag ? v.tag.split(',') : [v.tname].filter(Boolean);
-                return {
-                    bvid: v.bvid,
-                    title: v.title,
-                    description: v.desc || '',
-                    pic: v.pic,
-                    duration: durationStr,
-                    pubdate: v.pubdate,
-                    stat: { view: v.stat?.view || 0, like: v.stat?.like || 0, coin: v.stat?.coin || 0, danmaku: v.stat?.danmaku || 0 },
-                    tag: tag,
-                    tags: tags.slice(0,3)
-                };
-            } catch(err) {
-                console.warn(`获取视频 ${bvid} 失败:`, err);
-                return null;
-            }
-        }
-        for (let i = 0; i < bvList.length; i += limit) {
-            const batch = bvList.slice(i, i+limit);
-            const batchResults = await Promise.all(batch.map(bvid => fetchSingleVideo(bvid)));
-            allVideos.push(...batchResults.filter(v => v !== null));
-        }
-        biliVideos = allVideos;
-        // 渲染数据面板和视频列表
-        renderBiliProfile();
-        renderBiliVideos();
     }
 
-    function inferTag(title, desc) { // 与原版保持一致
-        const text = (title + ' ' + desc).toLowerCase();
-        if (text.includes('教程') || text.includes('指南') || text.includes('入门')) return 'tutorial';
-        if (text.includes('游戏') || text.includes('mc') || text.includes('minecraft') || text.includes('godot')) return 'game';
-        if (text.includes('vlog') || text.includes('日常') || text.includes('生活')) return 'life';
-        return 'tech';
-    }
-
-    function formatNumber(num) { if (num >= 10000) return (num / 10000).toFixed(1) + '万'; if (num >= 1000) return (num / 1000).toFixed(1) + 'k'; return num.toString(); }
-    function formatDuration(seconds) { if (typeof seconds === 'string') return seconds; const m = Math.floor(seconds / 60); const s = seconds % 60; return `${m}:${s.toString().padStart(2, '0')}`; }
-
-    function renderBiliProfile() { if (!biliUserInfo) return; const info = biliUserInfo;
+    function renderBiliProfile(info) { 
         document.getElementById('biliLevel').textContent = `LV${info.level}`;
         document.getElementById('biliExp').textContent = info.current_exp.toLocaleString();
         document.getElementById('biliCoins').textContent = info.coins.toLocaleString();
@@ -1202,94 +558,26 @@
         document.getElementById('nextLevelText').textContent = info.level >= 6 ? '已达到最高等级！' : `距离 LV${info.level+1} 还需 ${(nextExp - info.current_exp).toLocaleString()} 经验`;
     }
 
-    function renderBiliVideos() {
-        const grid = document.getElementById('biliVideoGrid');
-        if (!grid) return;
-        let filtered = [...biliVideos];
-        if (biliCurrentFilter !== 'all') filtered = filtered.filter(v => v.tag === biliCurrentFilter);
-        if (biliSearchText.trim()) {
-            const kw = biliSearchText.toLowerCase();
-            filtered = filtered.filter(v => v.title.toLowerCase().includes(kw) || v.description.toLowerCase().includes(kw) || v.tags.some(t => t.toLowerCase().includes(kw)));
-        }
-        if (filtered.length === 0) {
-            grid.innerHTML = `<div class="bili-empty"><i class="fas fa-film"></i><p>暂无匹配的视频</p></div>`; return;
-        }
-        grid.innerHTML = '';
-        filtered.forEach(video => {
-            const card = document.createElement('div'); card.className = 'video-card'; card.onclick = () => openVideoModal(video);
-            const dateStr = new Date(video.pubdate * 1000).toLocaleDateString('zh-CN');
-            const tagsHtml = video.tags.slice(0,3).map(t => `<span class="video-tag">${escapeHtml(t)}</span>`).join('');
-            card.innerHTML = `
-                <div class="video-thumb-wrap">
-                    <img class="video-thumbnail" src="${video.pic}" alt="${escapeHtml(video.title)}" loading="lazy">
-                    <span class="video-duration">${video.duration}</span>
-                </div>
-                <div class="video-info">
-                    <div class="video-title">${escapeHtml(video.title)}</div>
-                    <div class="video-meta"><i class="far fa-calendar"></i> ${dateStr}</div>
-                    <div class="video-stats">
-                        <span class="video-stat"><i class="far fa-eye"></i> ${formatNumber(video.stat.view)}</span>
-                        <span class="video-stat"><i class="far fa-thumbs-up"></i> ${formatNumber(video.stat.like)}</span>
-                        <span class="video-stat"><i class="far fa-comment-dots"></i> ${formatNumber(video.stat.danmaku)}</span>
-                    </div>
-                    ${tagsHtml}
-                </div>
-            `;
-            grid.appendChild(card);
-        });
-    }
-
-    function openVideoModal(video) { const modal = document.getElementById('videoModal');
-        document.getElementById('modalThumb').src = video.pic;
-        document.getElementById('modalTitle').textContent = video.title;
-        document.getElementById('modalDesc').textContent = video.description || '暂无描述';
-        const dateStr = new Date(video.pubdate * 1000).toLocaleDateString('zh-CN');
-        document.getElementById('modalStats').innerHTML = `
-            <span class="video-modal-stat"><i class="far fa-eye"></i> ${formatNumber(video.stat.view)} 播放</span>
-            <span class="video-modal-stat"><i class="far fa-thumbs-up"></i> ${formatNumber(video.stat.like)} 点赞</span>
-            <span class="video-modal-stat"><i class="fas fa-coins"></i> ${formatNumber(video.stat.coin)} 投币</span>
-            <span class="video-modal-stat"><i class="far fa-comment-dots"></i> ${formatNumber(video.stat.danmaku)} 弹幕</span>
-            <span class="video-modal-stat"><i class="far fa-calendar"></i> ${dateStr}</span>`;
-        document.getElementById('modalLink').href = `https://www.bilibili.com/video/${video.bvid}`;
-        document.getElementById('modalCopy').onclick = () => { const url = `https://www.bilibili.com/video/${video.bvid}`; navigator.clipboard.writeText(url).then(() => alert('链接已复制'), () => alert('手动复制：'+url)); };
-        modal.classList.add('active'); document.body.style.overflow = 'hidden';
-    }
-    function closeVideoModal() { document.getElementById('videoModal').classList.remove('active'); document.body.style.overflow = ''; }
-    document.getElementById('modalClose')?.addEventListener('click', closeVideoModal);
-    document.getElementById('videoModal')?.addEventListener('click', (e) => { if (e.target === document.getElementById('videoModal')) closeVideoModal(); });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeVideoModal(); });
-
-    // 筛选器事件
-    document.querySelectorAll('#biliFilterRow .filter-chip').forEach(chip => {
-        chip.addEventListener('click', () => {
-            document.querySelectorAll('#biliFilterRow .filter-chip').forEach(c => { c.style.background = ''; c.style.color = ''; });
-            chip.style.background = '#6c8dff'; chip.style.color = 'white';
-            biliCurrentFilter = chip.dataset.filter;
-            renderBiliVideos();
-        });
-    });
-    const biliSearchInputDom = document.getElementById('biliSearchInput');
-    if (biliSearchInputDom) biliSearchInputDom.addEventListener('input', (e) => { biliSearchText = e.target.value; renderBiliVideos(); });
-
     // 分页逻辑
     const pages = ['profile', 'skills', 'games', 'identity', 'experience', 'github', 'bilibili', 'contact'];
     function switchPage(pageId) {
         pages.forEach(p => { const el = document.getElementById(`${p}Page`); if (el) el.classList.remove('active-page'); });
         const activePage = document.getElementById(`${pageId}Page`); if (activePage) activePage.classList.add('active-page');
         document.querySelectorAll('.tab-btn').forEach(btn => { if (btn.getAttribute('data-page') === pageId) btn.classList.add('active'); else btn.classList.remove('active'); });
+        
         if (pageId === 'github' && allRepos.length === 0) fetchRepos();
-        if (pageId === 'bilibili' && biliVideos.length === 0) fetchBiliData();
+        if (pageId === 'bilibili' && featuredProjects.length === 0) fetchProgramList();
     }
     document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => switchPage(btn.getAttribute('data-page'))));
 
-    // 社交与头像
+    // 社交与头像功能
     function openQQHomepage(qq) { const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent); if(isMobile) { window.location.href = `mqq://card/show_pslcard?uin=${qq}`; setTimeout(() => { if(confirm('未唤起QQ，复制QQ号?')) navigator.clipboard.writeText(qq); }, 500); } else { window.open(`${CONFIG.QQ_ZONE_URL}${qq}`, '_blank'); } }
     function openBilibili(uid) { window.open(`${CONFIG.BILI_SPACE_URL}${uid}`, '_blank'); }
     function copyWechat() { navigator.clipboard.writeText(CONFIG.WECHAT_ID).then(() => alert(`微信号 ${CONFIG.WECHAT_ID} 已复制`)).catch(() => alert('手动复制：'+CONFIG.WECHAT_ID)); }
     function initAvatar() { const avatarDiv = document.getElementById('avatarShake'); if(avatarDiv) avatarDiv.addEventListener('click', () => { avatarDiv.style.transform = `translate(${(Math.random()-0.5)*40}px, ${(Math.random()-0.5)*30}px) scale(1.02)`; setTimeout(() => avatarDiv.style.transform = '', 400); }); const img = document.getElementById('dynamic-qq-avatar'); if(img) img.src = `https://q.qlogo.cn/headimg_dl?dst_uin=${CONFIG.QQ_NUMBER}&spec=140&t=${Date.now()}`; }
     function initButtons() { document.getElementById('ghBtn')?.addEventListener('click', () => window.open(CONFIG.GITHUB_HOMEPAGE, '_blank')); document.getElementById('biliBtn')?.addEventListener('click', () => openBilibili(CONFIG.BILI_UID)); document.getElementById('qqBtn')?.addEventListener('click', () => openQQHomepage(CONFIG.QQ_NUMBER)); document.getElementById('wxBtn')?.addEventListener('click', copyWechat); document.querySelectorAll('.skill-badge[data-url]').forEach(el => { el.addEventListener('click', (e) => { e.stopPropagation(); window.open(el.getAttribute('data-url'), '_blank'); }); }); }
-    function initTheme() { const themeBtn = document.getElementById('globalThemeSwitch'); if (localStorage.getItem('theme') === 'dark') { document.body.classList.add('dark'); themeBtn.innerHTML = '<i class="fas fa-sun"></i>'; } else { themeBtn.innerHTML = '<i class="fas fa-moon"></i>'; } themeBtn.addEventListener('click', () => { const isDark = document.body.classList.toggle('dark'); localStorage.setItem('theme', isDark ? 'dark' : 'light'); themeBtn.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>'; if (allRepos.length) { buildLanguageFilters(); renderRepoGrid(); } if (biliVideos.length) renderBiliVideos(); }); }
-    function init() { initTheme(); initAvatar(); initButtons(); fetchRepos(); const observer = new MutationObserver(() => { const ghPage = document.getElementById('githubPage'); if(ghPage && ghPage.classList.contains('active-page') && allRepos.length === 0) fetchRepos(); else if(ghPage && ghPage.classList.contains('active-page') && allRepos.length > 0 && repoContainer.children.length <= 1) renderRepoGrid(); }); observer.observe(document.getElementById('githubPage') || document.body, { attributes: true, attributeFilter: ['class'] }); }
+    function initTheme() { const themeBtn = document.getElementById('globalThemeSwitch'); if (localStorage.getItem('theme') === 'dark') { document.body.classList.add('dark'); themeBtn.innerHTML = '<i class="fas fa-sun"></i>'; } else { themeBtn.innerHTML = '<i class="fas fa-moon"></i>'; } themeBtn.addEventListener('click', () => { const isDark = document.body.classList.toggle('dark'); localStorage.setItem('theme', isDark ? 'dark' : 'light'); themeBtn.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>'; if (allRepos.length) { buildLanguageFilters(); renderRepoGrid(); } }); }
+    function init() { initTheme(); initAvatar(); initButtons(); fetchRepos(); fetchBiliData(); }
     document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
