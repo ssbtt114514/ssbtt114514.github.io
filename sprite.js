@@ -8,7 +8,7 @@ const CONFIG = {
     QQ_ZONE_URL: 'https://user.qzone.qq.com/',
     BILI_SPACE_URL: 'https://space.bilibili.com/',
     BILI_USER_API: 'https://api.bilibili.com/x/space/acc/info?mid=3546557150399113',
-    CORS_PROXY: 'https://cors-anywhere.herokuapp.com/',
+    CORS_PROXY: 'https://corsproxy.io/',
     CONFIG_JSON_URL: './config.json'   // 著名项目配置文件
 };
 
