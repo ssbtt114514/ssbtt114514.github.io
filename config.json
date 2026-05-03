@@ -1,0 +1,30 @@
+{
+  "projects": [
+    {
+      "name": "seewohelp",
+      "url": "https://github.com/ssbtt114514/seewohelp",
+      "button": true,
+      "buttons": [
+        {
+          "icon": "fas fa-book",
+          "color": "#6c8dff",
+          "activeColor": "#4caf50",
+          "link": "https://ssbtt114514.github.io/seewohelp/docs",
+          "text": "文档"
+        },
+        {
+          "icon": "fas fa-download",
+          "color": "#ff9800",
+          "activeColor": "#f44336",
+          "link": "https://github.com/ssbtt114514/seewohelp/releases",
+          "text": "下载"
+        }
+      ]
+    },
+    {
+      "name": "example-project",
+      "url": "https://github.com/ssbtt114514/example",
+      "button": false
+    }
+  ]
+}
