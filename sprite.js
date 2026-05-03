@@ -98,32 +98,38 @@ async function fetchProgramList() {
         const configData = await configRes.json();
         const projectsConfig = configData.projects || [];
 
-        console.log('📋 配置中的项目数量:', projectsConfig.length);
-        console.log('📋 项目列表:', projectsConfig.map(p => p.url));
-
         if (projectsConfig.length === 0) {
             grid.innerHTML = '<div class="bili-empty"><i class="fas fa-folder-open"></i><p>config.json 中没有项目</p></div>';
             return;
         }
 
-        // 显示加载中状态
-        grid.innerHTML = '<div class="bili-loading"><i class="fas fa-spinner fa-pulse"></i> 正在获取项目详情...</div>';
-
-        const projectPromises = projectsConfig.map(async (proj) => {
+        featuredProjects = [];
+        
+        for (let i = 0; i < projectsConfig.length; i++) {
+            const proj = projectsConfig[i];
+            grid.innerHTML = `<div class="bili-loading"><i class="fas fa-spinner fa-pulse"></i> 正在加载项目 (${i+1}/${projectsConfig.length})...</div>`;
+            
             try {
-                console.log(`🔄 正在获取: ${proj.url}`);
                 const parts = new URL(proj.url).pathname.split('/').filter(Boolean);
+                if (parts.length < 2) {
+                    console.error('❌ URL格式错误:', proj.url);
+                    continue;
+                }
+                
                 const owner = parts[0];
                 const repo = parts[1];
                 const apiRes = await fetch(`https://api.github.com/repos/${owner}/${repo}`);
                 
                 if (!apiRes.ok) {
-                    console.warn(`⚠️ GitHub API 返回错误 ${apiRes.status}: ${proj.url}`);
-                    return null;
+                    if (apiRes.status === 403) {
+                        console.warn('⚠️ GitHub API 速率限制');
+                    } else if (apiRes.status === 404) {
+                        console.warn('⚠️ 仓库不存在:', proj.url);
+                    }
+                    continue;
                 }
                 
                 const data = await apiRes.json();
-                console.log(`✅ 成功获取: ${data.full_name}`);
 
                 let category = 'Tool';
                 const n = data.name.toLowerCase();
@@ -132,24 +138,22 @@ async function fetchProgramList() {
                 else if (n.includes('web') || n.includes('github.io') || d.includes('website')) category = 'Web';
                 else if (n.includes('game') || d.includes('game')) category = 'Game';
 
-                return {
+                featuredProjects.push({
                     ...data,
                     category,
                     config: proj
-                };
+                });
+                
+                renderProjects();
             } catch (e) {
-                console.error(`❌ 获取失败: ${proj.url}`, e);
-                return null;
+                console.error(`❌ 加载失败: ${proj.url}`, e);
+                continue;
             }
-        });
+        }
 
-        const results = await Promise.all(projectPromises);
-        featuredProjects = results.filter(p => p !== null);
-        
-        console.log(`📊 最终加载项目数: ${featuredProjects.length}/${projectsConfig.length}`);
-        console.log('📊 项目名称:', featuredProjects.map(p => p.name));
-        
-        renderProjects();
+        if (featuredProjects.length === 0) {
+            grid.innerHTML = '<div class="bili-empty"><i class="fas fa-exclamation-triangle"></i><p>所有项目加载失败，请检查网络或 GitHub 状态</p></div>';
+        }
     } catch (e) {
         console.error('❌ 配置文件加载失败:', e);
         grid.innerHTML = `<div class="bili-empty"><i class="fas fa-exclamation-triangle"></i><p>加载失败: ${e.message}</p></div>`;
