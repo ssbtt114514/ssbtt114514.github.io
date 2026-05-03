@@ -87,50 +87,66 @@ function renderRepoGrid() {
 if (searchInput) searchInput.addEventListener('input', (e) => { currentSearchText = e.target.value; renderRepoGrid(); });
 
 // ========== 著名项目板块 (基于 config.json) ==========
+// ========== 著名项目板块 (稳定版) ==========
 async function fetchProgramList() {
     const grid = document.getElementById('projectGrid');
     if (!grid) return;
     grid.innerHTML = '<div class="bili-loading"><i class="fas fa-spinner fa-pulse"></i> 正在从 config.json 加载项目配置...</div>';
 
     try {
+        // 1. 加载配置文件
         const configRes = await fetch(CONFIG.CONFIG_JSON_URL);
-        if (!configRes.ok) throw new Error('无法读取 config.json');
+        if (!configRes.ok) throw new Error('无法读取 config.json (HTTP ' + configRes.status + ')');
         const configData = await configRes.json();
         const projectsConfig = configData.projects || [];
 
+        console.log('✅ 读取到 ' + projectsConfig.length + ' 个项目配置');
+        
         if (projectsConfig.length === 0) {
             grid.innerHTML = '<div class="bili-empty"><i class="fas fa-folder-open"></i><p>config.json 中没有项目</p></div>';
             return;
         }
 
+        // 2. 逐个加载项目
         featuredProjects = [];
         
         for (let i = 0; i < projectsConfig.length; i++) {
             const proj = projectsConfig[i];
-            grid.innerHTML = `<div class="bili-loading"><i class="fas fa-spinner fa-pulse"></i> 正在加载项目 (${i+1}/${projectsConfig.length})...</div>`;
+            grid.innerHTML = `<div class="bili-loading"><i class="fas fa-spinner fa-pulse"></i> 正在加载项目 ${i+1}/${projectsConfig.length}: ${proj.name || proj.url}</div>`;
             
             try {
-                const parts = new URL(proj.url).pathname.split('/').filter(Boolean);
-                if (parts.length < 2) {
-                    console.error('❌ URL格式错误:', proj.url);
+                // 解析 URL
+                const urlParts = new URL(proj.url).pathname.split('/').filter(Boolean);
+                if (urlParts.length < 2) {
+                    console.error('❌ URL格式错误: ' + proj.url);
                     continue;
                 }
                 
-                const owner = parts[0];
-                const repo = parts[1];
-                const apiRes = await fetch(`https://api.github.com/repos/${owner}/${repo}`);
+                const owner = urlParts[0];
+                const repo = urlParts[1];
+                const apiUrl = `https://api.github.com/repos/${owner}/${repo}`;
+                
+                console.log(`🔄 [${i+1}/${projectsConfig.length}] 请求: ${apiUrl}`);
+                
+                const apiRes = await fetch(apiUrl);
                 
                 if (!apiRes.ok) {
-                    if (apiRes.status === 403) {
-                        console.warn('⚠️ GitHub API 速率限制');
-                    } else if (apiRes.status === 404) {
-                        console.warn('⚠️ 仓库不存在:', proj.url);
+                    console.error(`❌ GitHub API 返回 ${apiRes.status}: ${apiUrl}`);
+                    console.error(`   项目: ${proj.name} (${proj.url})`);
+                    
+                    // 如果是404，说明仓库不存在或私有
+                    if (apiRes.status === 404) {
+                        console.error('   → 仓库不存在或为私有仓库');
+                    } else if (apiRes.status === 403) {
+                        console.error('   → API速率限制，请稍后再试');
                     }
                     continue;
                 }
                 
                 const data = await apiRes.json();
-
+                console.log(`✅ 成功获取: ${data.full_name} (⭐${data.stargazers_count})`);
+                
+                // 智能分类
                 let category = 'Tool';
                 const n = data.name.toLowerCase();
                 const d = (data.description || "").toLowerCase();
@@ -138,22 +154,34 @@ async function fetchProgramList() {
                 else if (n.includes('web') || n.includes('github.io') || d.includes('website')) category = 'Web';
                 else if (n.includes('game') || d.includes('game')) category = 'Game';
 
+                // 添加到列表
                 featuredProjects.push({
                     ...data,
                     category,
                     config: proj
                 });
                 
+                // 即时渲染
                 renderProjects();
+                
             } catch (e) {
-                console.error(`❌ 加载失败: ${proj.url}`, e);
+                console.error(`❌ 加载失败 [${i+1}]: ${proj.url}`, e);
                 continue;
             }
         }
 
+        console.log(`📊 最终结果: ${featuredProjects.length}/${projectsConfig.length} 个项目加载成功`);
+        
+        // 3. 检查结果
         if (featuredProjects.length === 0) {
-            grid.innerHTML = '<div class="bili-empty"><i class="fas fa-exclamation-triangle"></i><p>所有项目加载失败，请检查网络或 GitHub 状态</p></div>';
+            grid.innerHTML = `
+                <div class="bili-empty">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>所有项目加载失败</p>
+                    <p style="font-size:0.8rem; margin-top:8px;">请检查：<br>1. GitHub 仓库是否存在<br>2. 网络连接是否正常<br>3. 打开控制台查看详细错误</p>
+                </div>`;
         }
+        
     } catch (e) {
         console.error('❌ 配置文件加载失败:', e);
         grid.innerHTML = `<div class="bili-empty"><i class="fas fa-exclamation-triangle"></i><p>加载失败: ${e.message}</p></div>`;
