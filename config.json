@@ -14,15 +14,15 @@
         }
       ]
     },
-        {
+    {
       "name": "vulkan mod for vk1.1",
       "url": "https://github.com/ssbtt114514/VulkanMod_for_vulkan1.1",
       "button": true,
       "buttons": [
         {
-          "icon": "fas fa-book",
-          "color": "#6c8dff",
-          "activeColor": "#4caf50",
+          "icon": "fas fa-download",
+          "color": "#ff9800",
+          "activeColor": "#f44336",
           "link": "https://github.com/ssbtt114514/VulkanMod_for_vulkan1.1/releases/tag/",
           "text": "release"
         }
