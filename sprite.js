@@ -98,19 +98,32 @@ async function fetchProgramList() {
         const configData = await configRes.json();
         const projectsConfig = configData.projects || [];
 
+        console.log('📋 配置中的项目数量:', projectsConfig.length);
+        console.log('📋 项目列表:', projectsConfig.map(p => p.url));
+
         if (projectsConfig.length === 0) {
             grid.innerHTML = '<div class="bili-empty"><i class="fas fa-folder-open"></i><p>config.json 中没有项目</p></div>';
             return;
         }
 
+        // 显示加载中状态
+        grid.innerHTML = '<div class="bili-loading"><i class="fas fa-spinner fa-pulse"></i> 正在获取项目详情...</div>';
+
         const projectPromises = projectsConfig.map(async (proj) => {
             try {
+                console.log(`🔄 正在获取: ${proj.url}`);
                 const parts = new URL(proj.url).pathname.split('/').filter(Boolean);
                 const owner = parts[0];
                 const repo = parts[1];
                 const apiRes = await fetch(`https://api.github.com/repos/${owner}/${repo}`);
-                if (!apiRes.ok) return null;
+                
+                if (!apiRes.ok) {
+                    console.warn(`⚠️ GitHub API 返回错误 ${apiRes.status}: ${proj.url}`);
+                    return null;
+                }
+                
                 const data = await apiRes.json();
+                console.log(`✅ 成功获取: ${data.full_name}`);
 
                 let category = 'Tool';
                 const n = data.name.toLowerCase();
@@ -122,21 +135,24 @@ async function fetchProgramList() {
                 return {
                     ...data,
                     category,
-                    config: proj      // 保留原始配置（按钮信息等）
+                    config: proj
                 };
             } catch (e) {
-                console.warn(`GitHub 获取失败: ${proj.url}`, e);
+                console.error(`❌ 获取失败: ${proj.url}`, e);
                 return null;
             }
         });
 
         const results = await Promise.all(projectPromises);
         featuredProjects = results.filter(p => p !== null);
+        
+        console.log(`📊 最终加载项目数: ${featuredProjects.length}/${projectsConfig.length}`);
+        console.log('📊 项目名称:', featuredProjects.map(p => p.name));
+        
         renderProjects();
-
     } catch (e) {
+        console.error('❌ 配置文件加载失败:', e);
         grid.innerHTML = `<div class="bili-empty"><i class="fas fa-exclamation-triangle"></i><p>加载失败: ${e.message}</p></div>`;
-        console.error(e);
     }
 }
 
