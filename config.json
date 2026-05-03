@@ -1,7 +1,7 @@
 {
   "projects": [
     {
-      "name": "seewohelp",
+      "name": "seewo手册",
       "url": "https://github.com/ssbtt114514/seewohelp",
       "button": true,
       "buttons": [
@@ -9,22 +9,24 @@
           "icon": "fas fa-book",
           "color": "#6c8dff",
           "activeColor": "#4caf50",
-          "link": "https://ssbtt114514.github.io/seewohelp/docs",
-          "text": "文档"
-        },
-        {
-          "icon": "fas fa-download",
-          "color": "#ff9800",
-          "activeColor": "#f44336",
-          "link": "https://github.com/ssbtt114514/seewohelp/releases",
-          "text": "下载"
+          "link": "https://ssbtt114514.github.io/seewo.help/",
+          "text": "阅读"
         }
       ]
-    },
-    {
-      "name": "example-project",
-      "url": "https://github.com/ssbtt114514/example",
-      "button": false
+    }
+        {
+      "name": "vulkan mod for vk1.1",
+      "url": "https://github.com/ssbtt114514/VulkanMod_for_vulkan1.1",
+      "button": true,
+      "buttons": [
+        {
+          "icon": "fas fa-book",
+          "color": "#6c8dff",
+          "activeColor": "#4caf50",
+          "link": "https://github.com/ssbtt114514/VulkanMod_for_vulkan1.1/releases/tag/",
+          "text": "release"
+        }
+      ]
     }
   ]
 }
