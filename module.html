@@ -2,8 +2,8 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>ssbtt · 流光分页 | 模块化架构</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>ssbtt个人主页</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,500;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/main.css">
@@ -11,23 +11,33 @@
 <body>
 <div class="app-wrapper">
     <div class="glass-nav">
-        <div class="logo-area"><i class="fas fa-dragon"></i> ssbtt·流光</div>
+        <div class="logo-area"><i class="fas fa-dragon"></i> ssbtt·主页</div>
         <button class="theme-toggle" id="globalThemeSwitch"><i class="fas fa-moon"></i></button>
     </div>
-    
+
     <div class="page-tabs" id="pageTabs"></div>
-    
+
     <div class="pages-container" id="pagesContainer"></div>
-    
-    <footer><p>© 2026 ssbtt · 模块化架构 | 每个板块独立文件</p></footer>
+
+    <footer><p>© 2026 created by ssbtt</p></footer>
 </div>
 
-<!-- 弹窗组件（共用） -->
-<div class="video-modal-overlay" id="videoModal">...</div>
+<!-- 全局模态框（项目详情用） -->
+<div class="video-modal-overlay" id="videoModal">
+    <div class="video-modal-content">
+        <div class="video-modal-header"><img class="video-modal-thumb" id="modalThumb" src="" alt=""><button class="video-modal-close" id="modalClose"><i class="fas fa-times"></i></button></div>
+        <div class="video-modal-body">
+            <div class="video-modal-title" id="modalTitle">--</div>
+            <div class="video-modal-stats" id="modalStats"></div>
+            <div class="video-modal-desc" id="modalDesc">--</div>
+            <div class="video-modal-actions" id="modalActions"></div>
+        </div>
+    </div>
+</div>
 
-<script src="js/config.js"></script>
+<script src="config/config.js"></script>
+<script src="config/api.js"></script>
 <script src="js/utils.js"></script>
-<script src="js/services/api.js"></script>
 <script src="js/modules/profile.js"></script>
 <script src="js/modules/skills.js"></script>
 <script src="js/modules/games.js"></script>
