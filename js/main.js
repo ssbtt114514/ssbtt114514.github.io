@@ -1,4 +1,4 @@
-// 页面定义列表 (顺序决定tab显示顺序)
+// 页面定义列表
 const PAGE_MODULES = [
     { id: 'profile', name: '主页', icon: 'fas fa-user-astronaut', module: window.ProfileModule },
     { id: 'skills', name: '技能', icon: 'fas fa-laptop-code', module: window.SkillsModule },
@@ -11,11 +11,25 @@ const PAGE_MODULES = [
 ];
 
 let currentPageId = 'profile';
+let loadingOverlay = null;
+
+function showLoading(msg = '初始化模块') {
+    if (!loadingOverlay) loadingOverlay = document.getElementById('loading-overlay');
+    if (loadingOverlay) {
+        const detailSpan = loadingOverlay.querySelector('#loading-detail');
+        if (detailSpan) detailSpan.textContent = msg;
+        loadingOverlay.style.display = 'flex';
+    }
+}
+
+function hideLoading() {
+    if (loadingOverlay) loadingOverlay.style.display = 'none';
+}
 
 function buildTabs() {
     const tabsContainer = document.getElementById('pageTabs');
     if (!tabsContainer) {
-        console.error('找不到 #pageTabs 容器');
+        window.addError('页面结构错误', '找不到 #pageTabs 容器，请检查 HTML', true);
         return;
     }
     tabsContainer.innerHTML = '';
@@ -34,11 +48,10 @@ function buildTabs() {
 function buildPages() {
     const pagesContainer = document.getElementById('pagesContainer');
     if (!pagesContainer) {
-        console.error('找不到 #pagesContainer 容器');
+        window.addError('页面结构错误', '找不到 #pagesContainer 容器', true);
         return;
     }
     pagesContainer.innerHTML = '';
-    // 创建页面容器
     PAGE_MODULES.forEach(page => {
         const pageDiv = document.createElement('div');
         pageDiv.id = `${page.id}Page`;
@@ -46,30 +59,41 @@ function buildPages() {
         if (page.id === currentPageId) pageDiv.classList.add('active-page');
         pagesContainer.appendChild(pageDiv);
     });
-    console.log('📄 页面容器创建完成，开始初始化各模块...');
+    console.log('📄 页面容器创建完成');
 
-    // 初始化各个模块（增加错误隔离）
+    let hasFatal = false;
     PAGE_MODULES.forEach(page => {
+        showLoading(`正在加载 ${page.name} 模块...`);
         if (page.module && typeof page.module.init === 'function') {
             try {
                 page.module.init(`${page.id}Page`);
                 console.log(`✅ 模块 ${page.id} 初始化成功`);
             } catch (err) {
-                console.error(`❌ 模块 ${page.id} 初始化失败:`, err);
-                // 在对应页面显示错误提示
+                hasFatal = true;
+                const errorDetail = `文件: js/modules/${page.id}.js\n错误: ${err.message}\n堆栈: ${err.stack}`;
+                window.addError(`模块 ${page.name} 初始化失败`, errorDetail, true);
                 const pageDiv = document.getElementById(`${page.id}Page`);
                 if (pageDiv) {
-                    pageDiv.innerHTML = `<div class="glass-card" style="color:red; text-align:center;">模块加载失败，请检查控制台<br>${err.message}</div>`;
+                    pageDiv.innerHTML = `<div class="glass-card" style="color:red; text-align:center;">${page.name} 模块加载失败<br>请在底部错误面板查看详情</div>`;
                 }
             }
         } else {
-            console.warn(`⚠️ 模块 ${page.id} 未定义或缺少 init 方法`);
+            hasFatal = true;
+            const errorDetail = `模块对象 window.${page.id.charAt(0).toUpperCase() + page.id.slice(1)}Module 不存在。\n请确认 js/modules/${page.id}.js 已正确加载并导出该对象。`;
+            window.addError(`模块 ${page.name} 未定义`, errorDetail, true);
             const pageDiv = document.getElementById(`${page.id}Page`);
             if (pageDiv) {
-                pageDiv.innerHTML = `<div class="glass-card" style="text-align:center;">模块未就绪，请刷新页面</div>`;
+                pageDiv.innerHTML = `<div class="glass-card" style="text-align:center;">${page.name} 模块未就绪</div>`;
             }
         }
     });
+
+    hideLoading();
+    if (hasFatal) {
+        console.warn('部分模块初始化失败，请查看底部错误面板');
+    } else {
+        console.log('🎉 所有模块初始化完成');
+    }
 }
 
 function switchPage(pageId) {
@@ -81,7 +105,6 @@ function switchPage(pageId) {
             else pageDiv.classList.remove('active-page');
         }
     });
-    // 更新tab样式
     document.querySelectorAll('.tab-btn').forEach(btn => {
         if (btn.getAttribute('data-page') === pageId) btn.classList.add('active');
         else btn.classList.remove('active');
@@ -101,16 +124,34 @@ function initTheme() {
         const isDark = document.body.classList.toggle('dark');
         localStorage.setItem('theme', isDark ? 'dark' : 'light');
         themeBtn.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-        // 通知 GitHub 模块刷新主题样式
         if (window.GitHubModule && window.GitHubModule.refreshTheme) {
             window.GitHubModule.refreshTheme();
         }
     });
 }
 
+// 全局资源加载错误监听
+window.addEventListener('error', (event) => {
+    const target = event.target;
+    if (target && (target.tagName === 'SCRIPT' || target.tagName === 'LINK')) {
+        const url = target.src || target.href;
+        window.addError('资源加载失败', `无法加载: ${url}\n请检查文件路径或网络`, true);
+    }
+});
+
+// 未捕获的 Promise 错误
+window.addEventListener('unhandledrejection', (event) => {
+    const reason = event.reason;
+    let errorMsg = '未知异步错误';
+    if (reason instanceof Error) errorMsg = reason.message;
+    else if (typeof reason === 'string') errorMsg = reason;
+    window.addError('异步操作错误', errorMsg, false);
+});
+
 // 启动应用
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 DOM 加载完成，开始构建页面...');
+    console.log('🚀 DOM 加载完成');
+    loadingOverlay = document.getElementById('loading-overlay');
     buildTabs();
     buildPages();
     initTheme();
