@@ -6,291 +6,55 @@
     <title>ssbtt个人主页</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,500;14..32,700;14..32,800&display=swap" rel="stylesheet">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        :root { --primary-accent: #6c8dff; --spring-easing: cubic-bezier(0.34, 1.2, 0.64, 1); --card-radius: 32px; }
-        body { font-family: 'Inter', 'Segoe UI', sans-serif; min-height: 100vh; background: radial-gradient(circle at 30% 10%, #eef2fa, #cdd8ec); transition: background 0.5s ease; overflow-x: hidden; }
-        body.dark, body.dark * { color: #ffffff !important; }
-        body.dark i, body.dark .fab, body.dark .fas, body.dark .far { color: #f0f3ff !important; }
-        body.dark { background: radial-gradient(circle at 30% 10%, #0b1120, #020409) !important; }
-        body.dark .glass-nav, body.dark .page-tabs, body.dark .glass-card { background: rgba(18, 24, 38, 0.75) !important; backdrop-filter: blur(20px) !important; border-color: rgba(255, 255, 255, 0.15) !important; }
-        body.dark .skill-badge, body.dark .game-bubble, body.dark .contact-btn, body.dark .repo-tile, body.dark .tab-btn:not(.active), body.dark .filter-chip, body.dark .video-card, body.dark .bili-stat-card, body.dark .level-progress-bg, body.dark .video-modal-content, body.dark .bili-search-box input { background: rgba(255, 255, 255, 0.12) !important; border-color: transparent !important; }
-        body.dark .tab-btn.active { background: var(--primary-accent) !important; color: white !important; }
-        body.dark .repo-tile:hover, body.dark .skill-badge:hover, body.dark .game-bubble:hover, body.dark .contact-btn:hover, body.dark .video-card:hover { background: var(--primary-accent) !important; color: white !important; }
-        body.dark input, body.dark .search-box input, body.dark .bili-search-box input { background: rgba(255, 255, 255, 0.15) !important; border-color: rgba(255, 255, 255, 0.3) !important; color: white !important; }
-        body.dark input::placeholder, body.dark .bili-search-box input::placeholder { color: rgba(255, 255, 255, 0.6) !important; }
-        body.dark .timeline-item { border-bottom-color: rgba(255, 255, 255, 0.2) !important; }
-        body.dark .bili-stat-value { color: #6c8dff !important; }
-        body.dark .level-progress-fill { background: linear-gradient(90deg, #6c8dff, #a0b8ff) !important; }
-        body.dark .video-stat { color: rgba(255,255,255,0.7) !important; }
-        body.dark .video-modal-overlay { background: rgba(0, 0, 0, 0.85) !important; }
-        body.dark .video-tag { background: rgba(108, 141, 255, 0.25) !important; }
-        .app-wrapper { max-width: 1300px; margin: 0 auto; padding: 24px 20px 40px; }
-        .glass-nav { background: rgba(245, 248, 255, 0.55); backdrop-filter: blur(18px); border-radius: 60px; padding: 8px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 8px 20px rgba(0,0,0,0.03); }
-        .logo-area { font-weight: 800; font-size: 1.4rem; background: linear-gradient(130deg, #2c3e66, #6c8dff); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        body.dark .logo-area { background: linear-gradient(130deg, #ffffff, #c0d0ff); -webkit-background-clip: text; background-clip: text; color: transparent !important; }
-        .theme-toggle { background: rgba(108,141,255,0.15); border: none; width: 42px; height: 42px; border-radius: 60px; font-size: 1.3rem; cursor: pointer; transition: transform 0.2s ease; }
-        body.dark .theme-toggle { background: #2d3a5e; }
-        .page-tabs { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-bottom: 32px; background: rgba(255,255,240,0.2); backdrop-filter: blur(12px); padding: 10px 20px; border-radius: 80px; }
-        .tab-btn { background: rgba(0,0,0,0.05); border: none; padding: 10px 24px; border-radius: 40px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.25s var(--spring-easing); display: flex; align-items: center; gap: 8px; }
-        .tab-btn.active { background: var(--primary-accent); color: white; box-shadow: 0 8px 18px rgba(108,141,255,0.4); transform: scale(1.02); }
-        .pages-container { position: relative; min-height: 550px; }
-        .page { display: none; animation: pageGlideIn 0.6s var(--spring-easing) forwards; }
-        .page.active-page { display: block; }
-        @keyframes pageGlideIn { 0% { opacity: 0; transform: translateY(26px) scale(0.98); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
-        .glass-card { background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(14px); border-radius: var(--card-radius); padding: 28px 24px; border: 1px solid rgba(255,255,255,0.6); box-shadow: 0 12px 28px rgba(0,0,0,0.05); transition: transform 0.3s ease, background 0.5s ease, border-color 0.5s ease; }
-        .glass-card:hover { transform: translateY(-3px); }
-        .section-title { font-size: 1.6rem; font-weight: 700; margin-bottom: 24px; display: flex; align-items: center; gap: 12px; color: #1f2a3e; }
-        body.dark .section-title { color: white !important; }
-        .badge-group { display: flex; flex-wrap: wrap; gap: 14px; }
-        .skill-badge, .game-bubble { background: rgba(108,141,255,0.12); padding: 10px 20px; border-radius: 40px; font-weight: 500; cursor: pointer; transition: all 0.25s var(--spring-easing); text-decoration: none; display: inline-flex; align-items: center; gap: 8px; color: #1f2937; }
-        .skill-badge:hover, .game-bubble:hover { background: var(--primary-accent); color: white !important; transform: translateY(-3px) scale(1.02); }
-        .timeline-item { padding: 12px 0; border-bottom: 1px dashed rgba(0,0,0,0.1); display: flex; gap: 12px; align-items: center; }
-        .repo-grid { display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 16px; padding-bottom: 12px; scroll-snap-type: x mandatory; }
-        .repo-grid::-webkit-scrollbar { height: 5px; }
-        .repo-grid::-webkit-scrollbar-thumb { background: var(--primary-accent); border-radius: 10px; }
-        .repo-tile { flex: 0 0 280px; background: rgba(0,0,0,0.04); border-radius: 24px; padding: 18px; text-decoration: none; border: 1px solid rgba(0,0,0,0.05); transition: all 0.25s ease; scroll-snap-align: start; color: #1f2937; }
-        .repo-tile:hover { background: var(--primary-accent); color: white !important; transform: translateY(-6px); }
-        @media (min-width: 700px) { .repo-grid { display: grid; grid-template-columns: repeat(2,1fr); overflow-x: visible; flex-wrap: wrap; } .repo-tile { flex: auto; width: auto; } }
-        .contact-buttons { display: grid; grid-template-columns: repeat(2,1fr); gap: 14px; margin-top: 8px; }
-        .contact-btn { background: white; padding: 14px; text-align: center; border-radius: 28px; font-weight: 600; transition: all 0.2s var(--spring-easing); cursor: pointer; text-decoration: none; color: #1f2937; }
-        .contact-btn:hover { background: var(--primary-accent); color: white !important; transform: scale(1.02); }
-        .avatar-modern { display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; }
-        .avatar-circle-big { width: 130px; height: 130px; border-radius: 50%; background: linear-gradient(135deg, #fff, #e9efff); padding: 5px; box-shadow: 0 15px 30px rgba(108,141,255,0.3); transition: transform 0.3s var(--spring-easing); cursor: pointer; }
-        .avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-        .display-name { font-size: 2.1rem; font-weight: 800; background: linear-gradient(135deg, #1f2a44, #6c8dff); -webkit-background-clip: text; background-clip: text; color: transparent; margin-top: 12px; }
-        body.dark .display-name { background: linear-gradient(135deg, #ffffff, #c0d0ff); -webkit-background-clip: text; background-clip: text; color: transparent !important; }
-        footer { text-align: center; margin-top: 48px; opacity: 0.6; font-size: 0.75rem; }
-        .filter-chip { background: rgba(0,0,0,0.05); padding: 6px 14px; border-radius: 40px; cursor: pointer; transition: 0.2s; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px; }
-        .search-box input { width: 100%; padding: 12px 16px; border-radius: 40px; border: 1px solid rgba(0,0,0,0.1); background: rgba(255,255,255,0.7); font-size: 0.9rem; outline: none; }
-        .bili-profile-section { margin-top: 28px; padding-top: 24px; border-top: 1px dashed rgba(0,0,0,0.1); }
-        body.dark .bili-profile-section { border-top-color: rgba(255,255,255,0.15) !important; }
-        .bili-stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
-        @media (min-width: 600px) { .bili-stats-grid { grid-template-columns: repeat(4, 1fr); } }
-        .bili-stat-card { background: rgba(108, 141, 255, 0.08); border-radius: 20px; padding: 16px 12px; text-align: center; transition: all 0.3s var(--spring-easing); border: 1px solid rgba(108, 141, 255, 0.15); }
-        .bili-stat-card:hover { transform: translateY(-4px); background: rgba(108, 141, 255, 0.15); }
-        .bili-stat-value { font-size: 1.5rem; font-weight: 800; color: var(--primary-accent); line-height: 1.2; }
-        .bili-stat-label { font-size: 0.75rem; opacity: 0.7; margin-top: 4px; }
-        .level-section { margin-top: 16px; }
-        .level-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .level-badge { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #6c8dff, #a0b8ff); color: white !important; padding: 4px 14px; border-radius: 40px; font-weight: 700; font-size: 0.85rem; }
-        .level-progress-bg { width: 100%; height: 10px; background: rgba(0,0,0,0.06); border-radius: 10px; overflow: hidden; }
-        .level-progress-fill { height: 100%; background: linear-gradient(90deg, #6c8dff, #a0b8ff); border-radius: 10px; transition: width 1s var(--spring-easing); }
-        .bili-search-box { margin-bottom: 16px; }
-        .bili-search-box input { width: 100%; padding: 12px 16px; border-radius: 40px; border: 1px solid rgba(0,0,0,0.1); background: rgba(255,255,255,0.7); font-size: 0.9rem; outline: none; }
-        .bili-filter-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
-        .video-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
-        @media (min-width: 600px) { .video-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (min-width: 900px) { .video-grid { grid-template-columns: repeat(3, 1fr); } }
-        .video-card { background: rgba(255, 255, 255, 0.6); border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.6); box-shadow: 0 8px 20px rgba(0,0,0,0.04); transition: all 0.3s var(--spring-easing); cursor: pointer; text-decoration: none; color: inherit; display: block; }
-        .video-card:hover { transform: translateY(-6px) scale(1.01); box-shadow: 0 16px 40px rgba(108,141,255,0.2); }
-        .video-thumbnail { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; display: block; transition: transform 0.4s ease; }
-        .video-card:hover .video-thumbnail { transform: scale(1.05); }
-        .video-thumb-wrap { position: relative; overflow: hidden; }
-        .video-duration { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.75); color: white !important; padding: 2px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 600; }
-        .video-info { padding: 14px 16px 16px; }
-        .video-title { font-weight: 700; font-size: 0.95rem; line-height: 1.4; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .video-meta { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; opacity: 0.7; margin-bottom: 10px; }
-        .video-stats { display: flex; gap: 14px; font-size: 0.78rem; }
-        .video-stat { display: inline-flex; align-items: center; gap: 4px; opacity: 0.75; }
-        .video-tag { display: inline-block; background: rgba(108, 141, 255, 0.12); padding: 2px 10px; border-radius: 20px; font-size: 0.72rem; margin-right: 6px; margin-top: 8px; }
-        .video-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; padding: 20px; }
-        .video-modal-overlay.active { opacity: 1; pointer-events: all; }
-        .video-modal-content { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px); border-radius: 28px; max-width: 560px; width: 100%; max-height: 85vh; overflow-y: auto; transform: scale(0.9) translateY(20px); transition: transform 0.4s var(--spring-easing); border: 1px solid rgba(255,255,255,0.6); box-shadow: 0 24px 60px rgba(0,0,0,0.2); }
-        .video-modal-overlay.active .video-modal-content { transform: scale(1) translateY(0); }
-        .video-modal-header { position: relative; padding: 0; }
-        .video-modal-thumb { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 28px 28px 0 0; }
-        .video-modal-close { position: absolute; top: 12px; right: 12px; width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.5); color: white !important; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: background 0.2s; }
-        .video-modal-close:hover { background: rgba(0,0,0,0.7); }
-        .video-modal-body { padding: 20px 24px 24px; }
-        .video-modal-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 12px; line-height: 1.4; }
-        .video-modal-stats { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px dashed rgba(0,0,0,0.1); }
-        body.dark .video-modal-stats { border-bottom-color: rgba(255,255,255,0.15) !important; }
-        .video-modal-stat { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; opacity: 0.8; }
-        .video-modal-desc { font-size: 0.9rem; line-height: 1.7; opacity: 0.85; margin-bottom: 20px; }
-        .video-modal-actions { display: flex; gap: 10px; }
-        .video-modal-btn { flex: 1; padding: 12px; border-radius: 16px; border: none; font-weight: 600; cursor: pointer; transition: all 0.2s var(--spring-easing); text-align: center; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
-        .video-modal-btn.primary { background: var(--primary-accent); color: white !important; }
-        .video-modal-btn.primary:hover { transform: scale(1.03); box-shadow: 0 8px 20px rgba(108,141,255,0.4); }
-        .video-modal-btn.secondary { background: rgba(0,0,0,0.05); color: inherit; }
-        .video-modal-btn.secondary:hover { background: rgba(0,0,0,0.1); }
-        body.dark .video-modal-btn.secondary { background: rgba(255,255,255,0.12) !important; }
-        .bili-loading { text-align: center; padding: 40px; grid-column: 1 / -1; }
-        .bili-empty { text-align: center; padding: 60px 20px; grid-column: 1 / -1; }
-        .bili-empty i { font-size: 3rem; opacity: 0.3; margin-bottom: 12px; display: block; }
-        @media (max-width: 550px) { .tab-btn span { display: none; } .tab-btn i { margin: 0; font-size: 1.3rem; } .tab-btn { padding: 10px 16px; } .contact-buttons { grid-template-columns: 1fr; } .video-modal-content { max-height: 90vh; border-radius: 20px; } .video-modal-body { padding: 16px 18px 20px; } .bili-stats-grid { grid-template-columns: repeat(2, 1fr); } }
-    </style>
+    <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
+
+<!-- 全局加载遮罩 -->
+<div id="loading-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); color:white; display:flex; align-items:center; justify-content:center; z-index:10000; font-size:1.5rem; backdrop-filter:blur(4px); flex-direction:column; gap:10px;">
+    <i class="fas fa-spinner fa-pulse" style="font-size:2rem;"></i>
+    <div>正在加载资源，请稍候...</div>
+    <div id="loading-detail" style="font-size:0.8rem; opacity:0.7;">初始化模块</div>
+</div>
+
 <div class="app-wrapper">
     <div class="glass-nav">
         <div class="logo-area"><i class="fas fa-dragon"></i> ssbtt·主页</div>
         <button class="theme-toggle" id="globalThemeSwitch"><i class="fas fa-moon"></i></button>
     </div>
 
-    <div class="page-tabs">
-        <button class="tab-btn active" data-page="profile"><i class="fas fa-user-astronaut"></i><span> 主页</span></button>
-        <button class="tab-btn" data-page="skills"><i class="fas fa-laptop-code"></i><span> 技能</span></button>
-        <button class="tab-btn" data-page="games"><i class="fas fa-gamepad"></i><span> 游戏</span></button>
-        <button class="tab-btn" data-page="identity"><i class="fas fa-id-card"></i><span> 身份</span></button>
-        <button class="tab-btn" data-page="experience"><i class="fas fa-history"></i><span> 经历</span></button>
-        <button class="tab-btn" data-page="github"><i class="fab fa-github"></i><span> 仓库</span></button>
-        <button class="tab-btn" data-page="bilibili"><i class="fas fa-code-branch"></i><span> 项目</span></button>
-        <button class="tab-btn" data-page="contact"><i class="fas fa-address-card"></i><span> 联系</span></button>
-    </div>
+    <div class="page-tabs" id="pageTabs"></div>
 
-    <div class="pages-container">
-        <div id="profilePage" class="page active-page">
-            <div class="glass-card" style="text-align: center;">
-                <div class="avatar-modern">
-                    <div class="avatar-circle-big" id="avatarShake">
-                        <img id="dynamic-qq-avatar" class="avatar-img" src="" alt="avatar">
-                    </div>
-                    <div class="display-name">ssbtt</div>
-                    <p style="margin-top: 6px;"><i class="fas fa-map-pin"></i> 数字漫游者 · 创造不息</p>
-                </div>
-                <div style="margin-top: 20px;">
-                    <p style="font-size: 1rem; max-width: 480px; margin: 0 auto;">⚡ 全栈爱好者 | 游戏设计探索者 | 开源精神实践者<br>🤔 "按寻思之力"</p>
-                </div>
-                <div class="badge-group" style="justify-content: center; margin-top: 28px;">
-                    <div class="skill-badge" data-url="https://github.com/ssbtt114514"><i class="fab fa-github"></i> GitHub</div>
-                    <div class="skill-badge" data-url="https://space.bilibili.com/3546557150399113"><i class="fab fa-bilibili"></i> B站创作</div>
-                </div>
-
-                <div class="bili-profile-section" id="biliProfileSection">
-                    <div class="section-title" style="font-size: 1.3rem; justify-content: center;">
-                        <i class="fab fa-bilibili" style="color: #00a1d6;"></i> Bilibili 数据面板
-                    </div>
-                    <div class="bili-stats-grid" id="biliStatsGrid">
-                        <div class="bili-stat-card"><div class="bili-stat-value" id="biliLevel">--</div><div class="bili-stat-label">等级</div></div>
-                        <div class="bili-stat-card"><div class="bili-stat-value" id="biliExp">--</div><div class="bili-stat-label">当前经验</div></div>
-                        <div class="bili-stat-card"><div class="bili-stat-value" id="biliCoins">--</div><div class="bili-stat-label">硬币数</div></div>
-                        <div class="bili-stat-card"><div class="bili-stat-value" id="biliVideos">--</div><div class="bili-stat-label">投稿视频</div></div>
-                    </div>
-                    <div class="level-section">
-                        <div class="level-header"><span class="level-badge" id="levelBadge">LV --</span><span style="font-size: 0.85rem; opacity: 0.7;" id="expText">-- / --</span></div>
-                        <div class="level-progress-bg"><div class="level-progress-fill" id="levelProgress" style="width: 0%;"></div></div>
-                        <p style="margin-top: 8px; font-size: 0.8rem; opacity: 0.6;" id="nextLevelText">距离下一级还需 -- 经验</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="skillsPage" class="page">
-            <div class="glass-card">
-                <div class="section-title"><i class="fas fa-crown"></i> 爱好 & 技术栈</div>
-                <div class="badge-group">
-                    <div class="skill-badge" data-url="https://www.java.com/"><i class="fab fa-java"></i> Java (Spring生态)</div>
-                    <div class="skill-badge" data-url="https://www.python.org/"><i class="fab fa-python"></i> Python / 自动化</div>
-                    <div class="skill-badge" data-url="https://www.lua.org/"><i class="fas fa-code"></i> Lua · 游戏脚本</div>
-                    <div class="skill-badge" data-url="https://godotengine.org/"><i class="fas fa-play-circle"></i> GDScript · Godot</div>
-                    <div class="skill-badge" data-url="https://developer.mozilla.org/"><i class="fab fa-js"></i> JavaScript / 前端魔法</div>
-                </div>
-                <div style="margin-top: 24px;"><p><i class="fas fa-tools"></i> 最近痴迷: 系统调优 · 独立游戏开发 · 跨端工具链</p></div>
-            </div>
-        </div>
-
-        <div id="gamesPage" class="page">
-            <div class="glass-card">
-                <div class="section-title"><i class="fas fa-dice-d6"></i> 游戏世界</div>
-                <div class="badge-group">
-                    <a href="https://www.minecraft.net/" target="_blank" class="game-bubble"><i class="fas fa-cube"></i> Minecraft</a>
-                    <a href="https://anuke.itch.io/mindustry" target="_blank" class="game-bubble"><i class="fas fa-industry"></i> Mindustry</a>
-                    <a href="https://deltarune.com/" target="_blank" class="game-bubble"><i class="fas fa-heart"></i> 三角符文</a>
-                    <a href="https://aqtk.qq.com/" target="_blank" class="game-bubble"><i class="fas fa-crosshairs"></i> 暗区突围</a>
-                    <a href="https://www.half-life.com/" target="_blank" class="game-bubble"><i class="fas fa-vial"></i> 半条命</a>
-                    <div class="game-bubble" style="cursor:default;"><i class="fas fa-puzzle-piece"></i> 怀旧 / 策略 / 沙盒</div>
-                </div>
-                <div style="margin-top: 24px; background: rgba(108,141,255,0.1); border-radius: 20px; padding: 12px;">
-                    <i class="fas fa-microphone-alt"></i> "游戏是第九艺术，我热衷在代码和关卡中创造张力。"
-                </div>
-            </div>
-        </div>
-
-        <div id="identityPage" class="page">
-            <div class="glass-card">
-                <div class="section-title"><i class="fas fa-fingerprint"></i> 身份光谱</div>
-                <ul style="list-style: none; line-height: 2.4;">
-                    <li><i class="fas fa-leaf" style="color: #4caf50; width: 32px;"></i> 中国共青团团员 · 青年先锋</li>
-                    <li><i class="fas fa-desktop" style="color: #ff9800;"></i> 希沃白板管理员 · 智慧教育实践者</li>
-                    <li><i class="fas fa-video" style="color: #e1306c;"></i> 视频创作者 · 记录技术生活</li>
-                    <li><i class="fas fa-hand-sparkles"></i> 开源贡献者、独立开发者</li>
-                </ul>
-            </div>
-        </div>
-
-        <div id="experiencePage" class="page">
-            <div class="glass-card">
-                <div class="section-title"><i class="fas fa-rocket"></i> 硬核折腾史</div>
-                <div class="timeline-item"><i class="fas fa-ubuntu" style="color: #e95420;"></i> 为朋友成功装机 + 部署 lUbuntu，优化开发环境</div>
-                <div class="timeline-item"><i class="fas fa-code-branch"></i> 从零搭建个人服务器 · 内网穿透 & Docker 玩法</div>
-                <div class="timeline-item"><i class="fas fa-gamepad"></i> 社区中帮助萌新解决问题</div>
-                <div class="timeline-item"><i class="fas fa-quote-right"></i> "在失败中成长"</div>
-            </div>
-        </div>
-
-        <div id="githubPage" class="page">
-            <div class="glass-card">
-                <div class="section-title"><i class="fab fa-github-alt"></i> 动态仓库 · 实时同步</div>
-                <div class="search-box" style="margin-bottom: 16px;"><input type="text" id="repoSearchPage" placeholder="🔍 搜索仓库名称 / 描述..."></div>
-                <div class="filter-wrapper" id="langFilterPage" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;"></div>
-                <div id="repoGridContainer" class="repo-grid"><div style="padding: 20px;">加载仓库中 <i class="fas fa-spinner fa-pulse"></i></div></div>
-            </div>
-        </div>
-
-        <div id="bilibiliPage" class="page">
-            <div class="glass-card">
-                <div class="section-title"><i class="fas fa-code-branch"></i> 著名项目 · Showcase</div>
-                <div class="bili-search-box">
-                    <input type="text" id="projectSearchInput" placeholder="🔍 搜索项目名称 / 描述 / 技术栈...">
-                </div>
-                <div class="bili-filter-row" id="projectFilterRow">
-                    <span class="filter-chip active" data-filter="all">📁 全部</span>
-                    <span class="filter-chip" data-filter="Engine">⚙️ 引擎</span>
-                    <span class="filter-chip" data-filter="Web">🌐 网页</span>
-                    <span class="filter-chip" data-filter="Tool">🛠️ 工具</span>
-                    <span class="filter-chip" data-filter="Game">🎮 游戏</span>
-                </div>
-                <div id="projectGrid" class="video-grid">
-                    <div class="bili-loading"><i class="fas fa-spinner fa-pulse"></i> 正在从 program.txt 同步项目数据...</div>
-                </div>
-            </div>
-        </div>
-
-        <div id="contactPage" class="page">
-            <div class="glass-card">
-                <div class="section-title"><i class="fas fa-paper-plane"></i> 联系方式</div>
-                <div class="contact-buttons">
-                    <div class="contact-btn" id="ghBtn"><i class="fab fa-github"></i> GitHub</div>
-                    <div class="contact-btn" id="biliBtn"><i class="fab fa-bilibili"></i> Bilibili</div>
-                    <div class="contact-btn" id="qqBtn"><i class="fab fa-qq"></i> QQ</div>
-                    <div class="contact-btn" id="wxBtn"><i class="fab fa-weixin"></i> Wechat</div>
-                </div>
-                <div style="margin-top: 28px; text-align: center; background: rgba(0,0,0,0.03); border-radius: 28px; padding: 15px;">
-                    <i class="fas fa-envelope"></i> 合作/交流: 欢迎通过 GitHub issue 或 B站私信~
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="video-modal-overlay" id="videoModal">
-        <div class="video-modal-content">
-            <div class="video-modal-header"><img class="video-modal-thumb" id="modalThumb" src="" alt=""><button class="video-modal-close" id="modalClose"><i class="fas fa-times"></i></button></div>
-            <div class="video-modal-body">
-                <div class="video-modal-title" id="modalTitle">--</div>
-                <div class="video-modal-stats" id="modalStats"></div>
-                <div class="video-modal-desc" id="modalDesc">--</div>
-                <div class="video-modal-actions">
-                    <a class="video-modal-btn primary" id="modalLink" href="#" target="_blank"><i class="fab fa-github"></i> 访问项目</a>
-                    <button class="video-modal-btn secondary" id="modalCopy"><i class="fas fa-share-alt"></i> 复制链接</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div class="pages-container" id="pagesContainer"></div>
 
     <footer><p>© 2026 created by ssbtt</p></footer>
 </div>
 
-<script src="sprite.js"></script>
+<!-- 全局模态框（项目详情用） -->
+<div class="video-modal-overlay" id="videoModal">
+    <div class="video-modal-content">
+        <div class="video-modal-header"><img class="video-modal-thumb" id="modalThumb" src="" alt=""><button class="video-modal-close" id="modalClose"><i class="fas fa-times"></i></button></div>
+        <div class="video-modal-body">
+            <div class="video-modal-title" id="modalTitle">--</div>
+            <div class="video-modal-stats" id="modalStats">--</div>
+            <div class="video-modal-desc" id="modalDesc">--</div>
+            <div class="video-modal-actions" id="modalActions"></div>
+        </div>
+    </div>
+</div>
+
+<script src="config/config.js"></script>
+<script src="config/api.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/modules/profile.js"></script>
+<script src="js/modules/skills.js"></script>
+<script src="js/modules/games.js"></script>
+<script src="js/modules/identity.js"></script>
+<script src="js/modules/experience.js"></script>
+<script src="js/modules/github.js"></script>
+<script src="js/modules/bilibili.js"></script>
+<script src="js/modules/contact.js"></script>
+<script src="js/main.js"></script>
+
 </body>
 </html>
