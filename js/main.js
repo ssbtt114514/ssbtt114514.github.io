@@ -1,4 +1,4 @@
-// 页面定义列表
+// 页面定义列表 (顺序决定tab显示顺序)
 const PAGE_MODULES = [
     { id: 'profile', name: '主页', icon: 'fas fa-user-astronaut', module: window.ProfileModule },
     { id: 'skills', name: '技能', icon: 'fas fa-laptop-code', module: window.SkillsModule },
@@ -29,7 +29,7 @@ function hideLoading() {
 function buildTabs() {
     const tabsContainer = document.getElementById('pageTabs');
     if (!tabsContainer) {
-        window.addError('页面结构错误', '找不到 #pageTabs 容器，请检查 HTML', true);
+        console.error('找不到 #pageTabs 容器');
         return;
     }
     tabsContainer.innerHTML = '';
@@ -48,7 +48,7 @@ function buildTabs() {
 function buildPages() {
     const pagesContainer = document.getElementById('pagesContainer');
     if (!pagesContainer) {
-        window.addError('页面结构错误', '找不到 #pagesContainer 容器', true);
+        console.error('找不到 #pagesContainer 容器');
         return;
     }
     pagesContainer.innerHTML = '';
@@ -59,9 +59,8 @@ function buildPages() {
         if (page.id === currentPageId) pageDiv.classList.add('active-page');
         pagesContainer.appendChild(pageDiv);
     });
-    console.log('📄 页面容器创建完成');
+    console.log('📄 页面容器创建完成，开始初始化各模块...');
 
-    let hasFatal = false;
     PAGE_MODULES.forEach(page => {
         showLoading(`正在加载 ${page.name} 模块...`);
         if (page.module && typeof page.module.init === 'function') {
@@ -69,31 +68,21 @@ function buildPages() {
                 page.module.init(`${page.id}Page`);
                 console.log(`✅ 模块 ${page.id} 初始化成功`);
             } catch (err) {
-                hasFatal = true;
-                const errorDetail = `文件: js/modules/${page.id}.js\n错误: ${err.message}\n堆栈: ${err.stack}`;
-                window.addError(`模块 ${page.name} 初始化失败`, errorDetail, true);
+                console.error(`❌ 模块 ${page.id} 初始化失败:`, err);
                 const pageDiv = document.getElementById(`${page.id}Page`);
                 if (pageDiv) {
-                    pageDiv.innerHTML = `<div class="glass-card" style="color:red; text-align:center;">${page.name} 模块加载失败<br>请在底部错误面板查看详情</div>`;
+                    pageDiv.innerHTML = `<div class="glass-card" style="color:red; text-align:center;">模块加载失败，请检查控制台<br>${err.message}</div>`;
                 }
             }
         } else {
-            hasFatal = true;
-            const errorDetail = `模块对象 window.${page.id.charAt(0).toUpperCase() + page.id.slice(1)}Module 不存在。\n请确认 js/modules/${page.id}.js 已正确加载并导出该对象。`;
-            window.addError(`模块 ${page.name} 未定义`, errorDetail, true);
+            console.warn(`⚠️ 模块 ${page.id} 未定义或缺少 init 方法`);
             const pageDiv = document.getElementById(`${page.id}Page`);
             if (pageDiv) {
-                pageDiv.innerHTML = `<div class="glass-card" style="text-align:center;">${page.name} 模块未就绪</div>`;
+                pageDiv.innerHTML = `<div class="glass-card" style="text-align:center;">模块未就绪，请刷新页面</div>`;
             }
         }
     });
-
     hideLoading();
-    if (hasFatal) {
-        console.warn('部分模块初始化失败，请查看底部错误面板');
-    } else {
-        console.log('🎉 所有模块初始化完成');
-    }
 }
 
 function switchPage(pageId) {
@@ -130,27 +119,8 @@ function initTheme() {
     });
 }
 
-// 全局资源加载错误监听
-window.addEventListener('error', (event) => {
-    const target = event.target;
-    if (target && (target.tagName === 'SCRIPT' || target.tagName === 'LINK')) {
-        const url = target.src || target.href;
-        window.addError('资源加载失败', `无法加载: ${url}\n请检查文件路径或网络`, true);
-    }
-});
-
-// 未捕获的 Promise 错误
-window.addEventListener('unhandledrejection', (event) => {
-    const reason = event.reason;
-    let errorMsg = '未知异步错误';
-    if (reason instanceof Error) errorMsg = reason.message;
-    else if (typeof reason === 'string') errorMsg = reason;
-    window.addError('异步操作错误', errorMsg, false);
-});
-
-// 启动应用
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 DOM 加载完成');
+    console.log('🚀 DOM 加载完成，开始构建页面...');
     loadingOverlay = document.getElementById('loading-overlay');
     buildTabs();
     buildPages();
