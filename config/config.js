@@ -1,32 +1,16 @@
-{
-  "projects": [
-    {
-      "name": "seewo手册",
-      "url": "https://github.com/ssbtt114514/seewo.help",
-      "button": true,
-      "buttons": [
-        {
-          "icon": "fas fa-book",
-          "color": "#6c8dff",
-          "activeColor": "#4caf50",
-          "link": "https://ssbtt114514.github.io/seewo.help/",
-          "text": "阅读"
-        }
-      ]
-    },
-    {
-      "name": "vulkan mod for vk1.1",
-      "url": "https://github.com/ssbtt114514/VulkanMod_for_vulkan1.1",
-      "button": true,
-      "buttons": [
-        {
-          "icon": "fas fa-download",
-          "color": "#ff9800",
-          "activeColor": "#f44336",
-          "link": "https://github.com/ssbtt114514/VulkanMod_for_vulkan1.1/releases/tag/",
-          "text": "release"
-        }
-      ]
-    }
-  ]
-}
+// config/config.js - 全局配置
+window.APP_CONFIG = {
+    // 基础信息
+    QQ_NUMBER: '1973737092',
+    WECHAT_ID: 'ssbtt114514',
+    
+    // GitHub配置
+    GITHUB_API_URL: 'https://api.github.com/users/ssbtt114514/repos?sort=updated&per_page=100',
+    GITHUB_HOMEPAGE: 'https://github.com/ssbtt114514',
+    
+    // 项目配置
+    CONFIG_JSON_URL: './config.json',
+    
+    // QQ空间
+    QQ_ZONE_URL: 'https://user.qzone.qq.com/'
+};
