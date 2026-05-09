@@ -17,7 +17,7 @@ window.ProfileModule = {
                     <p style="margin-top: 6px;"><i class="fas fa-map-pin"></i> 数字漫游者 · 创造不息</p>
                 </div>
                 <div style="margin-top: 20px;">
-                    <p style="font-size: 1rem; max-width: 480px; margin: 0 auto;">⚡ 全栈爱好者 | 游戏设计探索者 | 开源精神实践者<br>🤔 "按寻思之力"</p>
+                    <p style="font-size: 1rem; max-width: 480px; margin: 0 auto;">⚡ 全栈爱好者 | 游戏设计探索者 | 开源精神实践者<br>🤔 "俺寻思之力"</p>
                 </div>
                 <div class="badge-group" style="justify-content: center; margin-top: 28px;">
                     <div class="skill-badge" data-url="https://github.com/ssbtt114514"><i class="fab fa-github"></i> GitHub</div>
