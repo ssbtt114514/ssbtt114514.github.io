@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+  <title>Landroid — Android Baklava 彩蛋 (1:1 HTML 还原)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --eigengrau: #16161D;
+      --eigengrau2: #292936;
+      --eigengrau3: #3C3C4F;
+      --eigengrau4: #A7A7CA;
+      --green: #34A853;
+      --blue: #4285F4;
+      --mint: #E8F5E9;
+      --chartreuse: #C6FF00;
+      --console: #B7B7FF;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0; height: 100%;
+      background: var(--eigengrau);
+      color: var(--eigengrau4);
+      font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    #app { position: fixed; inset: 0; }
+    #canvas { display: block; width: 100%; height: 100%; background: var(--eigengrau); touch-action: none; cursor: crosshair; }
+    #debug {
+      position: absolute; top: 6px; left: 6px; right: 6px;
+      color: var(--console); font-size: 10.5px; line-height: 1.4;
+      letter-spacing: 1px; white-space: pre; pointer-events: none;
+      text-shadow: 0 0 4px rgba(0,0,0,.8);
+      max-height: 38vh; overflow: hidden;
+    }
+    #telemetry {
+      position: absolute; left: 6px; bottom: 6px;
+      color: var(--eigengrau4); font-size: 11.5px; line-height: 1.45;
+      letter-spacing: 1px; pointer-events: auto;
+      text-shadow: 0 0 4px rgba(0,0,0,.8);
+      white-space: pre;
+      max-height: calc(100vh - 50px); overflow-y: auto;
+      padding: 2px 6px;
+      scrollbar-width: thin;
+      opacity: 0; transition: opacity 1s;
+    }
+    #telemetry.show { opacity: 1; }
+    .ctrl-row { display: flex; gap: 4px; margin-bottom: 6px; flex-wrap: wrap; pointer-events: auto; }
+    .ctrl-btn {
+      font-family: inherit; font-size: 11px; letter-spacing: 1.5px;
+      color: var(--console); background: transparent;
+      border: 1px solid var(--console); padding: 6px 10px;
+      cursor: pointer; border-radius: 0;
+      transition: background .12s, color .12s;
+    }
+    .ctrl-btn:hover, .ctrl-btn:active { background: var(--console); color: var(--eigengrau); }
+    .ctrl-btn.active { background: var(--blue); color: var(--eigengrau); border-color: var(--blue); }
+    .ctrl-btn.flag.active { background: var(--chartreuse); color: var(--eigengrau); border-color: var(--chartreuse); }
+    #toast {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      color: var(--chartreuse); font-size: 18px; letter-spacing: 3px;
+      font-weight: 700; pointer-events: none; opacity: 0;
+      transition: opacity .35s;
+      text-align: center; line-height: 1.5;
+      text-shadow: 0 0 8px rgba(0,0,0,.9), 0 0 18px rgba(198,255,0,.4);
+    }
+    #toast.show { opacity: 1; }
+    #toast .small {
+      display: block; margin-top: 6px; font-size: 11px;
+      color: var(--console); font-weight: 400; letter-spacing: 1.5px;
+      text-shadow: 0 0 4px rgba(0,0,0,.8);
+    }
+    #stick-hint {
+      position: absolute; bottom: 8px; right: 10px;
+      color: rgba(183,183,255,.35); font-size: 10px;
+      letter-spacing: 1.5px; pointer-events: none;
+    }
+    #src-overlay { position: fixed; inset: 0; background: var(--eigengrau); display: none; z-index: 50; }
+    #src-overlay.show { display: flex; flex-direction: column; }
+    #src-toolbar {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 14px; border-bottom: 1px solid var(--eigengrau3);
+      background: #1a1a23;
+    }
+    #src-toolbar .back {
+      font-family: inherit; color: var(--console);
+      background: transparent; border: 1px solid var(--console);
+      padding: 5px 10px; font-size: 11px; letter-spacing: 1.5px;
+      cursor: pointer;
+    }
+    #src-toolbar .back:hover { background: var(--console); color: var(--eigengrau); }
+    #src-toolbar .title { color: var(--chartreuse); font-size: 12px; letter-spacing: 2px; font-weight: 700; }
+    #src-toolbar .subtitle { color: var(--eigengrau4); font-size: 11px; opacity: .6; }
+    #src-wrap { flex: 1; display: grid; grid-template-columns: 240px 1fr; overflow: hidden; }
+    #src-toc {
+      border-right: 1px solid var(--eigengrau3);
+      overflow-y: auto; padding: 14px 8px;
+      background: #1a1a23;
+    }
+    #src-toc h4 { margin: 0 0 10px 4px; color: var(--chartreuse); font-size: 10px; letter-spacing: 2px; font-weight: 700; }
+    #src-toc a {
+      display: block; padding: 4px 8px; font-size: 11px;
+      color: var(--eigengrau4); text-decoration: none;
+      border-left: 2px solid transparent;
+    }
+    #src-toc a:hover { color: var(--chartreuse); border-left-color: var(--eigengrau3); }
+    #src-toc a.active { color: var(--chartreuse); border-left-color: var(--chartreuse); background: rgba(198,255,0,.06); }
+    #src-code {
+      overflow: auto; background: var(--eigengrau);
+      font-size: 12px; line-height: 1.55; padding: 14px 0;
+    }
+    #src-code pre {
+      margin: 0; counter-reset: line;
+      font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+      color: var(--eigengrau4);
+    }
+    #src-code .line { display: block; padding: 0 16px 0 12px; border-left: 3px solid transparent; }
+    #src-code .line:hover { background: #1a1a23; border-left-color: var(--eigengrau3); }
+    #src-code .ln { display: inline-block; width: 48px; color: #555; text-align: right; user-select: none; margin-right: 14px; font-size: 11px; }
+    .tk-kw { color: #c792ea; font-weight: 500; }
+    .tk-fn { color: #82aaff; }
+    .tk-cls { color: #ffcb6b; }
+    .tk-str { color: #c3e88d; }
+    .tk-num { color: #f78c6c; }
+    .tk-cmt { color: #5c6370; font-style: italic; }
+    .tk-anno { color: #ffcb6b; }
+    .tk-typ { color: #ffcb6b; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <canvas id="canvas"></canvas>
+  <div id="debug">系统启动中…</div>
+  <div id="telemetry"></div>
+  <div id="toast"></div>
+  <div id="stick-hint">按住屏幕任意位置操控飞船 · 双指/滚轮 缩放</div>
+</div>
+
+<!-- 源码查看器 -->
+<div id="src-overlay">
+  <div id="src-toolbar">
+    <button class="back" id="btn-back">◀ 返回</button>
+    <span class="title">LANDROID · KOTLIN 源码</span>
+    <span class="subtitle">共 16 个文件 · 3553 行</span>
+  </div>
+  <div id="src-wrap">
+    <nav id="src-toc"><h4>文件列表</h4></nav>
+    <div id="src-code"></div>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+ * LANDROID — Android Baklava 彩蛋 (1:1 HTML 还原)
+ * 优化缩放逻辑：缩小最大缩放范围，增加平滑，避免极端拉扯
+ * ===================================================================== */
+
+'use strict';
+
+/* ── Vec2 ── */
+const PI2 = Math.PI * 2;
+const V = (x=0, y=0) => ({x, y});
+const Vadd = (a,b) => ({x:a.x+b.x, y:a.y+b.y});
+const Vsub = (a,b) => ({x:a.x-b.x, y:a.y-b.y});
+const Vmul = (a,k) => ({x:a.x*k, y:a.y*k});
+const Vmag = a => Math.hypot(a.x, a.y);
+const Vdist = (a,b) => Vmag(Vsub(a,b));
+const Vangle = a => Math.atan2(a.y, a.x);
+const Vwith = (angle, mag) => ({x: Math.cos(angle)*mag, y: Math.sin(angle)*mag});
+
+/* ── 原版常量 ── */
+const GRAVITATION = 1e-2;
+const KEPLER_CONSTANT = 50;
+const PLANETARY_DENSITY = 2.5;
+const STELLAR_DENSITY = 0.5;
+const SPACECRAFT_MASS = 10;
+const CRAFT_SPEED_LIMIT = 5000;
+const MAIN_ENGINE_ACCEL = 1000;
+const LAUNCH_MECO = 2;
+const LANDING_REMOVAL_TIME = 60 * 15;
+const UNIVERSE_RANGE = 200_000;
+const STAR_RADIUS_RANGE = [1000, 8000];
+const PLANET_RADIUS_RANGE = [50, 2000];
+const NUM_PLANETS_RANGE = [1, 10];
+
+let DYNAMIC_ZOOM = true;
+let TOUCH_CAMERA_PAN = true;
+let TOUCH_CAMERA_ZOOM = true;
+
+/* ── 缩放范围（优化后）── */
+const ZOOM_MIN = 0.05;          // 最小缩放（防止过度放大看到空白）
+const ZOOM_MAX = 3.0;           // 最大缩放（避免像素化）
+const ZOOM_SMOOTH = 4.0;        // 平滑速度
+let targetZoom = 1.0;           // 目标缩放，用于平滑过渡
+
+/* ── RNG ── */
+function mulberry32(seed) {
+  let a = seed >>> 0;
+  return () => {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function dailySeed() {
+  const d = new Date();
+  return d.getFullYear() * 10000 + d.getMonth() * 100 + d.getDate();
+}
+function lerp(a,b,t){ return a + (b - a) * t; }
+function expSmooth(cur, tgt, dt, speed) {
+  return cur + (tgt - cur) * (1 - Math.exp(-dt * speed));
+}
+
+/* ── 名称生成 ── */
+const PLANET_DESCS = ['繁茂','深红','蔚蓝','黑曜','冰封','熔岩','剧毒','翠绿','水晶','铜绿','霜冻','荒芜','薄雾','闪光','璀璨','微光','炽烈','雄伟','静谧','喧腾','欢腾','低语','遗忘','神圣'];
+const LIFE_DESCS   = ['繁盛','稀疏','旺盛','无生命','变异','共生','适应','高智','原始','高等','机械','和谐','悖论','临界','短暂'];
+const PLANET_TYPES = ['行星','卫星','世界','球体','星体','天体','星'];
+const ATMO_DESCS   = ['氮氧','甲烷','硫酸','氦气','真空','稀薄','有毒','可呼吸','浓密','稀薄','不稳定'];
+const CONSTELLATIONS = ['御夫','北极','鲸鱼','天龙','波江','天炉','长蛇','天琴','山案','矩尺','南极','孔雀','罗盘','网罟','玉夫','杜鹃','飞鱼','船帆'];
+const SUFFIXES = ['主星','次星','初序','第二','第三','半人马','比邻','终末','隐匿','南极','北极','隐秘','深藏'];
+const DELIMS   = [' ',' ',' ',' ',' ',' ',' ','-','-','-','_','/','.','*','^','#'];
+const ATMO_PL  = ['云层','蒸汽','薄雾','风暴','雾霭','气流','狂风','飓风'];
+const FLORA_PL = ['森林','树丛','丛林','苔藓','地衣','菌类','竹林','海藻','蕨类','苏铁'];
+const FAUNA_PL = ['螃蟹','鸟类','哺乳','鱼类','昆虫','爬行','两栖','甲虫','蛛形'];
+const ACTIVITIES = [
+  '和{fauna}一起野餐','徒步穿越{flora}','用吸管啜饮{atmo}','为画廊拍摄{planet}',
+  '给{fauna}朗诵诗歌','为{flora}插上一面旗帜','素描{atmo}形态','聆听{fauna}的八卦',
+];
+const pickBag = (arr, rng) => arr[Math.floor(rng() * arr.length)];
+
+function nameSystem(rng) {
+  const parts = [pickBag(CONSTELLATIONS, rng)];
+  if (rng() <= 0.75) parts.push(pickBag(DELIMS, rng), pickBag(SUFFIXES, rng));
+  if (rng() <= 0.30) parts.push(pickBag(DELIMS, rng), String.fromCharCode(65 + Math.floor(rng()*26)));
+  if (rng() <= 0.30) parts.push(pickBag(DELIMS, rng), String(2 + Math.floor(rng()*5037)));
+  return parts.join('');
+}
+function describePlanet(rng) { return pickBag(PLANET_DESCS, rng) + pickBag(PLANET_TYPES, rng); }
+function describeLife(rng)   { return pickBag(LIFE_DESCS, rng); }
+function describeAtmo(rng)   { return pickBag(ATMO_DESCS, rng); }
+function describeActivity(rng, planet) {
+  const tmpl = pickBag(ACTIVITIES, rng);
+  return tmpl
+    .replace('{flora}',  (planet?.flora || '某种') + pickBag(FLORA_PL, rng))
+    .replace('{fauna}',  (planet?.fauna || '某种') + pickBag(FAUNA_PL, rng))
+    .replace('{atmo}',   (planet?.atmosphere || '某种') + pickBag(ATMO_PL, rng))
+    .replace('{planet}', (planet?.description || '某天体'));
+}
+
+/* ── 实体类 ── */
+class Body {
+  constructor() {
+    this.pos = V(); this.opos = V(); this.velocity = V();
+    this.angle = 0; this.radius = 0; this.mass = 0; this.collides = true;
+  }
+  update(dt) {
+    if (dt <= 0) return;
+    this.opos = { ...this.pos };
+    this.pos = Vadd(this.pos, Vmul(this.velocity, dt));
+  }
+  postUpdate(dt) {
+    if (dt <= 0) return;
+    this.velocity = Vmul(Vsub(this.pos, this.opos), 1/dt);
+  }
+}
+
+class Star extends Body {
+  constructor(rng, radius) {
+    super();
+    this.cls = ['O','B','A','F','G','K','M'][Math.floor(rng()*7)];
+    this.radius = radius;
+    this.mass = (4/3) * Math.PI * Math.pow(radius, 3) * STELLAR_DENSITY;
+    this.color = ({O:'#6666FF', B:'#CCCCFF', A:'#EEEEFF', F:'#FFFFFF', G:'#FFFF66', K:'#FFCC33', M:'#FF8800'})[this.cls];
+    this.collides = false;
+    this.anim = 0;
+    this.name = '';
+  }
+  update(dt) { this.anim += dt; }
+}
+
+class Planet extends Body {
+  constructor(rng, star, radius, orbitRadius) {
+    super();
+    this.orbitCenter = { ...star.pos };
+    this.radius = radius;
+    this.mass = (4/3) * Math.PI * Math.pow(radius, 3) * PLANETARY_DENSITY;
+    const period = Math.sqrt(Math.pow(orbitRadius, 3) / star.mass) * KEPLER_CONSTANT;
+    this.speed = (2 * Math.PI * orbitRadius) / period;
+    this.pos = Vadd(star.pos, Vwith(rng() * PI2, orbitRadius));
+    this.color = '#A7A7CA';
+    this.description = describePlanet(rng);
+    this.atmosphere = describeAtmo(rng);
+    this.flora = describeLife(rng);
+    this.fauna = describeLife(rng);
+    this.explored = false;
+    this.name = '';
+    this.orbitRadius = orbitRadius;
+  }
+  update(dt) {
+    const ang = Vangle(Vsub(this.pos, this.orbitCenter));
+    this.velocity = Vwith(ang + Math.PI/2, this.speed);
+    super.update(dt);
+  }
+  postUpdate(dt) {
+    const ang = Vangle(Vsub(this.pos, this.orbitCenter));
+    this.pos = Vadd(this.orbitCenter, Vwith(ang, this.orbitRadius));
+    super.postUpdate(dt);
+  }
+}
+
+class Spacecraft extends Body {
+  constructor() {
+    super();
+    this.mass = SPACECRAFT_MASS;
+    this.radius = 12;
+    this.thrust = V();
+    this.thrustCmd = 0;
+    this.thrustAngle = 0;
+    this.launchClock = 0;
+    this.transit = false;
+    this.track = [];
+    this.landing = null;
+    this.autopilot = null;
+  }
+  update(sim, dt) {
+    if (this.thrustCmd > 0) {
+      let deltaV = MAIN_ENGINE_ACCEL * dt * this.thrustCmd;
+      if (this.landing) {
+        if (this.launchClock === 0) this.launchClock = sim.now + 1;
+        if (sim.now > this.launchClock) {
+          this.landing.ship = null;
+          this.landing = null;
+        } else deltaV = 0;
+      }
+      this.velocity = Vadd(this.velocity, Vwith(this.thrustAngle, deltaV));
+    } else if (this.launchClock !== 0) this.launchClock = 0;
+    if (Vmag(this.velocity) > CRAFT_SPEED_LIMIT) {
+      this.velocity = Vwith(Vangle(this.velocity), CRAFT_SPEED_LIMIT);
+    }
+    super.update(dt);
+  }
+  postUpdate(dt) {
+    super.postUpdate(dt);
+    this.track.push({ x: this.pos.x, y: this.pos.y, age: 0 });
+    if (this.track.length > 600) this.track.shift();
+    for (const t of this.track) t.age += dt;
+  }
+}
+
+class Landing {
+  constructor(ship, planet, angle, text) {
+    this.ship = ship; this.planet = planet; this.angle = angle; this.text = text;
+    this.life = LANDING_REMOVAL_TIME;
+  }
+  update(dt) { this.life -= dt; }
+  get canBeRemoved() { return this.life < 0; }
+}
+
+class Spark {
+  constructor(pos, velocity, ttl) {
+    this.pos = { ...pos }; this.velocity = { ...velocity };
+    this.ttl = ttl; this.life = ttl; this.size = 1;
+    this.color = '#FFFFFF'; this.style = 'DOT';
+  }
+  update(dt) {
+    this.pos = Vadd(this.pos, Vmul(this.velocity, dt));
+    this.life -= dt;
+  }
+  get canBeRemoved() { return this.life < 0; }
+}
+
+/* ── Autopilot ── */
+class Autopilot {
+  constructor(ship, universe) {
+    this.ship = ship; this.universe = universe;
+    this.BRAKING_TIME = 5; this.SIGHTSEEING_TIME = 15;
+    this.LAUNCH_THRUST_TIME = 5; this.STRATEGY_MIN_TIME = 0.5;
+    this.enabled = false;
+    this.target = null;
+    this.landingAltitude = 0;
+    this.nextStrategyTime = 0;
+    this.brakingDistance = 0;
+    this.leadingPos = V();
+    this.leadingVector = V();
+    this.strategy = 'NONE';
+    this.debug = '';
+  }
+  static STRATEGY_CN = {
+    NONE: '空闲', LANDED: '已着陆', LAUNCHING: '起飞中',
+    CHASING: '追击', APPROACHING: '接近', LANDING: '着陆',
+  };
+  update(sim, dt) {
+    if (!this.enabled) return;
+    if (sim.now < this.nextStrategyTime) return;
+    const currentStrategy = this.strategy;
+
+    if (this.ship.landing != null) {
+      if (this.target != null) {
+        this.strategy = 'LANDED';
+        this.debug = '';
+        this.target = null;
+        this.landingAltitude = 0;
+        this.nextStrategyTime = sim.now + this.SIGHTSEEING_TIME;
+      } else {
+        this.ship.thrustCmd = 1;
+        this.ship.thrustAngle = this.ship.angle;
+        this.strategy = 'LAUNCHING';
+        this.debug = '';
+        this.nextStrategyTime = sim.now + this.LAUNCH_THRUST_TIME;
+      }
+    } else {
+      if (this.target == null) {
+        const unexplored = this.universe.planets.filter(p => !p.explored)
+          .sort((a, b) => Vdist(a.pos, this.ship.pos) - Vdist(b.pos, this.ship.pos));
+        this.target = unexplored[0] || this.universe.planets[Math.floor(Math.random()*this.universe.planets.length)];
+        this.brakingDistance = 0;
+      }
+      const tgt = this.target;
+      const shipV = this.ship.velocity;
+      const targetV = tgt.velocity;
+      const targetVec = Vsub(tgt.pos, this.ship.pos);
+      const altitude = Vmag(targetVec) - tgt.radius;
+
+      this.landingAltitude = Math.min(tgt.radius, 100);
+
+      const relativeV = Vsub(shipV, targetV);
+      const projection = (() => {
+        const m = Vmag(targetVec);
+        return relativeV.x * targetVec.x/m + relativeV.y * targetVec.y/m;
+      })();
+      const relativeSpeed = Vmag(relativeV) * Math.sign(projection);
+      const timeToTarget = relativeSpeed !== 0 ? altitude / relativeSpeed : 1000;
+
+      const newBrakingDistance = this.BRAKING_TIME * (relativeSpeed > 0 ? relativeSpeed : MAIN_ENGINE_ACCEL);
+      this.brakingDistance = expSmooth(this.brakingDistance, newBrakingDistance, dt, 5);
+
+      this.leadingPos = Vadd(tgt.pos,
+        Vwith(Vangle(tgt.velocity), Math.min(altitude / 2, Vmag(tgt.velocity))));
+      this.leadingVector = Vsub(this.leadingPos, this.ship.pos);
+
+      if (altitude < this.landingAltitude) {
+        this.strategy = 'LANDING';
+        this.ship.thrustAngle = Vangle(Vsub(this.ship.pos, tgt.pos));
+        this.ship.thrustCmd = 0;
+      } else if (relativeSpeed < 0 || altitude > this.brakingDistance) {
+        this.strategy = 'CHASING';
+        this.ship.thrustAngle = Vangle(this.leadingVector);
+        this.ship.thrustCmd = 1.0;
+      } else {
+        this.strategy = 'APPROACHING';
+        this.ship.thrustAngle = Vangle(Vmul(this.ship.velocity, -1));
+        const decel = relativeSpeed / timeToTarget;
+        const decelThrust = (decel / MAIN_ENGINE_ACCEL) * 0.9;
+        this.ship.thrustCmd = Math.max(0, Math.min(1, decelThrust));
+      }
+      this.debug = `DV=${relativeSpeed.toFixed(0)} D=${altitude.toFixed(0)} T${timeToTarget >= 0 ? '+' : ''}${timeToTarget.toFixed(1)}`;
+    }
+    if (this.strategy !== currentStrategy) {
+      this.nextStrategyTime = sim.now + this.STRATEGY_MIN_TIME;
+    }
+  }
+}
+
+/* ── Universe ── */
+class Universe {
+  constructor(seed) {
+    this.seed = seed;
+    this.rng = mulberry32(seed);
+    this.now = 0;
+    this.dt = 0;
+    this.planets = [];
+    this.ship = null;
+    this.star = null;
+    this.sparks = [];
+    this.landings = [];
+    this.follow = null;
+    this.latestDiscovery = null;
+  }
+  initRandom() {
+    const systemName = nameSystem(this.rng);
+    const starR = lerp(STAR_RADIUS_RANGE[0], STAR_RADIUS_RANGE[1], this.rng());
+    this.star = new Star(this.rng, starR);
+    this.star.name = systemName;
+
+    const n = 4 + Math.floor(this.rng() * 5);
+    for (let i = 0; i < n; i++) {
+      const r = lerp(PLANET_RADIUS_RANGE[0], PLANET_RADIUS_RANGE[1], this.rng());
+      const orbitR = lerp(STAR_RADIUS_RANGE[1] * 2, UNIVERSE_RANGE * 0.75, Math.pow(this.rng(), 0.6));
+      this.planets.push(new Planet(this.rng, this.star, r, orbitR));
+    }
+    this.planets.sort((a, b) => Vdist(a.pos, this.star.pos) - Vdist(b.pos, this.star.pos));
+    this.planets.forEach((p, idx) => p.name = `${systemName} ${idx + 1}`);
+
+    this.ship = new Spacecraft();
+    this.ship.pos = Vadd(this.star.pos, Vwith(this.rng() * PI2, lerp(STAR_RADIUS_RANGE[1] * 2, UNIVERSE_RANGE * 0.75, this.rng())));
+    this.ship.angle = this.rng() * PI2;
+
+    const ap = new Autopilot(this.ship, this);
+    this.ship.autopilot = ap;
+    this.follow = this.ship;
+  }
+  applyGravity(dt) {
+    if (this.now <= this.ship.launchClock + LAUNCH_MECO) return;
+    this.ship.transit = false;
+    for (const body of [...this.planets, this.star]) {
+      const v = Vsub(body.pos, this.ship.pos);
+      const d = Vmag(v);
+      if (d < body.radius) {
+        if (body instanceof Star) this.ship.transit = true;
+        continue;
+      }
+      const accel = GRAVITATION * (this.ship.mass * body.mass) / (d * d);
+      const dv = Vwith(Vangle(v), accel * dt);
+      this.ship.velocity = Vadd(this.ship.velocity, dv);
+    }
+  }
+  resolveCollisions() {
+    if (this.ship.landing) return;
+    let closest = null, closestD = Infinity;
+    for (const body of [...this.planets, this.star]) {
+      const d = Vdist(body.pos, this.ship.pos);
+      if (d < closestD) { closestD = d; closest = body; }
+    }
+    if (!closest || !closest.collides) return;
+    const surfaceD = Vdist(closest.pos, this.ship.pos) - this.ship.radius - closest.radius;
+    if (surfaceD >= 0) return;
+
+    const a = Vangle(Vsub(this.ship.pos, closest.pos));
+    const aDiff = Math.abs(this.ship.angle - a);
+
+    if (aDiff < Math.PI / 4) {
+      const landing = new Landing(this.ship, closest, a, describeActivity(this.rng, closest));
+      this.ship.thrustCmd = 0;
+      this.ship.thrust = V();
+      this.ship.landing = landing;
+      this.ship.velocity = { ...closest.velocity };
+      this.landings.push(landing);
+      closest.explored = true;
+      this.latestDiscovery = closest;
+      showToast(`已着陆: ${closest.name}`, landing.text, 4500);
+    } else {
+      const impact = Vadd(closest.pos, Vwith(a, closest.radius));
+      this.ship.pos = Vadd(closest.pos, Vwith(a, closest.radius + this.ship.radius - surfaceD));
+      this.ship.thrustCmd = 0;
+      for (let i = 0; i < 14; i++) {
+        const ang = this.rng() * PI2;
+        const mag = 0.1 + this.rng() * 0.4;
+        this.sparks.push(new Spark(
+          Vadd(impact, Vwith(ang, mag)),
+          { x: this.ship.velocity.x * 0.8 + Math.cos(ang) * mag, y: this.ship.velocity.y * 0.8 + Math.sin(ang) * mag },
+          0.5 + this.rng() * 1.5
+        ));
+      }
+      this.ship.velocity = Vmul(this.ship.velocity, 0.2);
+    }
+  }
+  step(dt) {
+    this.dt = dt;
+    this.now += dt;
+    this.applyGravity(dt);
+    for (const p of this.planets) p.update(dt);
+    this.star.update(dt);
+    this.ship.update(this, dt);
+    for (const p of this.planets) p.postUpdate(dt);
+    this.ship.postUpdate(dt);
+    for (const land of this.landings) land.update(dt);
+    for (const s of this.sparks) s.update(dt);
+    this.resolveCollisions();
+    this.landings = this.landings.filter(l => !l.canBeRemoved);
+    this.sparks = this.sparks.filter(s => !s.canBeRemoved);
+    if (this.ship.autopilot) this.ship.autopilot.update(this, dt);
+    if (this.ship.autopilot?.enabled) {
+      this.ship.thrust = Vwith(this.ship.thrustAngle, this.ship.thrustCmd);
+    }
+  }
+}
+
+/* ── Camera ── */
+const cam = {
+  zoom: 1, offX: 0, offY: 0,
+  centerX: 0.5, centerY: 0.5,
+};
+
+/* ── 背景星 ── */
+const bgStars = [];
+for (let i = 0; i < 800; i++) {
+  bgStars.push({
+    x: (Math.random() - 0.5) * UNIVERSE_RANGE * 4,
+    y: (Math.random() - 0.5) * UNIVERSE_RANGE * 4,
+    s: Math.random() * 1.4 + 0.2,
+    c: Math.random() < 0.04 ? '#FFCC33' : (Math.random() < 0.5 ? '#FFFFFF' : '#A7A7CA'),
+  });
+}
+
+/* ── Canvas ── */
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let DPR = Math.min(window.devicePixelRatio || 1, 2);
+let viewW = 0, viewH = 0;
+
+function resize() {
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  const rect = canvas.getBoundingClientRect();
+  viewW = rect.width; viewH = rect.height;
+  canvas.width = viewW * DPR; canvas.height = viewH * DPR;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+}
+window.addEventListener('resize', resize);
+new ResizeObserver(resize).observe(canvas.parentElement);
+resize();
+
+/* ── Game state ── */
+let universe = new Universe(dailySeed());
+universe.initRandom();
+
+/* ── UI 状态 ── */
+const flags = {
+  DRAW_ORBITS: true,
+  DRAW_GRAVITATIONAL_FIELDS: false,
+  DRAW_STAR_GRAVITATIONAL_FIELDS: true,
+  TRACK: true,
+  flagFlag: true,
+};
+
+/* ── 摇杆 ── */
+const stick = {
+  active: false,
+  origin: { x: 0, y: 0 },
+  pointer: { x: 0, y: 0 },
+  minRadius: 40,
+  maxRadius: 120,
+};
+
+function stickStart(x, y) {
+  stick.active = true;
+  stick.origin = { x, y };
+  stick.pointer = { x, y };
+  showStickIndicator(x, y);
+}
+function stickMove(x, y) {
+  if (!stick.active) return;
+  stick.pointer = { x, y };
+  updateStickIndicator();
+}
+function stickEnd() {
+  stick.active = false;
+  hideStickIndicator();
+}
+
+canvas.addEventListener('pointerdown', e => {
+  e.preventDefault();
+  e.stopPropagation();
+  stickStart(e.clientX, e.clientY);
+  try { canvas.setPointerCapture(e.pointerId); } catch(_) {}
+}, { passive: false });
+canvas.addEventListener('pointermove', e => {
+  if (!stick.active) return;
+  stickMove(e.clientX, e.clientY);
+}, { passive: false });
+document.addEventListener('pointerup', stickEnd);
+document.addEventListener('pointercancel', stickEnd);
+
+/* 触屏兼容 */
+canvas.addEventListener('touchstart', e => {
+  if (e.touches.length !== 1) return;
+  e.preventDefault();
+  const t = e.touches[0];
+  stickStart(t.clientX, t.clientY);
+}, { passive: false });
+canvas.addEventListener('touchmove', e => {
+  if (!stick.active) return;
+  if (e.touches.length !== 1) return;
+  e.preventDefault();
+  const t = e.touches[0];
+  stickMove(t.clientX, t.clientY);
+}, { passive: false });
+canvas.addEventListener('touchend', e => {
+  e.preventDefault();
+  stickEnd();
+}, { passive: false });
+canvas.addEventListener('touchcancel', stickEnd);
+
+/* 双指捏合缩放 */
+let pinchDist = 0;
+canvas.addEventListener('touchstart', e => {
+  if (e.touches.length === 2) {
+    const a = e.touches[0], b = e.touches[1];
+    pinchDist = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+  }
+}, { passive: false });
+canvas.addEventListener('touchmove', e => {
+  if (e.touches.length === 2) {
+    e.preventDefault();
+    const a = e.touches[0], b = e.touches[1];
+    const d = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+    if (pinchDist > 0) {
+      const factor = d / pinchDist;
+      targetZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, targetZoom * factor));
+    }
+    pinchDist = d;
+  }
+}, { passive: false });
+canvas.addEventListener('touchend', () => { pinchDist = 0; });
+
+/* 滚轮缩放 */
+canvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  const factor = Math.exp(-e.deltaY * 0.0015);
+  targetZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, targetZoom * factor));
+}, { passive: false });
+
+/* ── 摇杆指示器 ── */
+const stickIndicator = document.createElement('div');
+stickIndicator.id = 'stick-indicator';
+stickIndicator.style.cssText = `position: fixed; pointer-events: none; z-index: 20; display: none;`;
+document.body.appendChild(stickIndicator);
+
+function showStickIndicator(x, y) {
+  stickIndicator.style.display = 'block';
+  stickIndicator.style.left = (x - 60) + 'px';
+  stickIndicator.style.top = (y - 60) + 'px';
+  updateStickIndicator();
+}
+function updateStickIndicator() {
+  if (!stick.active) return;
+  const dx = stick.pointer.x - stick.origin.x;
+  const dy = stick.pointer.y - stick.origin.y;
+  const mag = Math.min(stick.maxRadius, Math.hypot(dx, dy));
+  const a = Math.atan2(dy, dx);
+  const r = Math.max(stick.minRadius, mag);
+  const thrustRatio = mag <= stick.minRadius ? 0 : (mag - stick.minRadius) / (stick.maxRadius - stick.minRadius);
+  const color = thrustRatio === 0 ? 'rgba(167,167,202,0.7)' : 'rgba(52,168,83,0.85)';
+  stickIndicator.innerHTML = `
+    <svg width="120" height="120" viewBox="-60 -60 120 120" style="overflow:visible">
+      <circle r="${stick.minRadius}" fill="none" stroke="rgba(167,167,202,0.35)" stroke-dasharray="3 3" stroke-width="1"/>
+      <circle r="${stick.maxRadius}" fill="none" stroke="rgba(167,167,202,0.18)" stroke-width="1"/>
+      <line x1="0" y1="0" x2="${Math.cos(a) * r}" y2="${Math.sin(a) * r}" stroke="${color}" stroke-width="2"/>
+      <circle cx="${Math.cos(a) * r}" cy="${Math.sin(a) * r}" r="6" fill="${color}"/>
+      <text x="0" y="-65" text-anchor="middle" style="font:10px JetBrains Mono;fill:${color === 'rgba(167,167,202,0.7)' ? '#A7A7CA' : '#34A853'};letter-spacing:2px">
+        ${mag <= stick.minRadius ? 'REORIENT' : `THRUST ${(thrustRatio*100).toFixed(0)}%`}
+      </text>
+    </svg>`;
+}
+function hideStickIndicator() {
+  stickIndicator.style.display = 'none';
+}
+
+/* ── 键盘 ── */
+const keys = {};
+window.addEventListener('keydown', e => {
+  keys[e.key.toLowerCase()] = true;
+  if (e.key === 'a' || e.key === 'A') toggleAutopilot();
+  if (e.key === 'r' || e.key === 'R') regenUniverse();
+  if (e.key === 'o' || e.key === 'O') toggleFlag('DRAW_ORBITS');
+  if (e.key === 'f' || e.key === 'F') toggleFlag('DRAW_GRAVITATIONAL_FIELDS');
+  if (e.key === 't' || e.key === 'T') toggleFlag('TRACK');
+  if (e.key === 's' || e.key === 'S') toggleSrc();
+});
+window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+
+/* ── 控制函数 ── */
+function toggleAutopilot() {
+  const ap = universe.ship.autopilot;
+  ap.enabled = !ap.enabled;
+  showToast(ap.enabled ? '自动驾驶 已启动' : '手动控制 接管', '', 2200);
+  refreshTelemetryButtons();
+}
+function regenUniverse() {
+  universe = new Universe(dailySeed() + Math.floor(Math.random() * 100000));
+  universe.initRandom();
+  targetZoom = 1;
+  cam.zoom = 1;
+  cam.offX = 0; cam.offY = 0;
+  showToast('新星系 已生成', '', 2000);
+  refreshTelemetryButtons();
+  setTimeout(() => { document.getElementById('telemetry').classList.add('show'); }, 50);
+}
+function toggleFlag(name) {
+  flags[name] = !flags[name];
+  refreshTelemetryButtons();
+}
+function toggleSrc() {
+  document.getElementById('src-overlay').classList.toggle('show');
+}
+
+/* ── Toast ── */
+const toastEl = document.getElementById('toast');
+let toastTimer = null;
+function showToast(title, sub = '', dur = 2500) {
+  toastEl.innerHTML = title + (sub ? `<span class="small">${sub}</span>` : '');
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), dur);
+}
+
+/* ── 主循环 ── */
+let lastT = performance.now();
+let fpsAvg = 60, fpsAcc = 0, fpsCount = 0;
+
+function tick(now) {
+  const realDt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+  fpsAcc += 1 / Math.max(realDt, 1e-6);
+  fpsCount++;
+  if (fpsCount >= 30) { fpsAvg = fpsAcc / fpsCount; fpsAcc = 0; fpsCount = 0; }
+
+  const ship = universe.ship;
+  const ap = ship.autopilot;
+
+  /* 摇杆 → 推力 */
+  if (stick.active) {
+    const dx = stick.pointer.x - stick.origin.x;
+    const dy = stick.pointer.y - stick.origin.y;
+    const mag = Math.min(stick.maxRadius, Math.hypot(dx, dy));
+    if (mag > 0) {
+      const a = Math.atan2(dy, dx);
+      if (mag < stick.minRadius) {
+        ship.thrustCmd = 0;
+        ship.thrustAngle = a;
+      } else {
+        ship.thrustAngle = a;
+        const m = (mag - stick.minRadius) / (stick.maxRadius - stick.minRadius);
+        ship.thrustCmd = Math.max(0, Math.min(1, m));
+      }
+      ship.thrust = Vwith(ship.thrustAngle, ship.thrustCmd);
+      if (!ap.enabled) ship.angle = ship.thrustAngle;
+    }
+  }
+  if (!stick.active && !ap.enabled) {
+    let turn = 0;
+    if (keys['a'] || keys['arrowleft'])  turn -= 1;
+    if (keys['d'] || keys['arrowright']) turn += 1;
+    if (turn) ship.angle += turn * 1.8 * realDt;
+    let thrustMag = 0;
+    if (keys[' '] || keys['w'] || keys['arrowup']) thrustMag = 1;
+    ship.thrustAngle = ship.angle;
+    ship.thrustCmd = thrustMag;
+    ship.thrust = Vwith(ship.angle, thrustMag);
+  }
+
+  /* 物理子步 */
+  for (let i = 0; i < 4; i++) universe.step(realDt / 4);
+
+  /* 相机跟随 */
+  cam.offX = -(universe.follow?.pos?.x || 0);
+  cam.offY = -(universe.follow?.pos?.y || 0);
+
+  /* 动态缩放（优化版：更平滑、限制范围） */
+  if (DYNAMIC_ZOOM) {
+    const closest = universe.planets.concat([universe.star])
+      .sort((a, b) => Vdist(a.pos, ship.pos) - Vdist(b.pos, ship.pos))[0];
+    const d = Math.max(0, Vdist(closest.pos, ship.pos) - closest.radius * 1.2);
+    const idealZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, 500 / Math.max(d, 1)));
+    targetZoom = idealZoom;
+  }
+  // 平滑过渡到目标缩放
+  cam.zoom = expSmooth(cam.zoom, targetZoom, realDt, ZOOM_SMOOTH);
+
+  draw();
+  updateDEBUG();
+  updateTelemetry();
+
+  requestAnimationFrame(tick);
+}
+
+/* ── 渲染 ── */
+function draw() {
+  ctx.fillStyle = '#16161D';
+  ctx.fillRect(0, 0, viewW, viewH);
+
+  const cx = viewW * cam.centerX;
+  const cy = viewH * cam.centerY;
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.scale(cam.zoom, cam.zoom);
+  ctx.translate(cam.offX, cam.offY);
+
+  drawBackground();
+  drawGrid();
+  drawRingfence();
+
+  for (const p of universe.planets) drawPlanet(p);
+  drawStar(universe.star);
+
+  for (const s of universe.sparks) drawSpark(s);
+
+  if (flags.TRACK) drawTrack(universe.ship.track);
+
+  drawSpacecraft(universe.ship);
+
+  for (const land of universe.landings) drawLanding(land);
+
+  if (universe.ship.autopilot?.enabled) drawAutopilot(universe.ship.autopilot);
+
+  ctx.restore();
+}
+
+function drawBackground() {
+  ctx.fillStyle = '#FFFFFF';
+  for (const s of bgStars) {
+    ctx.globalAlpha = 0.3 + s.s * 0.4;
+    ctx.fillRect(s.x, s.y, s.s, s.s);
+  }
+  ctx.globalAlpha = 1;
+}
+
+function drawGrid() {
+  let step = 1000;
+  while (step * cam.zoom < 32) step *= 10;
+
+  ctx.strokeStyle = '#292936';
+  ctx.lineWidth = 1 / cam.zoom;
+  const vw = viewW / cam.zoom, vh = viewH / cam.zoom;
+  const camX = -cam.offX, camY = -cam.offY;
+  const left   = camX - vw * cam.centerX;
+  const right  = camX + vw * (1 - cam.centerX);
+  const top    = camY - vh * cam.centerY;
+  const bottom = camY + vh * (1 - cam.centerY);
+
+  ctx.beginPath();
+  for (let x = Math.floor(left / step) * step; x < right; x += step) {
+    ctx.moveTo(x, top); ctx.lineTo(x, bottom);
+  }
+  for (let y = Math.floor(top / step) * step; y < bottom; y += step) {
+    ctx.moveTo(left, y); ctx.lineTo(right, y);
+  }
+  ctx.stroke();
+}
+
+function drawRingfence() {
+  ctx.strokeStyle = '#800000';
+  ctx.setLineDash([8 / cam.zoom, 8 / cam.zoom]);
+  ctx.beginPath();
+  ctx.arc(0, 0, UNIVERSE_RANGE, 0, PI2);
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+function drawStar(star) {
+  ctx.save();
+  ctx.translate(star.pos.x, star.pos.y);
+
+  const glow = ctx.createRadialGradient(0, 0, star.radius * 0.8, 0, 0, star.radius * 3);
+  glow.addColorStop(0, star.color + 'AA');
+  glow.addColorStop(1, star.color + '00');
+  ctx.fillStyle = glow;
+  ctx.beginPath(); ctx.arc(0, 0, star.radius * 3, 0, PI2); ctx.fill();
+
+  ctx.fillStyle = star.color;
+  ctx.beginPath(); ctx.arc(0, 0, star.radius, 0, PI2); ctx.fill();
+
+  if (flags.DRAW_STAR_GRAVITATIONAL_FIELDS) drawGravField(star);
+
+  drawStarSpikes(star.radius + 80, star.radius + 250, 31, star.anim / 23);
+  drawStarSpikes(star.radius + 20, star.radius + 200, 32, -star.anim / 19);
+
+  ctx.restore();
+}
+
+function drawStarSpikes(r1, r2, points, rot) {
+  ctx.save();
+  ctx.rotate(rot * PI2);
+  ctx.strokeStyle = universe.star.color;
+  ctx.lineWidth = 3 / cam.zoom;
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  const step = PI2 / points;
+  for (let i = 0; i < points; i++) {
+    const a1 = step * i, a2 = a1 + step / 2;
+    const x1 = Math.cos(a1) * r1, y1 = Math.sin(a1) * r1;
+    const x2 = Math.cos(a2) * r2, y2 = Math.sin(a2) * r2;
+    const x3 = Math.cos(a1 + step) * r1, y3 = Math.sin(a1 + step) * r1;
+    if (i === 0) ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.lineTo(x3, y3);
+  }
+  ctx.closePath();
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawGravField(body) {
+  const rings = 8;
+  for (let i = 0; i < rings; i++) {
+    const force = lerp(200, 0.01, i / rings);
+    const r = Math.sqrt(GRAVITATION * body.mass * SPACECRAFT_MASS / force);
+    ctx.strokeStyle = `rgba(255,0,0,${lerp(0.4, 0.08, i/rings)})`;
+    ctx.lineWidth = 2 / cam.zoom;
+    ctx.beginPath();
+    ctx.arc(body.pos.x, body.pos.y, r, 0, PI2);
+    ctx.stroke();
+  }
+}
+
+function drawPlanet(p) {
+  if (flags.DRAW_ORBITS) {
+    ctx.strokeStyle = 'rgba(0,255,255,0.5)';
+    ctx.lineWidth = 1 / cam.zoom;
+    ctx.beginPath();
+    ctx.arc(p.orbitCenter.x, p.orbitCenter.y, p.orbitRadius, 0, PI2);
+    ctx.stroke();
+  }
+  if (flags.DRAW_GRAVITATIONAL_FIELDS) drawGravField(p);
+
+  ctx.fillStyle = '#16161D';
+  ctx.beginPath(); ctx.arc(p.pos.x, p.pos.y, p.radius, 0, PI2); ctx.fill();
+  ctx.strokeStyle = p.color;
+  ctx.lineWidth = 2 / cam.zoom;
+  ctx.beginPath(); ctx.arc(p.pos.x, p.pos.y, p.radius, 0, PI2); ctx.stroke();
+
+  if (p.explored) {
+    ctx.strokeStyle = 'rgba(198,255,0,0.6)';
+    ctx.lineWidth = 1.5 / cam.zoom;
+    ctx.beginPath();
+    ctx.arc(p.pos.x, p.pos.y, p.radius + 8 / cam.zoom, 0, PI2);
+    ctx.stroke();
+  }
+}
+
+function drawSpark(s) {
+  const life = 1 - s.life / s.ttl;
+  if (s.style === 'DOT') {
+    ctx.fillStyle = s.color;
+    ctx.globalAlpha = 1 - life;
+    ctx.beginPath(); ctx.arc(s.pos.x, s.pos.y, s.size, 0, PI2); ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+}
+
+function drawTrack(track) {
+  if (!track || track.length < 2) return;
+  ctx.strokeStyle = '#34A853';
+  ctx.lineWidth = 1.5 / cam.zoom;
+  ctx.beginPath();
+  for (let i = 0; i < track.length; i++) {
+    const t = track[i];
+    if (i === 0) ctx.moveTo(t.x, t.y);
+    else ctx.lineTo(t.x, t.y);
+  }
+  ctx.stroke();
+}
+
+function drawSpacecraft(s) {
+  ctx.save();
+  ctx.translate(s.pos.x, s.pos.y);
+  ctx.rotate(s.angle);
+
+  if (s.thrustCmd > 0) {
+    const intensity = s.thrustCmd;
+    const flicker = 0.7 + Math.random() * 0.6;
+    const flameLen = 16 + intensity * 12 * flicker;
+    const grad = ctx.createLinearGradient(-8, 0, -8 - flameLen, 0);
+    grad.addColorStop(0, '#FFFF88');
+    grad.addColorStop(0.4, '#FF8800');
+    grad.addColorStop(1, 'rgba(255,80,0,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.moveTo(-8, -3);
+    ctx.lineTo(-8 - flameLen, 0);
+    ctx.lineTo(-8, 3);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  const path = new Path2D(`M11.853 0 C11.853 -4.418 8.374 -8 4.083 -8 L-5.5 -8 C-6.328 -8 -7 -7.328 -7 -6.5 C-7 -5.672 -6.328 -5 -5.5 -5 L-2.917 -5 C-1.26 -5 0.083 -3.657 0.083 -2 L0.083 2 C0.083 3.657 -1.26 5 -2.917 5 L-5.5 5 C-6.328 5 -7 5.672 -7 6.5 C-7 7.328 -6.328 8 -5.5 8 L4.083 8 C8.374 8 11.853 4.418 11.853 0 Z`);
+  ctx.fillStyle = '#16161D';
+  ctx.fill(path);
+  ctx.strokeStyle = s.transit ? '#000000' : '#FFFFFF';
+  ctx.lineWidth = 2 / cam.zoom;
+  ctx.stroke(path);
+
+  if (s.landing) {
+    ctx.strokeStyle = '#CCCCCC';
+    ctx.lineWidth = 2 / cam.zoom;
+    ctx.beginPath();
+    ctx.moveTo(-7, -6.5); ctx.lineTo(-10.5, -6.5); ctx.lineTo(-11.5, -8.5); ctx.lineTo(-11.5, -4.5); ctx.lineTo(-10.5, -6.5);
+    ctx.moveTo(-7,  6.5); ctx.lineTo(-10.5,  6.5); ctx.lineTo(-11.5,  8.5); ctx.lineTo(-11.5,  4.5); ctx.lineTo(-10.5,  6.5);
+    ctx.stroke();
+  }
+
+  ctx.restore();
+}
+
+function drawLanding(land) {
+  if (!flags.flagFlag) return;
+  const v = Vadd(land.planet.pos, Vwith(land.angle, land.planet.radius));
+  ctx.save();
+  ctx.translate(v.x, v.y);
+  ctx.rotate(land.angle);
+  ctx.strokeStyle = '#C6FF00';
+  ctx.lineWidth = 2 / cam.zoom;
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(80, 0);
+  ctx.lineTo(70, 20);
+  ctx.lineTo(60, 0);
+  ctx.closePath();
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawAutopilot(ap) {
+  if (!ap || !ap.target) return;
+  const tgt = ap.target;
+  const color = 'rgba(66,133,244,0.5)';
+  ctx.save();
+  ctx.translate(tgt.pos.x, tgt.pos.y);
+  ctx.rotate(universe.now * PI2 / 10);
+  const sides = 15;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1 / cam.zoom;
+  ctx.beginPath();
+  for (let i = 0; i <= sides; i++) {
+    const a = (i / sides) * PI2;
+    const x = Math.cos(a) * (tgt.radius + ap.brakingDistance);
+    const y = Math.sin(a) * (tgt.radius + ap.brakingDistance);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  ctx.restore();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1 / cam.zoom;
+  ctx.beginPath();
+  ctx.moveTo(ap.ship.pos.x, ap.ship.pos.y);
+  ctx.lineTo(ap.leadingPos.x, ap.leadingPos.y);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(ap.leadingPos.x, ap.leadingPos.y, 5 / cam.zoom, 0, PI2);
+  ctx.stroke();
+}
+
+/* ── DEBUG_TEXT ── */
+const debugEl = document.getElementById('debug');
+function updateDEBUG() {
+  const u = universe;
+  const sysName = u.star.name;
+  const designation = `UDC-${u.seed % 100000}`;
+  const cls = u.star.cls;
+  const shipStr = `p=<${u.ship.pos.x.toFixed(1).padStart(7)},${u.ship.pos.y.toFixed(1).padStart(7)}> v=${Vmag(u.ship.velocity).toFixed(2).padStart(7)} a=${u.ship.angle.toFixed(3)} t=<${u.ship.thrust.x.toFixed(2).padStart(5)},${u.ship.thrust.y.toFixed(2).padStart(5)}>`;
+
+  const parts = [];
+  parts.push(`模拟 //`);
+  parts.push(`实体: ${u.planets.length + 2} // 缩放: ${cam.zoom.toFixed(4)}x // 帧率: ${fpsAvg.toFixed(0).padStart(3)} 步长: ${u.dt.toFixed(3)}`);
+  parts.push(`飞船: ${shipStr}`);
+  parts.push(`恒星: '${sysName}' 编号=${designation} 光谱=${cls} 半径=${u.star.radius.toFixed(0)} 质量=${u.star.mass.toExponential(2)}`);
+  parts.push(`行星: ${u.planets.length}`);
+
+  for (const p of u.planets) {
+    const range = Vdist(u.ship.pos, p.pos);
+    const vorbit = Math.sqrt(GRAVITATION * p.mass / Math.max(range, 1));
+    const vescape = Math.sqrt(2 * GRAVITATION * p.mass / p.radius);
+    parts.push(` * ${p.name}:`);
+    if (p.explored) {
+      parts.push(`   类型:  ${p.description}`);
+      parts.push(`   大气:  ${p.atmosphere}`);
+      parts.push(`   动物:  ${p.fauna}`);
+      parts.push(`   植物:  ${p.flora}`);
+    } else {
+      parts.push(`   (未探索)`);
+    }
+    parts.push(`   轨道=${p.orbitRadius.toFixed(0)} 半径=${p.radius.toFixed(0)} 质量=${p.mass.toExponential(2)} // 距离=${range.toFixed(0)} 轨道速度=${vorbit.toFixed(0)} 逃逸速度=${vescape.toFixed(0)}`);
+  }
+  debugEl.textContent = parts.join('\n');
+}
+
+/* ── Telemetry ── */
+const telEl = document.getElementById('telemetry');
+
+function refreshTelemetryButtons() {
+  const ap = universe.ship.autopilot;
+  telEl.innerHTML = '';
+
+  const row1 = document.createElement('div');
+  row1.className = 'ctrl-row';
+  row1.appendChild(makeBtn('[A] 自动驾驶', ap.enabled, () => toggleAutopilot()));
+  row1.appendChild(makeBtn('[R] 新星系', false, () => regenUniverse()));
+  row1.appendChild(makeBtn('[O] 轨道', flags.DRAW_ORBITS, () => toggleFlag('DRAW_ORBITS'), 'active'));
+  row1.appendChild(makeBtn('[F] 引力场', flags.DRAW_GRAVITATIONAL_FIELDS, () => toggleFlag('DRAW_GRAVITATIONAL_FIELDS'), 'active'));
+  row1.appendChild(makeBtn('[T] 轨迹', flags.TRACK, () => toggleFlag('TRACK'), 'active'));
+  telEl.appendChild(row1);
+
+  const wide = viewW > viewH;
+  if (wide) {
+    telEl.style.left = 'auto';
+    telEl.style.right = '6px';
+    telEl.style.bottom = '6px';
+    telEl.style.width = `min(45vw, 480px)`;
+  } else {
+    telEl.style.left = '6px';
+    telEl.style.right = '6px';
+    telEl.style.bottom = '6px';
+    telEl.style.width = 'auto';
+  }
+}
+
+function makeBtn(text, active, onClick, activeClass = 'active') {
+  const b = document.createElement('button');
+  b.className = 'ctrl-btn' + (active ? ' ' + activeClass : '');
+  b.textContent = text;
+  b.onclick = onClick;
+  return b;
+}
+
+function updateTelemetry() {
+  const ap = universe.ship.autopilot;
+  if (ap.enabled && !telEl.querySelector('.strategy-line')) {
+    const line = document.createElement('div');
+    line.className = 'strategy-line';
+    line.innerHTML = '<span class="strategy-tag">◆ </span><span class="strategy-active" id="ap-strategy"></span>';
+    telEl.appendChild(line);
+  } else if (!ap.enabled) {
+    const line = telEl.querySelector('.strategy-line');
+    if (line) line.remove();
+  }
+  const stratEl = document.getElementById('ap-strategy');
+  if (stratEl) stratEl.textContent = (Autopilot.STRATEGY_CN[ap.strategy] || ap.strategy) + (ap.debug ? ` (${ap.debug})` : '');
+}
+
+/* ── 启动 ── */
+refreshTelemetryButtons();
+setTimeout(() => { telEl.classList.add('show'); }, 800);
+showToast(`${universe.star.name}`, `光谱 ${universe.star.cls} · ${universe.planets.length} 颗行星`, 3500);
+requestAnimationFrame(tick);
+
+/* ── 源码查看器 ── */
+const SRC_FILES = [
+  { name: 'Flags.kt',                       from: 1,    to: 49   },
+  { name: 'Autopilot.kt',                   from: 50,   to: 217  },
+  { name: 'Colors.kt',                      from: 218,  to: 259  },
+  { name: 'Common.kt',                      from: 260,  to: 329  },
+  { name: 'DreamUniverse.kt',               from: 330,  to: 445  },
+  { name: 'MainActivity.kt (Spaaaace)',     from: 446,  to: 1085 },
+  { name: 'Math.kt (expSmooth)',            from: 1086, to: 1113 },
+  { name: 'Namer.kt',                       from: 1114, to: 1223 },
+  { name: 'Polygon.kt',                     from: 1224, to: 1279 },
+  { name: 'Simulator.kt',                   from: 1280, to: 1462 },
+  { name: 'Bag.kt / RandomTable.kt',        from: 1463, to: 1519 },
+  { name: 'Universe.kt',                    from: 1520, to: 2024 },
+  { name: 'UniverseProgressNotifier.kt',    from: 2025, to: 2278 },
+  { name: 'Vec2.kt',                        from: 2279, to: 2329 },
+  { name: 'UniverseCanvas.kt',              from: 2330, to: 2787 },
+  { name: 'AndroidBaklavaEasterEgg.kt',     from: 2788, to: 3553 },
+];
+
+document.getElementById('btn-back').onclick = toggleSrc;
+
+function escapeHtml(s) { return s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+function highlightKotlin(src) {
+  const KW = ['package','import','class','object','interface','fun','val','var','if','else','when','for','while','do','return','in','is','as','by','companion','private','public','internal','protected','open','override','lateinit','const','enum','true','false','null','this','super','throw','try','catch','finally','init','suspend','operator','abstract','sealed','data','inline','reified','noinline','crossinline','typealias','field','get','set','continue','break'];
+  let out = escapeHtml(src);
+  out = out.replace(/\/\*[\s\S]*?\*\//g, m => `<span class="tk-cmt">${m}</span>`);
+  out = out.replace(/\/\/[^\n]*/g, m => `<span class="tk-cmt">${m}</span>`);
+  out = out.replace(/(&quot;|"|')((?:\\\1|(?!\1).)*?)\1/g, m => `<span class="tk-str">${m}</span>`);
+  out = out.replace(/@([A-Za-z_][A-Za-z0-9_]*)/g, '<span class="tk-anno">@$1</span>');
+  out = out.replace(/\b(\d[\d_]*(?:\.\d[\d_]*)?(?:[eE][+-]?\d+)?[fFlL]?)\b/g, '<span class="tk-num">$1</span>');
+  out = out.replace(new RegExp(`\\b(${KW.join('|')})\\b`, 'g'), '<span class="tk-kw">$1</span>');
+  out = out.replace(/\b([A-Z][A-Za-z0-9_]*)\b/g, '<span class="tk-cls">$1</span>');
+  out = out.replace(/\b([a-z_][A-Za-z0-9_]*)(?=\s*\()/g, '<span class="tk-fn">$1</span>');
+  return out;
+}
+
+let sourceLoaded = false;
+async function loadSource() {
+  if (sourceLoaded) return;
+  sourceLoaded = true;
+  const resp = await fetch('/source.txt').catch(() => null);
+  if (!resp || !resp.ok) return;
+  const raw = await resp.text();
+  const lines = raw.split('\n');
+
+  const toc = document.getElementById('src-toc');
+  toc.innerHTML = '<h4>文件列表</h4>';
+  SRC_FILES.forEach(f => {
+    const a = document.createElement('a');
+    a.href = '#L' + f.from;
+    a.dataset.line = f.from;
+    a.textContent = f.name;
+    a.onclick = e => {
+      e.preventDefault();
+      const el = document.getElementById('L' + f.from);
+      if (el) document.getElementById('src-code').scrollTo({ top: el.offsetTop - 10, behavior: 'smooth' });
+    };
+    toc.appendChild(a);
+  });
+
+  const code = document.getElementById('src-code');
+  const pre = document.createElement('pre');
+  for (let i = 0; i < lines.length; i++) {
+    const div = document.createElement('div');
+    div.className = 'line';
+    div.id = 'L' + (i + 1);
+    div.innerHTML = `<span class="ln">${i + 1}</span><span>${highlightKotlin(lines[i] || ' ')}</span>`;
+    pre.appendChild(div);
+  }
+  code.innerHTML = '';
+  code.appendChild(pre);
+
+  code.addEventListener('scroll', () => {
+    const top = code.scrollTop;
+    let active = SRC_FILES[0];
+    for (const f of SRC_FILES) {
+      const el = document.getElementById('L' + f.from);
+      if (el && el.offsetTop <= top + 30) active = f;
+    }
+    toc.querySelectorAll('a').forEach(a => {
+      a.classList.toggle('active', +a.dataset.line === active.from);
+    });
+  });
+}
+
+window.toggleSrc = async () => {
+  const ov = document.getElementById('src-overlay');
+  const showing = ov.classList.toggle('show');
+  if (showing) await loadSource();
+};
+</script>
+
+<!-- 原始源码嵌入 (作为 /source.txt 来源) -->
+<script id="raw-source" type="text/plain">"package com.android_baklava.egg.flags;\n\n/**\n * Generate by <a href=\"https://cs.android.com/android/platform/superproject/+/android15-release:frameworks/base/packages/EasterEgg/easter_egg_flags.aconfig\">easter_egg_flags.aconfig</a>\n *\n * <li><a href=\"https://cs.android.com/android/platform/superproject/+/android15-release:build/make/tools/aconfig/aconfig/\">Project aconfig</a></li>\n * <li><a href=\"https://cs.android.com/android/platform/superproject/+/android15-release:build/make/tools/aconfig/aconfig/templates/Flags.java.template\">Flags.java.template</a></li>\n *\n * <pre>\n * package: \"com.android.egg.flags\"\n * container: \"system\"\n *\n * flag {\n *     name: \"flag_flag\"\n *     namespace: \"systemui\"\n *     description: \"Flags are planted on planets when you land. Yes, it's a flag for flags.\"\n *     bug: \"320150798\"\n * }\n * </pre>\n */\npublic final class Flags {\n\n    public static final String FLAG_FLAG_FLAG = \"com.android_baklava.egg.flags.flag_flag\";\n\n    public static boolean flagFlag() {\n//        FEATURE_FLAGS.flagFlag();\n        return true;\n    }\n\n//    private static final FeatureFlags FEATURE_FLAGS = new FeatureFlagsImpl();\n}\n\n\n/*\n * Copyright (C) 2024 The Android Open Source Project\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *      http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\n\npackage com.android_baklava.egg.landroid\n\nimport kotlin.math.min\nimport kotlin.math.sign\n\nclass Autopilot(val ship: Spacecraft, val universe: Universe) : Entity {\n    val BRAKING_TIME = 5f\n    val SIGHTSEEING_TIME = 15f\n    val LAUNCH_THRUST_TIME = 5f\n    val STRATEGY_MIN_TIME = 0.5f\n\n    var enabled = false\n\n    var target: Planet? = null\n\n    var landingAltitude = 0f\n\n    var nextStrategyTime = 0f\n\n    var brakingDistance = 0f\n\n    // used by rendering\n    var leadingPos = Vec2.Zero\n    var leadingVector = Vec2.Zero\n\n    val telemetry: String\n        get() =\n            if (enabled)\n                listOf(\n                        \"---- AUTOPILOT ENGAGED ----\",\n                        \"TGT: \" + (target?.name?.uppercase() ?: \"SELECTING...\"),\n                        \"EXE: $strategy\" + if (debug.isNotEmpty()) \" ($debug)\" else \"\",\n                    )\n                    .joinToString(\"\\n\")\n            else \"\"\n\n    var strategy: String = \"NONE\"\n    private var debug: String = \"\"\n\n    override fun update(sim: Simulator, dt: Float) {\n        if (!enabled) return\n\n        if (sim.now < nextStrategyTime) {\n            return\n        }\n\n        val currentStrategy = strategy\n\n        if (ship.landing != null) {\n            if (target != null) {\n                strategy = \"LANDED\"\n                debug = \"\"\n                // we just got here. see the sights.\n                target = null\n                landingAltitude = 0f\n                nextStrategyTime = sim.now + SIGHTSEEING_TIME\n            } else {\n                // full power until we blast off\n                ship.thrust = Vec2.makeWithAngleMag(ship.angle, 1f)\n\n                strategy = \"LAUNCHING\"\n                debug = \"\"\n                nextStrategyTime = sim.now + LAUNCH_THRUST_TIME\n            }\n        } else {\n            // select new target\n\n            if (target == null) {\n                // testing: target the first planet\n                //   target = universe.planets[0]\n\n                // target the nearest unexplored planet\n                target =\n                    universe.planets\n                        .sortedBy { (it.pos - ship.pos).mag() }\n                        .firstOrNull { !it.explored }\n                brakingDistance = 0f\n\n                // if we've explored them all, pick one at random\n                if (target == null) target = universe.planets.random()\n            }\n\n            target?.let { target -> // should be nonnull\n                val shipV = ship.velocity\n                val targetV = target.velocity\n                val targetVector = (target.pos - ship.pos)\n                val altitude = targetVector.mag() - target.radius\n\n                landingAltitude = min(target.radius, 100f)\n\n                // the following is in the moving reference frame of the target\n                val relativeV: Vec2 = shipV - targetV\n                val projection = relativeV.dot(targetVector / targetVector.mag())\n                val relativeSpeed = relativeV.mag() * projection.sign\n                val timeToTarget = if (relativeSpeed != 0f) altitude / relativeSpeed else 1_000f\n\n                val newBrakingDistance =\n                    BRAKING_TIME * if (relativeSpeed > 0) relativeSpeed else MAIN_ENGINE_ACCEL\n                brakingDistance =\n                    expSmooth(brakingDistance, newBrakingDistance, dt = sim.dt, speed = 5f)\n\n                // We're going to aim at where the target will be, but we want to make sure to\n                // compute\n                leadingPos =\n                    target.pos +\n                        Vec2.makeWithAngleMag(\n                            target.velocity.angle(),\n                            min(altitude / 2, target.velocity.mag()),\n                        )\n                leadingVector = leadingPos - ship.pos\n\n                if (altitude < landingAltitude) {\n                    strategy = \"LANDING\"\n                    // Strategy: zero thrust, face away, prepare for landing\n\n                    ship.angle = (ship.pos - target.pos).angle() // point away from ground\n                    ship.thrust = Vec2.Zero\n                } else {\n                    if (relativeSpeed < 0 || altitude > brakingDistance) {\n                        strategy = \"CHASING\"\n                        // Strategy: Make tracks. We are either a long way away, or falling behind.\n                        ship.angle = leadingVector.angle()\n\n                        ship.thrust = Vec2.makeWithAngleMag(ship.angle, 1.0f)\n                    } else {\n                        strategy = \"APPROACHING\"\n                        // Strategy: Just slow down. If we get caught in the gravity well, it will\n                        // gradually start pulling us more in the direction of the planet, which\n                        // will create a graceful deceleration\n                        ship.angle = (-ship.velocity).angle()\n\n                        // We want to bleed off velocity over time. Specifically, relativeSpeed px/s\n                        // over timeToTarget seconds.\n                        val decel = relativeSpeed / timeToTarget\n                        val decelThrust =\n                            decel / MAIN_ENGINE_ACCEL * 0.9f // not quite slowing down enough\n                        ship.thrust = Vec2.makeWithAngleMag(ship.angle, decelThrust)\n                    }\n                }\n                debug = (\"DV=%.0f D=%.0f T%+.1f\").format(relativeSpeed, altitude, timeToTarget)\n            }\n            if (strategy != currentStrategy) {\n                nextStrategyTime = sim.now + STRATEGY_MIN_TIME\n            }\n        }\n    }\n\n    override fun postUpdate(sim: Simulator, dt: Float) {\n        if (!enabled) return\n    }\n}\n\n\n/*\n * Copyright (C) 2023 The Android Open Source Project\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *      http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\n\npackage com.android_baklava.egg.landroid\n\nimport androidx.compose.ui.graphics.Color\n\n/** Various UI colors. */\nclass Colors {\n    object Android {\n        val Green = Color(0xFF34A853)\n        val Blue = Color(0xFF4285F4)\n        val Mint = Color(0xFFE8F5E9)\n        val Chartreuse = Color(0xFFC6FF00)\n    }\n    companion object {\n        val Eigengrau = Color(0xFF16161D)\n        val Eigengrau2 = Color(0xFF292936)\n        val Eigengrau3 = Color(0xFF3C3C4F)\n        val Eigengrau4 = Color(0xFFA7A7CA)\n\n        val Console = Color(0xFFB7B7FF)\n        val Autopilot = Android.Blue\n        val Track = Android.Green\n        val Flag = Android.Chartreuse\n    }\n}\n\n\n/*\n * Copyright (C) 2023 The Android Open Source Project\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *      http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */\n\npackage com.android_baklava.egg.landroid\n\nimport androidx.compose.animation.core.CubicBezierEasing\nimport androidx.compose.animation.core.Easing\nimport androidx.compose.animation.core.tween\nimport androidx.compose.animation.fadeIn\nimport androidx.compose.foundation.background\nimport androidx.compose.foundation.border\nimport androidx.compose.foundation.clickable\nimport androidx.compose.foundation.layout.padding\nimport androidx.compose.material.Text\nimport androidx.compose.material.minimumInteractiveComponentSize\nimport androidx.compose.runtime.Composable\nimport androidx.compose.ui.Modifier\nimport androidx.compose.ui.graphics.Color\nimport androidx.compose.ui.platform.LocalDensity\nimport androidx.compose.ui.text.TextStyle\nimport androidx.compose.ui.unit.Dp\nimport androidx.compose.ui.unit.dp\nimport kotlin.random.Random\n\n@Composable fun Dp.toLocalPx() = with(LocalDensity.current) { this@toLocalPx.toPx() }\n\noperator fun Easing.times(next: Easing) = { x: Float -> next.transform(transform(x)) }\n\nfun flickerFadeEasing(rng: Random) = Easing { frac -> if (rng.nextFloat() < frac) 1f else 0f }\n\nval flickerFadeIn =\n    fadeIn(\n        animationSpec =\n            tween(\n                durationMillis = 1000,\n                easing = CubicBezierEasing(0f, 1f, 1f, 0f) * flickerFadeEasing(Random),\n            )\n    )\n\nfun flickerFadeInAfterDelay(delay: Int = 0) =\n    fadeIn(\n        animationSpec =\n            tween(\n                durationMillis = 1000,\n                delayMillis = delay,\n                easing = CubicBezierEasing(0f, 1f, 1f, 0f) * flickerFadeEasing(Random),\n            )\n    )\n\n@Composable\nfun ConsoleButton(\n    modifier: Modifier = Modifier,\n    textStyle: TextStyle = TextStyle.Default,\n    color: Color,\n    bgColor: Color,\n    borderColor: Color,\n    text: String,\n    onClick: () -> Unit,\n) {\n    Text(\n        style = textStyle,\n        color = color,\n        modifier =\n            modifier\n                .clickable { onClick() }\n                .background(color = bgColor)\n                .border(width = 1.dp, color = borderColor)\n                .padding(6.dp)\n                .minimumInteractiveComponentSize(),\n        text = text,\n    )\n}\n\n\npackage com.android_baklava.egg.landroid\n\nimport android.service.dreams.DreamService\nimport androidx.compose.foundation.layout.fillMaxSize\nimport androidx.compose.runtime.mutableStateOf\nimport androidx.compose.ui.Modifier\nimport androidx.compose.ui.platform.ComposeView\nimport androidx.lifecycle.Lifecycle\nimport androidx.lifecycle.LifecycleRegistry\nimport androidx.lifecycle.setViewTreeLifecycleOwner\nimport androidx.savedstate.SavedStateRegistryController\nimport androidx.savedstate.SavedStateRegistryOwner\nimport androidx.savedstate.setViewTreeSavedStateRegistryOwner\nimport androidx.window.layout.FoldingFeature\nimport kotlin.random.Random\n\nclass DreamUniverse : DreamService() {\n    private var foldState = mutableStateOf<FoldingFeature?>(null) // unused\n\n    private val lifecycleOwner =\n        object : SavedStateRegistryOwner {\n            override val lifecycle = LifecycleRegistry(this)\n            override val savedStateRegistry\n                get() = savedStateRegistryController.savedStateRegistry\n\n            private val savedStateRegistryController =\n                SavedStateRegistryController.create(this).apply { performAttach() }\n\n            fun onCreate() {\n                savedStateRegistryController.performRestore(null)\n                lifecycle.currentState = Lifecycle.State.CREATED\n            }\n\n            fun onStart() {\n                lifecycle.currentState = Lifecycle.State.STARTED\n            }\n\n            fun onStop() {\n                lifecycle.currentState = Lifecycle.State.CREATED\n            }\n        }\n\n    private var notifier: UniverseProgressNotifier? = null\n\n    override fun onAttachedToWindow() {\n        super.onAttachedToWindow()\n\n        val universe = Universe(namer = Namer(resources), randomSeed = randomSeed())\n\n        isInteractive = false\n\n        if (TEST_UNIVERSE) {\n            universe.initTest()\n        } else {\n            universe.initRandom()\n\n            // We actually don't want the deterministic random position of the ship, we want\n            // true randomness to keep things interesting. So use Random (not universe.rng).\n            universe.ship.pos =\n                universe.star.pos +\n                    Vec2.makeWithAngleMag(\n                        Random.nextFloat() * PI2f,\n                        Random.nextFloatInRange(\n                            PLANET_ORBIT_RANGE.start,\n                            PLANET_ORBIT_RANGE.endInclusive,\n                        ),\n                    )\n        }\n\n        // enable autopilot in screensaver mode\n        val autopilot = Autopilot(universe.ship, universe)\n        universe.ship.autopilot = autopilot\n        universe.add(autopilot)\n        autopilot.enabled = true\n\n        // much more visually interesting in a screensaver context\n        DYNAMIC_ZOOM = true\n\n        val composeView = ComposeView(this)\n        composeView.setContent {\n            Spaaaace(modifier = Modifier.fillMaxSize(), u = universe, foldState = foldState)\n            DebugText(DEBUG_TEXT)\n            Telemetry(universe, showControls = false)\n        }\n\n        notifier = UniverseProgressNotifier(this, universe)\n\n        composeView.setViewTreeLifecycleOwner(lifecycleOwner)\n        composeView.setViewTreeSavedStateRegistryOwner(lifecycleOwner)\n\n        setContentView(composeView)\n    }\n\n    override fun onCreate() {\n        super.onCreate()\n        lifecycleOwner.onCreate()\n    }\n\n    override fun onDreamingStarted() {\n        super.onDreamingStarted()\n        lifecycleOwner.onStart()\n    }\n\n    override fun onDreamingStopped() {\n        super.onDreamingStopped()\n        lifecycleOwner.onStop()\n    }\n\n    override fun onDestroy() {\n        notifier?.cancel()\n        DYNAMIC_ZOOM = false\n        super.onDestroy()\n    }\n}\n\n\n\n\npackage com.android_baklava.egg.landroid\n\nimport android.content.res.Resources\nimport android.os.Bundle\nimport android.util.Log\nimport androidx.activity.ComponentActivity\nimport androidx.activity.compose.setContent\nimport androidx.activity.enableEdgeToEdge\nimport androidx.compose.animation.AnimatedVisibility\nimport androidx.compose.animation.core.animateFloatAsState\nimport androidx.compose.animation.core.withInfiniteAnimationFrameNanos\nimport androidx.compose.foundation.border\nimport androidx.compose.foundation.gestures.awaitFirstDown\nimport androidx.compose.foundation.gestures.forEachGesture\nimport androidx.compose.foundation.gestures.rememberTransformableState\nimport androidx.compose.foundation.gestures.transformable\nimport androidx.compose.foundation.layout.Box\nimport androidx.compose.foundation.layout.BoxWithConstraints\nimport androidx.compose.foundation.layout.Column\nimport androidx.compose.foundation.layout.Row\nimport androidx.compose.foundation.layout.WindowInsets\nimport androidx.compose.foundation.layout.fillMaxSize\nimport androidx.compose.foundation.layout.fillMaxWidth\nimport androidx.compose.foundation.layout.padding\nimport androidx.compose.foundation.layout.safeContent\nimport androidx.compose.foundation.layout.windowInsetsPadding\nimport androidx.compose.material.Text\nimport androidx.compose.runtime.Composable\nimport androidx.compose.runtime.LaunchedEffect\nimport androidx.compose.runtime.MutableState\nimport androidx.compose.runtime.currentRecomposeScope\nimport androidx.compose.runtime.getValue\nimport androidx.compose.runtime.mutableFloatStateOf\nimport androidx.compose.runtime.mutableStateOf\nimport androidx.compose.runtime.remember\nimport androidx.compose.runtime.setValue\nimport androidx.compose.ui.AbsoluteAlignment.Left\nimport androidx.compose.ui.Alignment\nimport androidx.compose.ui.Modifier\nimport androidx.compose.ui.draw.drawBehind\nimport androidx.compose.ui.geometry.Offset\nimport androidx.compose.ui.geometry.Rect\nimport androidx.compose.ui.graphics.Color\nimport androidx.compose.ui.graphics.PathEffect\nimport androidx.compose.ui.graphics.drawscope.Stroke\nimport androidx.compose.ui.graphics.drawscope.translate\nimport androidx.compose.ui.input.pointer.PointerEvent\nimport androidx.compose.ui.input.pointer.pointerInput\nimport androidx.compose.ui.text.TextStyle\nimport androidx.compose.ui.text.font.FontFamily\nimport androidx.compose.ui.text.font.FontWeight\nimport androidx.compose.ui.tooling.preview.Devices\nimport androidx.compose.ui.tooling.preview.Preview\nimport androidx.compose.ui.unit.dp\nimport androidx.compose.ui.unit.sp\nimport androidx.core.math.MathUtils.clamp\nimport androidx.lifecycle.Lifecycle\nimport androidx.lifecycle.lifecycleScope\nimport androidx.lifecycle.repeatOnLifecycle\nimport androidx.window.layout.FoldingFeature\nimport androidx.window.layout.WindowInfoTracker\nimport com.android_baklava.egg.ComponentActivationActivity\nimport com.dede.basic.utils.DessertUtils\nimport kotlinx.coroutines.Dispatchers\nimport kotlinx.coroutines.delay\nimport kotlinx.coroutines.launch\nimport java.lang.Float.max\nimport java.lang.Float.min\nimport java.util.Calendar\nimport java.util.GregorianCalendar\nimport kotlin.math.absoluteValue\nimport kotlin.math.floor\nimport kotlin.math.sqrt\nimport kotlin.random.Random\n\nenum class RandomSeedType {\n    Fixed,\n    Daily,\n    Evergreen,\n}\n\nconst val TEST_UNIVERSE = false\n\nval RANDOM_SEED_TYPE = RandomSeedType.Daily\n\nconst val FIXED_RANDOM_SEED = 5038L\nconst val DEFAULT_CAMERA_ZOOM = 1f\nconst val MIN_CAMERA_ZOOM = 250f / UNIVERSE_RANGE // 0.0025f\nconst val MAX_CAMERA_ZOOM = 5f\nvar TOUCH_CAMERA_PAN = false\nvar TOUCH_CAMERA_ZOOM = false\nvar DYNAMIC_ZOOM = false\n\nfun dailySeed(): Long {\n    val today = GregorianCalendar()\n    return today.get(Calendar.YEAR) * 10_000L +\n        today.get(Calendar.MONTH) * 100L +\n        today.get(Calendar.DAY_OF_MONTH)\n}\n\nfun randomSeed(): Long {\n    return when (RANDOM_SEED_TYPE) {\n        RandomSeedType.Fixed -> FIXED_RANDOM_SEED\n        RandomSeedType.Daily -> dailySeed()\n        else -> Random.Default.nextLong().mod(10_000_000).toLong()\n    }.absoluteValue\n}\n\nfun getDessertCode(): String = DessertUtils.getDessertCode()\n//    when (Build.VERSION.SDK_INT) {\n//        Build.VERSION_CODES.LOLLIPOP -> \"LMP\"\n//        Build.VERSION_CODES.LOLLIPOP_MR1 -> \"LM1\"\n//        Build.VERSION_CODES.M -> \"MNC\"\n//        Build.VERSION_CODES.N -> \"NYC\"\n//        Build.VERSION_CODES.N_MR1 -> \"NM1\"\n//        Build.VERSION_CODES.O -> \"OC\"\n//        Build.VERSION_CODES.P -> \"PIE\"\n//        Build.VERSION_CODES.Q -> \"QT\"\n//        Build.VERSION_CODES.R -> \"RVC\"\n//        Build.VERSION_CODES.S -> \"SC\"\n//        Build.VERSION_CODES.S_V2 -> \"SC2\"\n//        Build.VERSION_CODES.TIRAMISU -> \"TM\"\n//        Build.VERSION_CODES.UPSIDE_DOWN_CAKE -> \"UDC\"\n//        Build.VERSION_CODES.VANILLA_ICE_CREAM -> \"VIC\"\n//        else -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {\n//            Build.VERSION.RELEASE_OR_CODENAME.replace(Regex(\"[a-z]*\"), \"\")\n//        } else {\n//            throw IllegalStateException(\"getDessertCode, Build SDK: %d\".format(Build.VERSION.SDK_INT))\n//        }\n//    }\n\nfun getSystemDesignation(universe: Universe): String {\n    return \"${getDessertCode()}-${universe.randomSeed % 100_000}\"\n}\n\nval DEBUG_TEXT = mutableStateOf(\"Hello Universe\")\nconst val SHOW_DEBUG_TEXT = false\n\n@Composable\nfun DebugText(text: MutableState<String>) {\n    if (SHOW_DEBUG_TEXT) {\n        Text(\n            modifier = Modifier.fillMaxWidth().border(0.5.dp, color = Color.Yellow).padding(2.dp),\n            fontFamily = FontFamily.Monospace,\n            fontWeight = FontWeight.Medium,\n            fontSize = 9.sp,\n            color = Color.Yellow,\n            text = text.value,\n        )\n    }\n}\n\n@Composable\nfun Telemetry(universe: Universe, showControls: Boolean) {\n    var topVisible by remember { mutableStateOf(false) }\n    var bottomVisible by remember { mutableStateOf(false) }\n\n    var catalogFontSize by remember { mutableStateOf(9.sp) }\n\n    val textStyle =\n        TextStyle(\n            fontFamily = FontFamily.Monospace,\n            fontWeight = FontWeight.Medium,\n            fontSize = 12.sp,\n            letterSpacing = 1.sp,\n            lineHeight = 12.sp,\n        )\n\n    LaunchedEffect(\"blah\") {\n        delay(1000)\n        bottomVisible = true\n        topVisible = true\n    }\n\n    val explored = universe.planets.filter { it.explored }\n\n    // TODO: Narrow the scope of invalidation here to the specific data needed;\n    // the behavior below mimics the previous implementation of a snapshot ticker value\n    val recomposeScope = currentRecomposeScope\n    Telescope(universe) { recomposeScope.invalidate() }\n\n    BoxWithConstraints(\n        modifier =\n            Modifier.fillMaxSize().padding(6.dp).windowInsetsPadding(WindowInsets.safeContent)\n    ) {\n        val wide = maxWidth > maxHeight\n        Column(\n            modifier =\n                Modifier.align(if (wide) Alignment.BottomEnd else Alignment.BottomStart)\n                    .fillMaxWidth(if (wide) 0.45f else 1.0f)\n        ) {\n            val autopilotEnabled = universe.ship.autopilot?.enabled == true\n            if (autopilotEnabled) {\n                universe.ship.autopilot?.let { autopilot ->\n                    AnimatedVisibility(\n                        modifier = Modifier,\n                        visible = bottomVisible,\n                        enter = flickerFadeIn,\n                    ) {\n                        Text(\n                            style = textStyle,\n                            color = Colors.Autopilot,\n                            modifier = Modifier.align(Left),\n                            text = autopilot.telemetry,\n                        )\n                    }\n                }\n            }\n\n            Row(modifier = Modifier.padding(top = 6.dp)) {\n                AnimatedVisibility(\n                    modifier = Modifier.weight(1f),\n                    visible = bottomVisible,\n                    enter = flickerFadeIn,\n                ) {\n                    Text(\n                        style = textStyle,\n                        color = Colors.Console,\n                        text =\n                            with(universe.ship) {\n                                val closest = universe.closestPlanet()\n                                val distToClosest =\n                                    ((closest.pos - pos).mag() - closest.radius).toInt()\n                                listOfNotNull(\n                                        landing?.let {\n                                            \"LND: ${it.planet.name.uppercase()}\\n\" +\n                                                \"JOB: ${it.text.uppercase()}\"\n                                        }\n                                            ?: if (distToClosest < 10_000) {\n                                                \"ALT: $distToClosest\"\n                                            } else null,\n                                        \"THR: %.0f%%\".format(thrust.mag() * 100f),\n                                        \"POS: %s\".format(pos.str(\"%+7.0f\")),\n                                        \"VEL: %.0f\".format(velocity.mag()),\n                                    )\n                                    .joinToString(\"\\n\")\n                            },\n                    )\n                }\n\n                if (showControls) {\n                    AnimatedVisibility(\n                        visible = bottomVisible,\n                        enter = flickerFadeInAfterDelay(500),\n                    ) {\n                        ConsoleButton(\n                            textStyle = textStyle,\n                            color = Colors.Console,\n                            bgColor = if (autopilotEnabled) Colors.Autopilot else Color.Transparent,\n                            borderColor = Colors.Console,\n                            text = \"AUTO\",\n                        ) {\n                            universe.ship.autopilot?.let {\n                                it.enabled = !it.enabled\n                                DYNAMIC_ZOOM = it.enabled\n                                if (!it.enabled) universe.ship.thrust = Vec2.Zero\n                            }\n                        }\n                    }\n                }\n            }\n        }\n\n        AnimatedVisibility(\n            modifier = Modifier.align(Alignment.TopStart),\n            visible = topVisible,\n            enter = flickerFadeInAfterDelay(1000),\n        ) {\n            Text(\n                style = textStyle,\n                fontSize = catalogFontSize,\n                lineHeight = catalogFontSize,\n                letterSpacing = 1.sp,\n                color = Colors.Console,\n                onTextLayout = { textLayoutResult ->\n                    if (textLayoutResult.didOverflowHeight) {\n                        catalogFontSize = 8.sp\n                    }\n                },\n                text =\n                    (with(universe.star) {\n                            listOf(\n                                \"  STAR: $name (${getSystemDesignation(universe)})\",\n                                \" CLASS: ${cls.name}\",\n                                \"RADIUS: ${radius.toInt()}\",\n                                \"  MASS: %.3g\".format(mass),\n                                \"BODIES: ${explored.size} / ${universe.planets.size}\",\n                                \"\",\n                            )\n                        } +\n                            explored\n                                .map {\n                                    listOf(\n                                        \"  BODY: ${it.name}\",\n                                        \"  TYPE: ${it.description.capitalize()}\",\n                                        \"  ATMO: ${it.atmosphere.capitalize()}\",\n                                        \" FAUNA: ${it.fauna.capitalize()}\",\n                                        \" FLORA: ${it.flora.capitalize()}\",\n                                        \"\",\n                                    )\n                                }\n                                .flatten())\n                        .joinToString(\"\\n\"),\n\n                // TODO: different colors, highlight latest discovery\n            )\n        }\n    }\n}\n\nclass MainActivity : ComponentActivity() {\n    private var notifier: UniverseProgressNotifier? = null\n    private var foldState = mutableStateOf<FoldingFeature?>(null)\n\n    override fun onCreate(savedInstanceState: Bundle?) {\n        super.onCreate(savedInstanceState)\n\n        onWindowLayoutInfoChange()\n\n        enableEdgeToEdge()\n\n        val universe = Universe(namer = Namer(resources), randomSeed = randomSeed())\n\n        if (TEST_UNIVERSE) {\n            universe.initTest()\n        } else {\n            universe.initRandom()\n        }\n\n        ComponentActivationActivity.lockUnlockComponents(applicationContext)\n\n        // set up the autopilot in case we need it\n        val autopilot = Autopilot(universe.ship, universe)\n        universe.ship.autopilot = autopilot\n        universe.add(autopilot)\n        autopilot.enabled = false\n\n        notifier = UniverseProgressNotifier(this, universe)\n\n        setContent {\n            Spaaaace(modifier = Modifier.fillMaxSize(), u = universe, foldState = foldState)\n            DebugText(DEBUG_TEXT)\n\n            val minRadius = 50.dp.toLocalPx()\n            val maxRadius = 100.dp.toLocalPx()\n            FlightStick(\n                modifier = Modifier.fillMaxSize(),\n                minRadius = minRadius,\n                maxRadius = maxRadius,\n                color = Color.Green,\n            ) { vec ->\n                (universe.follow as? Spacecraft)?.let { ship ->\n                    if (vec == Vec2.Zero) {\n                        ship.thrust = Vec2.Zero\n                    } else {\n                        val a = vec.angle()\n                        ship.angle = a\n\n                        val m = vec.mag()\n                        if (m < minRadius) {\n                            // within this radius, just reorient\n                            ship.thrust = Vec2.Zero\n                        } else {\n                            ship.thrust =\n                                Vec2.makeWithAngleMag(\n                                    a,\n                                    lexp(minRadius, maxRadius, m).coerceIn(0f, 1f),\n                                )\n                        }\n                    }\n                }\n            }\n            Telemetry(universe, true)\n        }\n    }\n\n    private fun onWindowLayoutInfoChange() {\n        val windowInfoTracker = WindowInfoTracker.getOrCreate(this@MainActivity)\n\n        lifecycleScope.launch(Dispatchers.Main) {\n            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {\n                windowInfoTracker.windowLayoutInfo(this@MainActivity).collect { layoutInfo ->\n                    foldState.value =\n                        layoutInfo.displayFeatures.filterIsInstance<FoldingFeature>().firstOrNull()\n                    Log.v(\"Landroid\", \"fold updated: $foldState\")\n                }\n            }\n        }\n    }\n\n    override fun onDestroy() {\n        notifier?.cancel()\n        DYNAMIC_ZOOM = false\n        super.onDestroy()\n    }\n}\n\n@Preview(name = \"phone\", device = Devices.PHONE)\n@Preview(name = \"fold\", device = Devices.FOLDABLE)\n@Preview(name = \"tablet\", device = Devices.TABLET)\n@Composable\nfun MainActivityPreview() {\n    val universe = Universe(namer = Namer(Resources.getSystem()), randomSeed = randomSeed())\n\n    universe.initTest()\n\n    Spaaaace(modifier = Modifier.fillMaxSize(), universe)\n    DebugText(DEBUG_TEXT)\n    Telemetry(universe, true)\n}\n\n@Composable\nfun FlightStick(\n    modifier: Modifier,\n    minRadius: Float = 0f,\n    maxRadius: Float = 1000f,\n    color: Color = Color.Green,\n    onStickChanged: (vector: Vec2) -> Unit,\n) {\n    val origin = remember { mutableStateOf(Vec2.Zero) }\n    val target = remember { mutableStateOf(Vec2.Zero) }\n\n    Box(\n        modifier =\n            modifier\n                .pointerInput(Unit) {\n                    forEachGesture {\n                        awaitPointerEventScope {\n                            // ACTION_DOWN\n                            val down = awaitFirstDown(requireUnconsumed = false)\n                            origin.value = down.position\n                            target.value = down.position\n\n                            do {\n                                // ACTION_MOVE\n                                val event: PointerEvent = awaitPointerEvent()\n                                target.value = event.changes[0].position\n\n                                onStickChanged(target.value - origin.value)\n                            } while (\n                                !event.changes.any { it.isConsumed } &&\n                                    event.changes.count { it.pressed } == 1\n                            )\n\n                            // ACTION_UP / CANCEL\n                            target.value = Vec2.Zero\n                            origin.value = Vec2.Zero\n\n                            onStickChanged(Vec2.Zero)\n                        }\n                    }\n                }\n                .drawBehind {\n                    if (origin.value != Vec2.Zero) {\n                        val delta = target.value - origin.value\n                        val mag = min(maxRadius, delta.mag())\n                        val r = max(minRadius, mag)\n                        val a = delta.angle()\n                        drawCircle(\n                            color = color,\n                            center = origin.value,\n                            radius = r,\n                            style =\n                                Stroke(\n                                    width = 2f,\n                                    pathEffect =\n                                        if (mag < minRadius)\n                                            PathEffect.dashPathEffect(\n                                                floatArrayOf(this.density * 1f, this.density * 2f)\n                                            )\n                                        else null,\n                                ),\n                        )\n                        drawLine(\n                            color = color,\n                            start = origin.value,\n                            end = origin.value + Vec2.makeWithAngleMag(a, mag),\n                            strokeWidth = 2f,\n                        )\n                    }\n                }\n    )\n}\n\n@Composable\nfun Spaaaace(\n    modifier: Modifier,\n    u: Universe,\n    foldState: MutableState<FoldingFeature?> = mutableStateOf(null),\n) {\n    LaunchedEffect(u) {\n        while (true) withInfiniteAnimationFrameNanos { frameTimeNanos -> u.step(frameTimeNanos) }\n    }\n\n    var cameraZoom by remember { mutableFloatStateOf(DEFAULT_CAMERA_ZOOM) }\n    var cameraOffset by remember { mutableStateOf(Offset.Zero) }\n\n    val transformableState =\n        rememberTransformableState { zoomChange, offsetChange, rotationChange ->\n            if (TOUCH_CAMERA_PAN) cameraOffset += offsetChange / cameraZoom\n            if (TOUCH_CAMERA_ZOOM)\n                cameraZoom = clamp(cameraZoom * zoomChange, MIN_CAMERA_ZOOM, MAX_CAMERA_ZOOM)\n        }\n\n    var canvasModifier = modifier\n\n    if (TOUCH_CAMERA_PAN || TOUCH_CAMERA_ZOOM) {\n        canvasModifier = canvasModifier.transformable(transformableState)\n    }\n\n    val halfFolded = foldState.value?.let { it.state == FoldingFeature.State.HALF_OPENED } ?: false\n    val horizontalFold =\n        foldState.value?.let { it.orientation == FoldingFeature.Orientation.HORIZONTAL } ?: false\n\n    val centerFracX: Float by\n        animateFloatAsState(if (halfFolded && !horizontalFold) 0.25f else 0.5f, label = \"centerX\")\n    val centerFracY: Float by\n        animateFloatAsState(if (halfFolded && horizontalFold) 0.25f else 0.5f, label = \"centerY\")\n\n    UniverseCanvas(u, canvasModifier) { u ->\n        drawRect(Colors.Eigengrau, Offset.Zero, size)\n\n        val closest = u.closestPlanet()\n        val distToNearestSurf = max(0f, (u.ship.pos - closest.pos).mag() - closest.radius * 1.2f)\n        //        val normalizedDist = clamp(distToNearestSurf, 50f, 50_000f) / 50_000f\n        val targetZoom =\n            if (DYNAMIC_ZOOM) {\n                clamp(500f / distToNearestSurf, MIN_CAMERA_ZOOM, MAX_CAMERA_ZOOM)\n            } else {\n                DEFAULT_CAMERA_ZOOM\n            }\n        if (!TOUCH_CAMERA_ZOOM) {\n            cameraZoom = expSmooth(cameraZoom, targetZoom, dt = u.dt, speed = 1.5f)\n        }\n\n        if (!TOUCH_CAMERA_PAN) cameraOffset = (u.follow?.pos ?: Vec2.Zero) * -1f\n\n        // cameraZoom: metersToPixels\n        // visibleSpaceSizeMeters: meters\n        // cameraOffset: meters \u2248 vector pointing from ship to (0,0) (e.g. -pos)\n        val visibleSpaceSizeMeters = size / cameraZoom // meters x meters\n        val visibleSpaceRectMeters =\n            Rect(\n                -cameraOffset -\n                    Offset(\n                        visibleSpaceSizeMeters.width * centerFracX,\n                        visibleSpaceSizeMeters.height * centerFracY,\n                    ),\n                visibleSpaceSizeMeters,\n            )\n\n        var gridStep = 1000f\n        while (gridStep * cameraZoom < 32.dp.toPx()) gridStep *= 10\n\n        DEBUG_TEXT.value =\n            (\"SIMULATION //\\n\" +\n                // \"normalizedDist=${normalizedDist} \\n\" +\n                \"entities: ${u.entities.size} // \" +\n                \"zoom: ${\"%.4f\".format(cameraZoom)}x // \" +\n                \"fps: ${\"%3.0f\".format(1f / u.dt)} \" +\n                \"dt: ${u.dt}\\n\" +\n                ((u.follow as? Spacecraft)?.let {\n                    \"ship: p=%s v=%7.2f a=%6.3f t=%s\\n\"\n                        .format(\n                            it.pos.str(\"%+7.1f\"),\n                            it.velocity.mag(),\n                            it.angle,\n                            it.thrust.str(\"%+5.2f\"),\n                        )\n                } ?: \"\") +\n                \"star: '${u.star.name}' designation=UDC-${u.randomSeed % 100_000} \" +\n                \"class=${u.star.cls.name} r=${u.star.radius.toInt()} m=${u.star.mass}\\n\" +\n                \"planets: ${u.planets.size}\\n\" +\n                u.planets.joinToString(\"\\n\") {\n                    val range = (u.ship.pos - it.pos).mag()\n                    val vorbit = sqrt(GRAVITATION * it.mass / range)\n                    val vescape = sqrt(2 * GRAVITATION * it.mass / it.radius)\n                    \" * ${it.name}:\\n\" +\n                        if (it.explored) {\n                            \"   TYPE:  ${it.description.capitalize()}\\n\" +\n                                \"   ATMO:  ${it.atmosphere.capitalize()}\\n\" +\n                                \"   FAUNA: ${it.fauna.capitalize()}\\n\" +\n                                \"   FLORA: ${it.flora.capitalize()}\\n\"\n                        } else {\n                            \"   (Unexplored)\\n\"\n                        } +\n                        \"   orbit=${(it.pos - it.orbitCenter).mag().toInt()}\" +\n                        \" radius=${it.radius.toInt()}\" +\n                        \" mass=${\"%g\".format(it.mass)}\" +\n                        \" vel=${(it.speed).toInt()}\" +\n                        \" // range=${\"%.0f\".format(range)}\" +\n                        \" vorbit=${vorbit.toInt()} vescape=${vescape.toInt()}\"\n                })\n\n        zoom(cameraZoom) {\n            // All coordinates are space coordinates now.\n\n            translate(\n                -visibleSpaceRectMeters.center.x + size.width * 0.5f,\n                -visibleSpaceRectMeters.center.y + size.height * 0.5f,\n            ) {\n                // debug outer frame\n                // drawRect(\n                //     Colors.Eigengrau2,\n                //     visibleSpaceRectMeters.topLeft,\n                //     visibleSpaceRectMeters.size,\n                //     style = Stroke(width = 10f / cameraZoom)\n                // )\n\n                var x = floor(visibleSpaceRectMeters.left / gridStep) * gridStep\n                while (x < visibleSpaceRectMeters.right) {\n                    drawLine(\n                        color = Colors.Eigengrau2,\n                        start = Offset(x, visibleSpaceRectMeters.top),\n                        end = Offset(x, visibleSpaceRectMeters.bottom),\n                        strokeWidth = (if ((x % (gridStep * 10) == 0f)) 3f else 1.5f) / cameraZoom,\n                    )\n                    x += gridStep\n                }\n\n                var y = floor(visibleSpaceRectMeters.top / gridStep) * gridStep\n                while (y < visibleSpaceRectMeters.bottom) {\n                    drawLine(\n                        color = Colors.Eigengrau2,\n                        start = Offset(visibleSpaceRectMeters.left, y),\n                        end = Offset(visibleSpaceRectMeters.right, y),\n                        strokeWidth = (if ((y % (gridStep * 10) == 0f)) 3f else 1.5f) / cameraZoom,\n                    )\n                    y += gridStep\n                }\n\n                this@zoom.drawUniverse(u)\n            }\n        }\n    }\n}\n\n\n\npackage com.android_baklava.egg.landroid\n\nimport kotlin.math.exp\nimport kotlin.math.pow\n\n/** smoothstep. Ken Perlin's version */\nfun smooth(x: Float): Float {\n    return x * x * x * (x * (x * 6 - 15) + 10)\n}\n\n/** Kind of like an inverted smoothstep, but */\nfun invsmoothish(x: Float): Float {\n    return 0.25f * ((2f * x - 1f).pow(5f) + 1f) + 0.5f * x\n}\n\n/** Compute the fraction that progress represents between start and end (inverse of lerp). */\nfun lexp(start: Float, end: Float, progress: Float): Float {\n    return (progress - start) / (end - start)\n}\n\n/** Exponentially smooth current toward target by a factor of speed. */\nfun expSmooth(current: Float, target: Float, dt: Float = 1f / 60, speed: Float = 5f): Float {\n    return current + (target - current) * (1 - exp(-dt * speed))\n}\n\npackage com.android_baklava.egg.landroid\n\nimport android.content.res.Resources\nimport com.android_baklava.egg.R\nimport kotlin.random.Random\n\nconst val SUFFIX_PROB = 0.75f\nconst val LETTER_PROB = 0.3f\nconst val NUMBER_PROB = 0.3f\nconst val RARE_PROB = 0.05f\n\nclass Namer(resources: Resources) {\n    private val planetDescriptors = Bag(resources.getStringArray(R.array.baklava_planet_descriptors))\n    private val lifeDescriptors = Bag(resources.getStringArray(R.array.baklava_life_descriptors))\n    private val anyDescriptors = Bag(resources.getStringArray(R.array.baklava_any_descriptors))\n    private val atmoDescriptors = Bag(resources.getStringArray(R.array.baklava_atmo_descriptors))\n\n    private val planetTypes = Bag(resources.getStringArray(R.array.baklava_planet_types))\n    private val constellations = Bag(resources.getStringArray(R.array.baklava_constellations))\n    private val constellationsRare = Bag(resources.getStringArray(R.array.baklava_constellations_rare))\n    private val suffixes = Bag(resources.getStringArray(R.array.baklava_star_suffixes))\n    private val suffixesRare = Bag(resources.getStringArray(R.array.baklava_star_suffixes_rare))\n\n    private val planetTable = RandomTable(0.75f to planetDescriptors, 0.25f to anyDescriptors)\n\n    private var lifeTable = RandomTable(0.75f to lifeDescriptors, 0.25f to anyDescriptors)\n\n    private var constellationsTable =\n        RandomTable(RARE_PROB to constellationsRare, 1f - RARE_PROB to constellations)\n\n    private var suffixesTable = RandomTable(RARE_PROB to suffixesRare, 1f - RARE_PROB to suffixes)\n\n    private var atmoTable = RandomTable(0.75f to atmoDescriptors, 0.25f to anyDescriptors)\n\n    private var delimiterTable =\n        RandomTable(\n            15f to \" \",\n            3f to \"-\",\n            1f to \"_\",\n            1f to \"/\",\n            1f to \".\",\n            1f to \"*\",\n            1f to \"^\",\n            1f to \"#\",\n            0.1f to \"(^*!%@##!!\",\n        )\n\n    private var activities = Bag(resources.getStringArray(R.array.baklava_activities))\n    private var floraGenericPlurals = Bag(resources.getStringArray(R.array.baklava_flora_generic_plurals))\n    private var faunaGenericPlurals = Bag(resources.getStringArray(R.array.baklava_fauna_generic_plurals))\n    private var atmoGenericPlurals = Bag(resources.getStringArray(R.array.baklava_atmo_generic_plurals))\n\n    fun describePlanet(rng: Random): String {\n        return planetTable.roll(rng).pull(rng) + \" \" + planetTypes.pull(rng)\n    }\n\n    fun describeLife(rng: Random): String {\n        return lifeTable.roll(rng).pull(rng)\n    }\n\n    fun nameSystem(rng: Random): String {\n        val parts = StringBuilder()\n        parts.append(constellationsTable.roll(rng).pull(rng))\n        if (rng.nextFloat() <= SUFFIX_PROB) {\n            parts.append(delimiterTable.roll(rng))\n            parts.append(suffixesTable.roll(rng).pull(rng))\n            if (rng.nextFloat() <= RARE_PROB) parts.append(' ').append(suffixesRare.pull(rng))\n        }\n        if (rng.nextFloat() <= LETTER_PROB) {\n            parts.append(delimiterTable.roll(rng))\n            parts.append('A' + rng.nextInt(0, 26))\n            if (rng.nextFloat() <= RARE_PROB) parts.append(delimiterTable.roll(rng))\n        }\n        if (rng.nextFloat() <= NUMBER_PROB) {\n            parts.append(delimiterTable.roll(rng))\n            parts.append(rng.nextInt(2, 5039))\n        }\n        return parts.toString()\n    }\n\n    fun describeAtmo(rng: Random): String {\n        return atmoTable.roll(rng).pull(rng)\n    }\n\n    fun floraPlural(rng: Random): String {\n        return floraGenericPlurals.pull(rng)\n    }\n\n    fun faunaPlural(rng: Random): String {\n        return faunaGenericPlurals.pull(rng)\n    }\n\n    fun atmoPlural(rng: Random): String {\n        return atmoGenericPlurals.pull(rng)\n    }\n\n    val TEMPLATE_REGEX = Regex(\"\"\"\\{(flora|fauna|planet|atmo)\\}\"\"\")\n\n    fun describeActivity(rng: Random, target: Planet?): String {\n        return activities.pull(rng).replace(TEMPLATE_REGEX) {\n            when (it.groupValues[1]) {\n                \"flora\" -> (target?.flora ?: \"SOME\") + \" \" + floraPlural(rng)\n                \"fauna\" -> (target?.fauna ?: \"SOME\") + \" \" + faunaPlural(rng)\n                \"atmo\" -> (target?.atmosphere ?: \"SOME\") + \" \" + atmoPlural(rng)\n                \"planet\" -> (target?.description ?: \"SOME BODY\") // once told me\n                else -> \"unknown template tag: ${it.groupValues[0]}\"\n            }\n        }\n    }\n}\n\npackage com.android_baklava.egg.landroid\n\nimport android.util.Log\nimport androidx.compose.ui.graphics.Path\nimport kotlin.math.cos\nimport kotlin.math.sin\n\nfun createPolygon(radius: Float, sides: Int): Path {\n    return Path().apply {\n        moveTo(radius, 0f)\n        val angleStep = PI2f / sides\n        for (i in 1 until sides) {\n            lineTo(radius * cos(angleStep * i), radius * sin(angleStep * i))\n        }\n        close()\n    }\n}\n\nfun createPolygonPoints(radius: Float, sides: Int): List<Vec2> {\n    val angleStep = PI2f / sides\n    return (0 until sides).map { i ->\n        Vec2(radius * cos(angleStep * i), radius * sin(angleStep * i))\n    }\n}\n\nfun createStar(radius1: Float, radius2: Float, points: Int): Path {\n    return Path().apply {\n        val angleStep = PI2f / points\n        moveTo(radius1, 0f)\n        lineTo(radius2 * cos(angleStep * (0.5f)), radius2 * sin(angleStep * (0.5f)))\n        for (i in 1 until points) {\n            lineTo(radius1 * cos(angleStep * i), radius1 * sin(angleStep * i))\n            lineTo(radius2 * cos(angleStep * (i + 0.5f)), radius2 * sin(angleStep * (i + 0.5f)))\n        }\n        close()\n    }\n}\n\nfun Path.parseSvgPathData(d: String) {\n    Regex(\"([A-Za-z])\\\\s*([-.,0-9e ]+)\").findAll(d.trim()).forEach {\n        val cmd = it.groups[1]!!.value\n        val args =\n            it.groups[2]?.value?.split(Regex(\"\\\\s+\"))?.map { v -> v.toFloat() } ?: emptyList()\n        // Log.d(\"Landroid\", \"cmd = $cmd, args = \" + args.joinToString(\",\"))\n        when (cmd) {\n            \"M\" -> moveTo(args[0], args[1])\n            \"C\" -> cubicTo(args[0], args[1], args[2], args[3], args[4], args[5])\n            \"L\" -> lineTo(args[0], args[1])\n            \"l\" -> relativeLineTo(args[0], args[1])\n            \"Z\" -> close()\n            else -> Log.v(\"Landroid\", \"unsupported SVG command: $cmd\")\n        }\n    }\n}\n\n\n\npackage com.android_baklava.egg.landroid\n\nimport androidx.collection.ArraySet\nimport androidx.compose.ui.util.fastForEach\nimport kotlinx.coroutines.DisposableHandle\nimport kotlin.random.Random\n\n// artificially speed up or slow down the simulation\nconst val TIME_SCALE = 1f // simulation seconds per wall clock second\n\n// if it's been over 1 real second since our last timestep, don't simulate that elapsed time.\n// this allows the simulation to \"pause\" when, for example, the activity pauses\nconst val MAX_VALID_DT = 1f\n\ninterface Entity {\n    // Integrate.\n    // Compute accelerations from forces, add accelerations to velocity, save old position,\n    // add velocity to position.\n    fun update(sim: Simulator, dt: Float)\n\n    // Post-integration step, after constraints are satisfied.\n    fun postUpdate(sim: Simulator, dt: Float)\n}\n\ninterface Removable {\n    fun canBeRemoved(): Boolean\n}\n\nclass Fuse(var lifetime: Float) : Removable {\n    fun update(dt: Float) {\n        lifetime -= dt\n    }\n    override fun canBeRemoved(): Boolean {\n        return lifetime < 0\n    }\n}\n\nopen class Body(var name: String = \"Unknown\") : Entity {\n    var pos = Vec2.Zero\n    var opos = Vec2.Zero\n    var velocity = Vec2.Zero\n\n    var mass = 0f\n    var angle = 0f\n    var radius = 0f\n\n    var collides = true\n\n    var omega: Float\n        get() = angle - oangle\n        set(value) {\n            oangle = angle - value\n        }\n\n    var oangle = 0f\n\n    override fun update(sim: Simulator, dt: Float) {\n        if (dt <= 0) return\n\n        // integrate velocity\n        val vscaled = velocity * dt\n        opos = pos\n        pos += vscaled\n\n        // integrate angular velocity\n        //        val wscaled = omega * timescale\n        //        oangle = angle\n        //        angle = (angle + wscaled) % PI2f\n    }\n\n    override fun postUpdate(sim: Simulator, dt: Float) {\n        if (dt <= 0) return\n        velocity = (pos - opos) / dt\n    }\n}\n\ninterface Constraint {\n    // Solve constraints. Pick up objects and put them where they are \"supposed\" to be.\n    fun solve(sim: Simulator, dt: Float)\n}\n\nopen class Container(val radius: Float) : Constraint {\n    private val list = ArraySet<Body>()\n    private val softness = 0.0f\n\n    override fun toString(): String {\n        return \"Container($radius)\"\n    }\n\n    fun add(p: Body) {\n        list.add(p)\n    }\n\n    fun remove(p: Body) {\n        list.remove(p)\n    }\n\n    override fun solve(sim: Simulator, dt: Float) {\n        for (p in list) {\n            if ((p.pos.mag() + p.radius) > radius) {\n                p.pos =\n                    p.pos * (softness) +\n                        Vec2.makeWithAngleMag(p.pos.angle(), radius - p.radius) * (1f - softness)\n            }\n        }\n    }\n}\n\nopen class Simulator(val randomSeed: Long) {\n    private var wallClockNanos: Long = 0L\n    var now: Float = 0f\n    var dt: Float = 0f\n    val rng = Random(randomSeed)\n    val entities = ArraySet<Entity>(1000)\n    val constraints = ArraySet<Constraint>(100)\n    private val simStepListeners = mutableListOf<() -> Unit>()\n\n    fun add(e: Entity) = entities.add(e)\n    fun remove(e: Entity) = entities.remove(e)\n    fun add(c: Constraint) = constraints.add(c)\n    fun remove(c: Constraint) = constraints.remove(c)\n\n    open fun updateAll(dt: Float, entities: ArraySet<Entity>) {\n        entities.forEach { it.update(this, dt) }\n    }\n\n    open fun solveAll(dt: Float, constraints: ArraySet<Constraint>) {\n        constraints.forEach { it.solve(this, dt) }\n    }\n\n    open fun postUpdateAll(dt: Float, entities: ArraySet<Entity>) {\n        entities.forEach { it.postUpdate(this, dt) }\n    }\n\n    fun step(nanos: Long) {\n        val firstFrame = (wallClockNanos == 0L)\n\n        dt = (nanos - wallClockNanos) / 1_000_000_000f * TIME_SCALE\n        this.wallClockNanos = nanos\n\n        // we start the simulation on the next frame\n        if (firstFrame || dt > MAX_VALID_DT) return\n\n        // simulation is running; we start accumulating simulation time\n        this.now += dt\n\n        val localEntities = ArraySet(entities)\n        val localConstraints = ArraySet(constraints)\n\n        // position-based dynamics approach:\n        // 1. apply acceleration to velocity, save positions, apply velocity to position\n        updateAll(dt, localEntities)\n\n        // 2. solve all constraints\n        solveAll(dt, localConstraints)\n\n        // 3. compute new velocities from updated positions and saved positions\n        postUpdateAll(dt, localEntities)\n\n        // 4. notify listeners that step is complete\n        simStepListeners.fastForEach { it.invoke() }\n    }\n\n    /**\n     * Register [listener] to be invoked every time the [Simulator] completes one [step].\n     * Use this to enqueue drawing.\n     *\n     * Instead of the usual register()/unregister() pattern, we're going to borrow\n     * [kotlinx.coroutines.DisposableHandle] here. Call [DisposableHandle.dispose] on the return\n     * value to unregister.\n     */\n    fun addSimulationStepListener(listener: () -> Unit): DisposableHandle {\n        // add to listener list\n        simStepListeners += listener\n\n        return DisposableHandle {\n            // on dispose, remove from listener list\n            simStepListeners -= listener\n        }\n    }\n}\n\n\npackage com.android_baklava.egg.landroid\n\nimport kotlin.random.Random\n\n/**\n * A bag of stones. Each time you pull one out it is not replaced, preventing duplicates. When the\n * bag is exhausted, all the stones are replaced and reshuffled.\n */\nclass Bag<T>(items: Array<T>) {\n    private val remaining = items.copyOf()\n    private var next = remaining.size // will cause a shuffle on first pull()\n\n    /** Return the next random item from the bag, without replacing it. */\n    fun pull(rng: Random): T {\n        if (next >= remaining.size) {\n            remaining.shuffle(rng)\n            next = 0\n        }\n        return remaining[next++]\n    }\n}\n\n/**\n * A loot table. The weight of each possibility is in the first of the pair; the value to be\n * returned in the second. They need not add up to 1f (we will do that for you, free of charge).\n */\nclass RandomTable<T>(private vararg val pairs: Pair<Float, T>) {\n    private val total = pairs.map { it.first }.sum()\n\n    /** Select a random value from the weighted table. */\n    fun roll(rng: Random): T {\n        var x = rng.nextFloatInRange(0f, total)\n        for ((weight, result) in pairs) {\n            x -= weight\n            if (x < 0f) return result\n        }\n        return pairs.last().second\n    }\n}\n\n/** Return a random float in the range [from, until). */\nfun Random.nextFloatInRange(from: Float, until: Float): Float =\n    from + ((until - from) * nextFloat())\n\n/** Return a random float in the range [start, end). */\nfun Random.nextFloatInRange(fromUntil: ClosedFloatingPointRange<Float>): Float =\n    nextFloatInRange(fromUntil.start, fromUntil.endInclusive)\n\n/** Return a random float in the range [first, second). */\nfun Random.nextFloatInRange(fromUntil: Pair<Float, Float>): Float =\n    nextFloatInRange(fromUntil.first, fromUntil.second)\n\n/** Choose a random element from an array. */\nfun <T> Random.choose(array: Array<T>) = array[nextInt(array.size)]\n\n\npackage com.android_baklava.egg.landroid\n\nimport androidx.collection.ArraySet\nimport androidx.compose.ui.graphics.Color\nimport androidx.compose.ui.util.lerp\nimport kotlin.math.absoluteValue\nimport kotlin.math.pow\nimport kotlin.math.sqrt\n\nconst val UNIVERSE_RANGE = 200_000f\n\nval NUM_PLANETS_RANGE = 1..10\nval STAR_RADIUS_RANGE = (1_000f..8_000f)\nval PLANET_RADIUS_RANGE = (50f..2_000f)\nval PLANET_ORBIT_RANGE = (STAR_RADIUS_RANGE.endInclusive * 2f)..(UNIVERSE_RANGE * 0.75f)\n\nconst val GRAVITATION = 1e-2f\nconst val KEPLER_CONSTANT = 50f // * 4f * PIf * PIf / GRAVITATION\n\n// m = d * r\nconst val PLANETARY_DENSITY = 2.5f\nconst val STELLAR_DENSITY = 0.5f\n\nconst val SPACECRAFT_MASS = 10f\n\nconst val CRAFT_SPEED_LIMIT = 5_000f\nconst val MAIN_ENGINE_ACCEL = 1000f // thrust effect, pixels per second squared\nconst val LAUNCH_MECO = 2f // how long to suspend gravity when launching\n\nconst val LANDING_REMOVAL_TIME = 60 * 15f // 15 min of simulation time\n\nconst val SCALED_THRUST = true\n\nopen class Planet(\n    val orbitCenter: Vec2,\n    radius: Float,\n    pos: Vec2,\n    var speed: Float,\n    var color: Color = Color.White\n) : Body() {\n    var atmosphere = \"\"\n    var description = \"\"\n    var flora = \"\"\n    var fauna = \"\"\n    var explored = false\n    private val orbitRadius: Float\n    init {\n        this.radius = radius\n        this.pos = pos\n        orbitRadius = pos.distance(orbitCenter)\n        mass = 4 / 3 * PIf * radius.pow(3) * PLANETARY_DENSITY\n    }\n\n    override fun update(sim: Simulator, dt: Float) {\n        val orbitAngle = (pos - orbitCenter).angle()\n        // constant linear velocity\n        velocity = Vec2.makeWithAngleMag(orbitAngle + PIf / 2f, speed)\n\n        super.update(sim, dt)\n    }\n\n    override fun postUpdate(sim: Simulator, dt: Float) {\n        // This is kind of like a constraint, but whatever.\n        val orbitAngle = (pos - orbitCenter).angle()\n        pos = orbitCenter + Vec2.makeWithAngleMag(orbitAngle, orbitRadius)\n        super.postUpdate(sim, dt)\n    }\n}\n\nenum class StarClass {\n    O,\n    B,\n    A,\n    F,\n    G,\n    K,\n    M\n}\n\nfun starColor(cls: StarClass) =\n    when (cls) {\n        StarClass.O -> Color(0xFF6666FF)\n        StarClass.B -> Color(0xFFCCCCFF)\n        StarClass.A -> Color(0xFFEEEEFF)\n        StarClass.F -> Color(0xFFFFFFFF)\n        StarClass.G -> Color(0xFFFFFF66)\n        StarClass.K -> Color(0xFFFFCC33)\n        StarClass.M -> Color(0xFFFF8800)\n    }\n\nclass Star(val cls: StarClass, radius: Float) :\n    Planet(orbitCenter = Vec2.Zero, radius = radius, pos = Vec2.Zero, speed = 0f) {\n    init {\n        pos = Vec2.Zero\n        mass = 4 / 3 * PIf * radius.pow(3) * STELLAR_DENSITY\n        color = starColor(cls)\n        collides = false\n    }\n    var anim = 0f\n    override fun update(sim: Simulator, dt: Float) {\n        anim += dt\n    }\n}\n\nopen class Universe(val namer: Namer, randomSeed: Long) : Simulator(randomSeed) {\n    var latestDiscovery: Planet? = null\n    lateinit var star: Star\n    lateinit var ship: Spacecraft\n    val planets: MutableList<Planet> = mutableListOf()\n    var follow: Body? = null\n    val ringfence = Container(UNIVERSE_RANGE)\n\n    fun initTest() {\n        val systemName = \"TEST SYSTEM\"\n        star =\n            Star(\n                    cls = StarClass.A,\n                    radius = STAR_RADIUS_RANGE.endInclusive,\n                )\n                .apply { name = \"TEST SYSTEM\" }\n\n        repeat(NUM_PLANETS_RANGE.last) {\n            val thisPlanetFrac = it.toFloat() / (NUM_PLANETS_RANGE.last - 1)\n            val radius =\n                lerp(PLANET_RADIUS_RANGE.start, PLANET_RADIUS_RANGE.endInclusive, thisPlanetFrac)\n            val orbitRadius =\n                lerp(PLANET_ORBIT_RANGE.start, PLANET_ORBIT_RANGE.endInclusive, thisPlanetFrac)\n\n            val period = sqrt(orbitRadius.pow(3f) / star.mass) * KEPLER_CONSTANT\n            val speed = 2f * PIf * orbitRadius / period\n\n            val p =\n                Planet(\n                    orbitCenter = star.pos,\n                    radius = radius,\n                    pos = star.pos + Vec2.makeWithAngleMag(thisPlanetFrac * PI2f, orbitRadius),\n                    speed = speed,\n                    color = Colors.Eigengrau4\n                )\n            android.util.Log.v(\"Landroid\", \"created planet $p with period $period and vel $speed\")\n            val num = it + 1\n            p.description = \"TEST PLANET #$num\"\n            p.atmosphere = \"radius=$radius\"\n            p.flora = \"mass=${p.mass}\"\n            p.fauna = \"speed=$speed\"\n            planets.add(p)\n            add(p)\n        }\n\n        planets.sortBy { it.pos.distance(star.pos) }\n        planets.forEachIndexed { idx, planet -> planet.name = \"$systemName ${idx + 1}\" }\n        add(star)\n\n        ship = Spacecraft()\n\n        // in the test universe, start the ship near the outermost planet\n        ship.pos = planets.last().pos + Vec2(planets.first().radius * 1.5f, 0f)\n\n        ship.angle = 0f\n        add(ship)\n\n        ringfence.add(ship)\n        add(ringfence)\n\n        follow = ship\n    }\n\n    fun initRandom() {\n        val systemName = namer.nameSystem(rng)\n        star =\n            Star(\n                cls = rng.choose(StarClass.values()),\n                radius = rng.nextFloatInRange(STAR_RADIUS_RANGE)\n            )\n        star.name = systemName\n        repeat(rng.nextInt(NUM_PLANETS_RANGE.first, NUM_PLANETS_RANGE.last + 1)) {\n            val radius = rng.nextFloatInRange(PLANET_RADIUS_RANGE)\n            val orbitRadius =\n                lerp(\n                    PLANET_ORBIT_RANGE.start,\n                    PLANET_ORBIT_RANGE.endInclusive,\n                    rng.nextFloat().pow(1f)\n                )\n\n            // Kepler's third law\n            val period = sqrt(orbitRadius.pow(3f) / star.mass) * KEPLER_CONSTANT\n            val speed = 2f * PIf * orbitRadius / period\n\n            val p =\n                Planet(\n                    orbitCenter = star.pos,\n                    radius = radius,\n                    pos = star.pos + Vec2.makeWithAngleMag(rng.nextFloat() * PI2f, orbitRadius),\n                    speed = speed,\n                    color = Colors.Eigengrau4\n                )\n            android.util.Log.v(\"Landroid\", \"created planet $p with period $period and vel $speed\")\n            p.description = namer.describePlanet(rng)\n            p.atmosphere = namer.describeAtmo(rng)\n            p.flora = namer.describeLife(rng)\n            p.fauna = namer.describeLife(rng)\n            planets.add(p)\n            add(p)\n        }\n        planets.sortBy { it.pos.distance(star.pos) }\n        planets.forEachIndexed { idx, planet -> planet.name = \"$systemName ${idx + 1}\" }\n        add(star)\n\n        ship = Spacecraft()\n\n        ship.pos =\n            star.pos +\n                Vec2.makeWithAngleMag(\n                    rng.nextFloat() * PI2f,\n                    rng.nextFloatInRange(PLANET_ORBIT_RANGE.start, PLANET_ORBIT_RANGE.endInclusive)\n                )\n        ship.angle = rng.nextFloat() * PI2f\n        add(ship)\n\n        ringfence.add(ship)\n        add(ringfence)\n\n        follow = ship\n    }\n\n    override fun updateAll(dt: Float, entities: ArraySet<Entity>) {\n        // check for passing in front of the sun\n        ship.transit = false\n\n        (planets + star).forEach { planet ->\n            val vector = planet.pos - ship.pos\n            val d = vector.mag()\n            if (d < planet.radius) {\n                if (planet is Star) ship.transit = true\n            } else if (\n                now > ship.launchClock + LAUNCH_MECO\n            ) { // within MECO sec of launch, no gravity at all\n                // simulate gravity: $ f_g = G * m1 * m2 * 1/d^2 $\n                ship.velocity =\n                    ship.velocity +\n                        Vec2.makeWithAngleMag(\n                            vector.angle(),\n                            GRAVITATION * (ship.mass * planet.mass) / d.pow(2)\n                        ) * dt\n            }\n        }\n\n        super.updateAll(dt, entities)\n    }\n\n    fun closestPlanet(): Planet {\n        val bodiesByDist =\n            (planets + star)\n                .map { planet -> (planet.pos - ship.pos) to planet }\n                .sortedBy { it.first.mag() }\n\n        return bodiesByDist[0].second\n    }\n\n    override fun solveAll(dt: Float, constraints: ArraySet<Constraint>) {\n        if (ship.landing == null) {\n            val planet = closestPlanet()\n\n            if (planet.collides) {\n                val d = (ship.pos - planet.pos).mag() - ship.radius - planet.radius\n                val a = (ship.pos - planet.pos).angle()\n\n                if (d < 0) {\n                    // landing, or impact?\n\n                    // 1. relative speed\n                    val vDiff = (ship.velocity - planet.velocity).mag()\n                    // 2. landing angle\n                    val aDiff = (ship.angle - a).absoluteValue\n\n                    // landing criteria\n                    if (aDiff < PIf / 4\n                    //                        &&\n                    //                        vDiff < 100f\n                    ) {\n                        val landing = Landing(ship, planet, a, namer.describeActivity(rng, planet))\n                        if (ship.thrust != Vec2.Zero) {\n                            // kill the power\n                            ship.thrust = Vec2.Zero\n                        }\n                        ship.landing = landing\n                        ship.velocity = planet.velocity\n                        add(landing)\n\n                        planet.explored = true\n                        latestDiscovery = planet\n                    } else {\n                        val impact = planet.pos + Vec2.makeWithAngleMag(a, planet.radius)\n                        ship.pos =\n                            planet.pos + Vec2.makeWithAngleMag(a, planet.radius + ship.radius - d)\n\n                        //                        add(Spark(\n                        //                            lifetime = 1f,\n                        //                            style = Spark.Style.DOT,\n                        //                            color = Color.Yellow,\n                        //                            size = 10f\n                        //                        ).apply {\n                        //                            pos = impact\n                        //                            opos = impact\n                        //                            velocity = Vec2.Zero\n                        //                        })\n                        //\n                        (1..10).forEach {\n                            Spark(\n                                    ttl = rng.nextFloatInRange(0.5f, 2f),\n                                    style = Spark.Style.DOT,\n                                    color = Color.White,\n                                    size = 1f\n                                )\n                                .apply {\n                                    pos =\n                                        impact +\n                                            Vec2.makeWithAngleMag(\n                                                rng.nextFloatInRange(0f, 2 * PIf),\n                                                rng.nextFloatInRange(0.1f, 0.5f)\n                                            )\n                                    opos = pos\n                                    velocity =\n                                        ship.velocity * 0.8f +\n                                            Vec2.makeWithAngleMag(\n                                                //                                            a +\n                                                // rng.nextFloatInRange(-PIf, PIf),\n                                                rng.nextFloatInRange(0f, 2 * PIf),\n                                                rng.nextFloatInRange(0.1f, 0.5f)\n                                            )\n                                    add(this)\n                                }\n                        }\n                    }\n                }\n            }\n        }\n\n        super.solveAll(dt, constraints)\n    }\n\n    override fun postUpdateAll(dt: Float, entities: ArraySet<Entity>) {\n        super.postUpdateAll(dt, entities)\n\n        entities\n            .filterIsInstance<Removable>()\n            .filter(predicate = Removable::canBeRemoved)\n            .forEach { remove(it as Entity) }\n\n        constraints\n            .filterIsInstance<Removable>()\n            .filter(predicate = Removable::canBeRemoved)\n            .forEach { remove(it as Constraint) }\n    }\n}\n\nclass Landing(\n    var ship: Spacecraft?,\n    val planet: Planet,\n    val angle: Float,\n    val text: String = \"\",\n    private val fuse: Fuse = Fuse(LANDING_REMOVAL_TIME)\n) : Constraint, Removable by fuse {\n    override fun solve(sim: Simulator, dt: Float) {\n        ship?.let { ship ->\n            val landingVector = Vec2.makeWithAngleMag(angle, ship.radius + planet.radius)\n            val desiredPos = planet.pos + landingVector\n            ship.pos = (ship.pos * 0.5f) + (desiredPos * 0.5f) // @@@ FIXME\n            ship.angle = angle\n        }\n\n        fuse.update(dt)\n    }\n}\n\nclass Spark(\n    var ttl: Float,\n    collides: Boolean = false,\n    mass: Float = 0f,\n    val style: Style = Style.LINE,\n    val color: Color = Color.Gray,\n    val size: Float = 2f,\n    val fuse: Fuse = Fuse(ttl)\n) : Removable by fuse, Body(name = \"Spark\") {\n    enum class Style {\n        LINE,\n        LINE_ABSOLUTE,\n        DOT,\n        DOT_ABSOLUTE,\n        RING\n    }\n\n    init {\n        this.collides = collides\n        this.mass = mass\n    }\n    override fun update(sim: Simulator, dt: Float) {\n        super.update(sim, dt)\n        fuse.update(dt)\n    }\n}\n\nconst val TRACK_LENGTH = 10_000\nconst val SIMPLE_TRACK_DRAWING = true\n\nclass Track {\n    val positions = ArrayDeque<Vec2>(TRACK_LENGTH)\n    private val angles = ArrayDeque<Float>(TRACK_LENGTH)\n    fun add(x: Float, y: Float, a: Float) {\n        if (positions.size >= (TRACK_LENGTH - 1)) {\n            positions.removeFirst()\n            angles.removeFirst()\n            positions.removeFirst()\n            angles.removeFirst()\n        }\n        positions.addLast(Vec2(x, y))\n        angles.addLast(a)\n    }\n}\n\nclass Spacecraft : Body() {\n    var thrust = Vec2.Zero\n    var launchClock = 0f\n\n    var transit = false\n\n    val track = Track()\n\n    var landing: Landing? = null\n    var autopilot: Autopilot? = null\n\n    init {\n        mass = SPACECRAFT_MASS\n        radius = 12f\n    }\n\n    override fun update(sim: Simulator, dt: Float) {\n        // check for thrusters\n        val thrustMag = thrust.mag()\n        if (thrustMag > 0) {\n            var deltaV = MAIN_ENGINE_ACCEL * dt\n            if (SCALED_THRUST) deltaV *= thrustMag.coerceIn(0f, 1f)\n\n            // check if we are currently attached to a landing\n            landing?.let { landing ->\n                // launch clock is 1 second long\n                if (launchClock == 0f) launchClock = sim.now + 1f /* @@@ TODO extract */\n\n                if (sim.now > launchClock) {\n                    // detach from landing site\n                    landing.ship = null\n                    this.landing = null\n                } else {\n                    deltaV = 0f\n                }\n            }\n\n            // this is it. impart thrust to the ship.\n            // note that we always thrust in the forward direction\n            velocity += Vec2.makeWithAngleMag(angle, deltaV)\n        } else {\n            if (launchClock != 0f) launchClock = 0f\n        }\n\n        // apply global speed limit\n        if (velocity.mag() > CRAFT_SPEED_LIMIT)\n            velocity = Vec2.makeWithAngleMag(velocity.angle(), CRAFT_SPEED_LIMIT)\n\n        super.update(sim, dt)\n    }\n\n    override fun postUpdate(sim: Simulator, dt: Float) {\n        super.postUpdate(sim, dt)\n\n        // special effects all need to be added after the simulation step so they have\n        // the correct position of the ship.\n        track.add(pos.x, pos.y, angle)\n\n        val mag = thrust.mag()\n        if (sim.rng.nextFloat() < mag) {\n            // exhaust\n            sim.add(\n                Spark(\n                        ttl = sim.rng.nextFloatInRange(0.5f, 1f),\n                        collides = true,\n                        mass = 1f,\n                        style = Spark.Style.RING,\n                        size = 1f,\n                        color = Color(0x40FFFFFF)\n                    )\n                    .also { spark ->\n                        spark.pos = pos\n                        spark.opos = pos\n                        spark.velocity =\n                            velocity +\n                                Vec2.makeWithAngleMag(\n                                    angle + sim.rng.nextFloatInRange(-0.2f, 0.2f),\n                                    -MAIN_ENGINE_ACCEL * mag * 10f * dt\n                                )\n                    }\n            )\n        }\n    }\n}\n\n\npackage com.android_baklava.egg.landroid\n\nimport android.app.Notification\nimport android.app.NotificationChannel\nimport android.app.NotificationManager\nimport android.app.PendingIntent\nimport android.content.Context\nimport android.content.Intent\nimport android.graphics.drawable.Icon\nimport android.os.Build\nimport androidx.annotation.ChecksSdkIntAtLeast\nimport androidx.annotation.RequiresApi\nimport androidx.compose.ui.graphics.toArgb\nimport androidx.compose.ui.util.lerp\nimport androidx.core.content.getSystemService\nimport com.android_baklava.egg.R\nimport kotlinx.coroutines.DisposableHandle\n\nconst val CHANNEL_ID = \"progress\"\nconst val CHANNEL_NAME = \"Spacecraft progress\"\nconst val UPDATE_FREQUENCY_SEC = 1f\n\nfun lerpRange(range: ClosedFloatingPointRange<Float>, x: Float): Float =\n    lerp(range.start, range.endInclusive, x)\n\nclass UniverseProgressNotifier(val context: Context, val universe: Universe) {\n\n    @ChecksSdkIntAtLeast(Build.VERSION_CODES.BAKLAVA)\n    private val isProgressNotifierSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA\n\n    private val notificationId = universe.randomSeed.toInt()\n    private val chan: NotificationChannel\n        @RequiresApi(Build.VERSION_CODES.O)\n        get() = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_LOW)\n                .apply { lockscreenVisibility = Notification.VISIBILITY_PUBLIC }\n\n    private val noman = context.getSystemService<NotificationManager>()?.apply {\n        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {\n            createNotificationChannel(chan)\n        }\n    }\n\n    private val registration: DisposableHandle =\n        universe.addSimulationStepListener(this::onSimulationStep)\n\n//    private val spacecraftIcon =\n//        Icon.createWithResource(context, R.drawable.baklava_ic_spacecraft_filled)\n//    private val planetIcons =\n//        listOf(\n//            (lerpRange(PLANET_RADIUS_RANGE, 0.75f)) to\n//                    Icon.createWithResource(context, R.drawable.ic_planet_large),\n//            (lerpRange(PLANET_RADIUS_RANGE, 0.5f)) to\n//                    Icon.createWithResource(context, R.drawable.ic_planet_medium),\n//            (lerpRange(PLANET_RADIUS_RANGE, 0.25f)) to\n//                    Icon.createWithResource(context, R.drawable.ic_planet_small),\n//            (PLANET_RADIUS_RANGE.start to\n//                    Icon.createWithResource(context, R.drawable.ic_planet_tiny)),\n//        )\n    private lateinit var planetIcons: List<Pair<Float, Icon>>\n\n    @RequiresApi(Build.VERSION_CODES.O)\n    private fun getPlanetIcon(planet: Planet): Icon {\n        for ((radius, icon) in planetIcons) {\n            if (planet.radius > radius) return icon\n        }\n        return planetIcons.last().second\n    }\n\n    private lateinit var progress: Notification.ProgressStyle\n//    private val progress = Notification.ProgressStyle().setProgressTrackerIcon(spacecraftIcon)\n\n    private val builder: Notification.Builder\n//    private val builder =\n//        Notification.Builder(context, CHANNEL_ID)\n//            .setContentIntent(\n//                PendingIntent.getActivity(\n//                    context,\n//                    0,\n//                    Intent(context, MainActivity::class.java).apply {\n//                        flags = Intent.FLAG_ACTIVITY_SINGLE_TOP\n//                    },\n//                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,\n//                )\n//            )\n//            .setFlag(Notification.FLAG_ONLY_ALERT_ONCE, true)\n//            .setColorized(true)\n//            .setOngoing(true)\n//            .setColor(Colors.Eigengrau2.toArgb())\n//            .setStyle(progress)\n\n    init {\n        if (isProgressNotifierSupported) {\n            val spacecraftIcon = Icon.createWithResource(context, R.drawable.baklava_ic_spacecraft_filled)\n            progress = Notification.ProgressStyle().setProgressTrackerIcon(spacecraftIcon)\n            planetIcons = listOf(\n                (lerpRange(PLANET_RADIUS_RANGE, 0.75f)) to\n                        Icon.createWithResource(context, R.drawable.baklava_ic_planet_large),\n                (lerpRange(PLANET_RADIUS_RANGE, 0.5f)) to\n                        Icon.createWithResource(context, R.drawable.baklava_ic_planet_medium),\n                (lerpRange(PLANET_RADIUS_RANGE, 0.25f)) to\n                        Icon.createWithResource(context, R.drawable.baklava_ic_planet_small),\n                (PLANET_RADIUS_RANGE.start to\n                        Icon.createWithResource(context, R.drawable.baklava_ic_planet_tiny)),\n            )\n        }\n\n        builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {\n            Notification.Builder(context, CHANNEL_ID)\n        } else {\n            @Suppress(\"DEPRECATION\")\n            Notification.Builder(context)\n        }\n            .setContentIntent(\n                PendingIntent.getActivity(\n                    context, 0,\n                    Intent(context, MainActivity::class.java).apply {\n                        flags = Intent.FLAG_ACTIVITY_SINGLE_TOP\n                    },\n                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,\n                )\n            )\n            .setOngoing(true)\n            .setColor(Colors.Eigengrau2.toArgb())\n            .apply {\n                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {\n                    setFlag(Notification.FLAG_ONLY_ALERT_ONCE, true)\n                } else {\n                    setOnlyAlertOnce(true)\n                }\n                // https://developer.android.com/develop/ui/views/notifications/live-update\n                if (Build.VERSION.SDK_INT_FULL >= Build.VERSION_CODES_FULL.BAKLAVA_1) {\n                    setRequestPromotedOngoing(true)\n                }\n                if (isProgressNotifierSupported) {\n                    setStyle(progress)\n                }\n            }\n    }\n\n    private var lastUpdate = 0f\n    private var initialDistToTarget = 0\n\n    private fun onSimulationStep() {\n        if (universe.now - lastUpdate >= UPDATE_FREQUENCY_SEC) {\n            lastUpdate = universe.now\n            // android.util.Log.v(\"Landroid\", \"posting notification at time ${universe.now}\")\n\n            var distToTarget = 0\n            val autopilot = universe.ship.autopilot\n            val autopilotEnabled: Boolean = autopilot?.enabled == true\n            val target = autopilot?.target\n            val landing = universe.ship.landing\n            val speed = universe.ship.velocity.mag()\n\n            if (landing != null) {\n                // landed\n                builder.setContentTitle(\"landed: ${landing.planet.name}\")\n                builder.setContentText(\"currently: ${landing.text}\")\n                if (isProgressNotifierSupported) {\n                    builder.setShortCriticalText(\"landed\")\n\n                    progress.setProgress(progress.progressMax)\n                    progress.setProgressIndeterminate(false)\n                    builder.setStyle(progress)\n                }\n\n            } else if (autopilotEnabled) {\n                if (target != null) {\n                    // autopilot en route\n                    distToTarget = ((target.pos - universe.ship.pos).mag() - target.radius).toInt()\n                    if (initialDistToTarget == 0) {\n                        // we have a new target!\n                        initialDistToTarget = distToTarget\n                        if (isProgressNotifierSupported) {\n                            progress.progressEndIcon = getPlanetIcon(target)\n                        }\n                    }\n\n                    val eta = if (speed > 0) \"%1.0fs\".format(distToTarget / speed) else \"???\"\n                    builder.setContentTitle(\"headed to: ${target.name}\")\n                    builder.setContentText(\n                        \"autopilot is ${autopilot.strategy.lowercase()}\" +\n                            \"\\ndist: ${distToTarget}u // eta: $eta\"\n                    )\n                    // fun fact: ProgressStyle was originally EnRouteStyle\n                    if (isProgressNotifierSupported) {\n                        builder.setShortCriticalText(\"en route\")\n\n                        progress\n                            .setProgressSegments(\n                                listOf(\n                                    Notification.ProgressStyle.Segment(initialDistToTarget)\n                                        .setColor(Colors.Track.toArgb())\n                                )\n                            )\n                            .setProgress(initialDistToTarget - distToTarget)\n                            .setProgressIndeterminate(false)\n                        builder.setStyle(progress)\n                    }\n                } else {\n                    // no target\n                    if (initialDistToTarget != 0) {\n                        // just launched\n                        initialDistToTarget = 0\n                        if (isProgressNotifierSupported) {\n                            progress.progressStartIcon = progress.progressEndIcon\n                            progress.progressEndIcon = null\n                        }\n                    }\n\n                    builder.setContentTitle(\"in space\")\n                    builder.setContentText(\"selecting new target...\")\n                    if (isProgressNotifierSupported) {\n                        builder.setShortCriticalText(\"launched\")\n\n                        progress.setProgressIndeterminate(true)\n                        builder.setStyle(progress)\n                    }\n                }\n            } else {\n                // under user control\n\n                initialDistToTarget = 0\n\n                builder.setContentTitle(\"in space\")\n                builder.setContentText(\"under manual control\")\n                if (isProgressNotifierSupported) {\n                    builder.setShortCriticalText(\"adrift\")\n\n                    builder.setStyle(null)\n                }\n            }\n\n            builder\n                .setSubText(getSystemDesignation(universe))\n                .setSmallIcon(R.drawable.baklava_ic_spacecraft_rotated)\n\n            val notification = builder.build()\n\n            // one of the silliest things about Android is that icon levels go from 0 to 10000\n            notification.iconLevel = (((universe.ship.angle + PI2f) / PI2f) * 10_000f).toInt()\n\n            noman?.notify(notificationId, notification)\n        }\n    }\n\n    // remove notification and stop listening to simulation steps\n    fun cancel() {\n        registration.dispose()\n        noman?.cancel(notificationId)\n    }\n}\n\n\npackage com.android_baklava.egg.landroid\n\nimport androidx.compose.ui.geometry.Offset\nimport kotlin.math.PI\nimport kotlin.math.atan2\nimport kotlin.math.cos\nimport kotlin.math.sin\n\nconst val PIf = PI.toFloat()\nconst val PI2f = (2 * PI).toFloat()\n\ntypealias Vec2 = Offset\n\nfun Vec2.str(fmt: String = \"%+.2f\"): String = \"<$fmt,$fmt>\".format(x, y)\n\nfun Vec2(x: Float, y: Float): Vec2 = Offset(x, y)\n\nfun Vec2.mag(): Float {\n    return getDistance()\n}\n\nfun Vec2.distance(other: Vec2): Float {\n    return (this - other).mag()\n}\n\nfun Vec2.angle(): Float {\n    return atan2(y, x)\n}\n\nfun Vec2.dot(o: Vec2): Float {\n    return x * o.x + y * o.y\n}\n\nfun Vec2.product(f: Float): Vec2 {\n    return Vec2(x * f, y * f)\n}\n\nfun Offset.Companion.makeWithAngleMag(a: Float, m: Float): Vec2 {\n    return Vec2(m * cos(a), m * sin(a))\n}\n\nfun Vec2.rotate(angle: Float, origin: Vec2 = Vec2.Zero): Offset {\n    val translated = this - origin\n    return origin +\n        Offset(\n            (translated.x * cos(angle) - translated.y * sin(angle)),\n            (translated.x * sin(angle) + translated.y * cos(angle))\n        )\n}\n\n\npackage com.android_baklava.egg.landroid\n\nimport androidx.compose.foundation.layout.Spacer\nimport androidx.compose.runtime.Composable\nimport androidx.compose.runtime.RememberObserver\nimport androidx.compose.runtime.getValue\nimport androidx.compose.runtime.mutableStateOf\nimport androidx.compose.runtime.remember\nimport androidx.compose.runtime.setValue\nimport androidx.compose.ui.Modifier\nimport androidx.compose.ui.graphics.Color\nimport androidx.compose.ui.graphics.Path\nimport androidx.compose.ui.graphics.PathEffect\nimport androidx.compose.ui.graphics.PointMode\nimport androidx.compose.ui.graphics.drawscope.ContentDrawScope\nimport androidx.compose.ui.graphics.drawscope.DrawScope\nimport androidx.compose.ui.graphics.drawscope.Stroke\nimport androidx.compose.ui.graphics.drawscope.rotateRad\nimport androidx.compose.ui.graphics.drawscope.scale\nimport androidx.compose.ui.graphics.drawscope.translate\nimport androidx.compose.ui.node.DrawModifierNode\nimport androidx.compose.ui.node.ModifierNodeElement\nimport androidx.compose.ui.node.invalidateDraw\nimport androidx.compose.ui.util.lerp\nimport androidx.core.math.MathUtils.clamp\nimport com.android_baklava.egg.flags.Flags.flagFlag\nimport kotlinx.coroutines.DisposableHandle\nimport java.lang.Float.max\nimport kotlin.math.exp\nimport kotlin.math.sqrt\n\nconst val DRAW_ORBITS = true\nconst val DRAW_GRAVITATIONAL_FIELDS = true\nconst val DRAW_STAR_GRAVITATIONAL_FIELDS = true\n\nval STAR_POINTS = android.os.Build.VERSION.SDK_INT.takeIf { it in 1..99 } ?: 31\n\n/**\n * A zoomedDrawScope is one that is scaled, but remembers its zoom level, so you can correct for it\n * if you want to draw single-pixel lines. Which we do.\n */\ninterface ZoomedDrawScope : DrawScope {\n    val zoom: Float\n}\n\nfun DrawScope.zoom(zoom: Float, block: ZoomedDrawScope.() -> Unit) {\n    val ds =\n        object : ZoomedDrawScope, DrawScope by this {\n            override var zoom = zoom\n        }\n    ds.scale(zoom) { block(ds) }\n}\n\n/**\n * A device for observing changes to a [Simulator] such as a [Universe].\n * [observer] will be invoked each time a [Simulator.step] has completed.\n */\n@Composable\nfun <S : Simulator> Telescope(\n    subject: S,\n    observer: (S) -> Unit\n) {\n    remember(subject) {\n        object : RememberObserver {\n            lateinit var registration: DisposableHandle\n            var currentObserver by mutableStateOf(observer)\n\n            override fun onRemembered() {\n                registration = subject.addSimulationStepListener { currentObserver(subject) }\n            }\n\n            override fun onForgotten() {\n                registration.dispose()\n            }\n\n            override fun onAbandoned() {}\n        }\n    }.currentObserver = observer\n}\n\nfun Modifier.drawUniverse(\n    universe: Universe,\n    draw: DrawScope.(Universe) -> Unit\n): Modifier = this then UniverseElement(universe, draw)\n\n@Composable\nfun UniverseCanvas(\n    universe: Universe,\n    modifier: Modifier = Modifier,\n    draw: DrawScope.(Universe) -> Unit\n) {\n    Spacer(modifier.drawUniverse(universe, draw))\n}\n\nprivate class UniverseElement(\n    val universe: Universe,\n    val draw: DrawScope.(Universe) -> Unit\n) : ModifierNodeElement<UniverseModifierNode>() {\n    override fun create(): UniverseModifierNode = UniverseModifierNode(universe, draw)\n\n    // Called when a modifier is applied to a Layout whose inputs have changed\n    override fun update(node: UniverseModifierNode) {\n        node.universe = universe\n        node.draw = draw\n    }\n\n    override fun equals(other: Any?): Boolean {\n        if (this === other) return true\n        if (javaClass != other?.javaClass) return false\n\n        other as UniverseElement\n\n        if (universe != other.universe) return false\n        if (draw != other.draw) return false\n\n        return true\n    }\n\n    override fun hashCode(): Int {\n        var result = universe.hashCode()\n        result = 31 * result + draw.hashCode()\n        return result\n    }\n}\n\nprivate class UniverseModifierNode(\n    universe: Universe,\n    draw: DrawScope.(Universe) -> Unit,\n) : Modifier.Node(), DrawModifierNode {\n    private val universeListener: () -> Unit = { invalidateDraw() }\n    private var removeUniverseListener: DisposableHandle? =\n        universe.addSimulationStepListener(universeListener)\n\n    var universe: Universe = universe\n        set(value) {\n            if (field === value) return\n            removeUniverseListener?.dispose()\n            field = value\n            removeUniverseListener = value.addSimulationStepListener(universeListener)\n        }\n\n    var draw: ContentDrawScope.(Universe) -> Unit = draw\n        set(value) {\n            if (field === value) return\n            field = value\n            invalidateDraw()\n        }\n\n    override fun ContentDrawScope.draw() {\n        draw(universe)\n    }\n}\n\nfun ZoomedDrawScope.drawUniverse(universe: Universe) {\n    with(universe) {\n        constraints.forEach {\n            when (it) {\n                is Landing -> drawLanding(it)\n                is Container -> drawContainer(it)\n            }\n        }\n        drawStar(star)\n        entities.forEach {\n            if (it === star) return@forEach // don't draw the star as a planet\n            when (it) {\n                is Spark -> drawSpark(it)\n                is Planet -> drawPlanet(it)\n                else -> Unit // draw these at a different time, or not at all\n            }\n        }\n        ship.autopilot?.let { drawAutopilot(it) }\n        drawSpacecraft(ship)\n    }\n}\n\nfun ZoomedDrawScope.drawContainer(container: Container) {\n    drawCircle(\n        color = Color(0xFF800000),\n        radius = container.radius,\n        center = Vec2.Zero,\n        style =\n            Stroke(\n                width = 1f / zoom,\n                pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f / zoom, 8f / zoom), 0f)\n            )\n    )\n}\n\nfun ZoomedDrawScope.drawGravitationalField(planet: Planet) {\n    val rings = 8\n    for (i in 0 until rings) {\n        val force =\n            lerp(\n                200f,\n                0.01f,\n                i.toFloat() / rings\n            ) // first rings at force = 1N, dropping off after that\n        val r = sqrt(GRAVITATION * planet.mass * SPACECRAFT_MASS / force)\n        drawCircle(\n            color = Color(1f, 0f, 0f, lerp(0.5f, 0.1f, i.toFloat() / rings)),\n            center = planet.pos,\n            style = Stroke(2f / zoom),\n            radius = r\n        )\n    }\n}\n\nfun ZoomedDrawScope.drawPlanet(planet: Planet) {\n    with(planet) {\n        if (DRAW_ORBITS)\n            drawCircle(\n                color = Color(0x8000FFFF),\n                radius = pos.distance(orbitCenter),\n                center = orbitCenter,\n                style =\n                    Stroke(\n                        width = 1f / zoom,\n                    )\n            )\n\n        if (DRAW_GRAVITATIONAL_FIELDS) {\n            drawGravitationalField(this)\n        }\n\n        drawCircle(color = Colors.Eigengrau, radius = radius, center = pos)\n        drawCircle(color = color, radius = radius, center = pos, style = Stroke(2f / zoom))\n    }\n}\n\nfun ZoomedDrawScope.drawStar(star: Star) {\n    translate(star.pos.x, star.pos.y) {\n        drawCircle(color = star.color, radius = star.radius, center = Vec2.Zero)\n\n        if (DRAW_STAR_GRAVITATIONAL_FIELDS) this@drawStar.drawGravitationalField(star)\n\n        rotateRad(radians = star.anim / 23f * PI2f, pivot = Vec2.Zero) {\n            drawPath(\n                path =\n                    createStar(\n                        radius1 = star.radius + 80,\n                        radius2 = star.radius + 250,\n                        points = STAR_POINTS\n                    ),\n                color = star.color,\n                style =\n                    Stroke(\n                        width = 3f / this@drawStar.zoom,\n                        pathEffect = PathEffect.cornerPathEffect(radius = 200f)\n                    )\n            )\n        }\n        rotateRad(radians = star.anim / -19f * PI2f, pivot = Vec2.Zero) {\n            drawPath(\n                path =\n                    createStar(\n                        radius1 = star.radius + 20,\n                        radius2 = star.radius + 200,\n                        points = STAR_POINTS + 1\n                    ),\n                color = star.color,\n                style =\n                    Stroke(\n                        width = 3f / this@drawStar.zoom,\n                        pathEffect = PathEffect.cornerPathEffect(radius = 200f)\n                    )\n            )\n        }\n    }\n}\n\nval spaceshipPath =\n    Path().apply {\n        parseSvgPathData(\n            \"\"\"\nM11.853 0\nC11.853 -4.418 8.374 -8 4.083 -8\nL-5.5 -8\nC-6.328 -8 -7 -7.328 -7 -6.5\nC-7 -5.672 -6.328 -5 -5.5 -5\nL-2.917 -5\nC-1.26 -5 0.083 -3.657 0.083 -2\nL0.083 2\nC0.083 3.657 -1.26 5 -2.917 5\nL-5.5 5\nC-6.328 5 -7 5.672 -7 6.5\nC-7 7.328 -6.328 8 -5.5 8\nL4.083 8\nC8.374 8 11.853 4.418 11.853 0\nZ\n\"\"\"\n        )\n    }\nval spaceshipLegs =\n    Path().apply {\n        parseSvgPathData(\n            \"\"\"\nM-7   -6.5\nl-3.5  0\nl-1   -2\nl 0    4\nl 1   -2\nZ\nM-7    6.5\nl-3.5  0\nl-1   -2\nl 0    4\nl 1   -2\nZ\n\"\"\"\n        )\n    }\nval thrustPath = createPolygon(-3f, 3).also { it.translate(Vec2(-5f, 0f)) }\n\nfun ZoomedDrawScope.drawSpacecraft(ship: Spacecraft) {\n    with(ship) {\n        rotateRad(angle, pivot = pos) {\n            translate(pos.x, pos.y) {\n                // new in V: little landing legs\n                ship.landing?.let {\n                    drawPath(\n                        path = spaceshipLegs,\n                        color = Color(0xFFCCCCCC),\n                        style = Stroke(width = 2f / this@drawSpacecraft.zoom)\n                    )\n                }\n                // draw the ship\n                drawPath(path = spaceshipPath, color = Colors.Eigengrau) // fauxpaque\n                drawPath(\n                    path = spaceshipPath,\n                    color = if (transit) Color.Black else Color.White,\n                    style = Stroke(width = 2f / this@drawSpacecraft.zoom)\n                )\n                // draw thrust\n                if (thrust != Vec2.Zero) {\n                    drawPath(\n                        path = thrustPath,\n                        color = Color(0xFFFF8800),\n                        style =\n                            Stroke(\n                                width = 2f / this@drawSpacecraft.zoom,\n                                pathEffect = PathEffect.cornerPathEffect(radius = 1f)\n                            )\n                    )\n                }\n            }\n        }\n        drawTrack(track)\n    }\n}\n\nfun ZoomedDrawScope.drawLanding(landing: Landing) {\n    val v = landing.planet.pos + Vec2.makeWithAngleMag(landing.angle, landing.planet.radius)\n\n    if (flagFlag()) {\n        val strokeWidth = 2f / zoom\n        val height = 80f\n        rotateRad(landing.angle, pivot = v) {\n            translate(v.x, v.y) {\n                val flagPath =\n                    Path().apply {\n                        moveTo(0f, 0f)\n                        lineTo(height, 0f)\n                        lineTo(height * 0.875f, height * 0.25f)\n                        lineTo(height * 0.75f, 0f)\n                        close()\n                    }\n                drawPath(flagPath, Colors.Flag, style = Stroke(width = strokeWidth))\n            }\n        }\n    }\n}\n\nfun ZoomedDrawScope.drawSpark(spark: Spark) {\n    with(spark) {\n        if (fuse.lifetime < 0) return\n        val life = 1f - fuse.lifetime / ttl\n        when (style) {\n            Spark.Style.LINE ->\n                if (opos != Vec2.Zero) drawLine(color, opos, pos, strokeWidth = size)\n            Spark.Style.LINE_ABSOLUTE ->\n                if (opos != Vec2.Zero) drawLine(color, opos, pos, strokeWidth = size / zoom)\n            Spark.Style.DOT -> drawCircle(color, size, pos)\n            Spark.Style.DOT_ABSOLUTE -> drawCircle(color, size, pos / zoom)\n            Spark.Style.RING ->\n                drawCircle(\n                    color = color.copy(alpha = color.alpha * (1f - life)),\n                    radius = exp(lerp(size, 3f * size, life)) - 1f,\n                    center = pos,\n                    style = Stroke(width = 1f / zoom)\n                )\n        }\n    }\n}\n\nfun ZoomedDrawScope.drawTrack(track: Track) {\n    with(track) {\n        if (SIMPLE_TRACK_DRAWING) {\n            drawPoints(\n                positions,\n                pointMode = PointMode.Lines,\n                color = Colors.Track,\n                strokeWidth = 1f / zoom\n            )\n        } else {\n            if (positions.size < 2) return\n            var prev: Vec2 = positions[positions.size - 1]\n            var a = 0.5f\n            positions.reversed().subList(1, positions.size).forEach { pos ->\n                drawLine(Color(0f, 1f, 0f, a), prev, pos, strokeWidth = max(1f, 1f / zoom))\n                prev = pos\n                a = clamp((a - 1f / TRACK_LENGTH), 0f, 1f)\n            }\n        }\n    }\n}\n\nfun ZoomedDrawScope.drawAutopilot(autopilot: Autopilot) {\n    val color = Colors.Autopilot.copy(alpha = 0.5f)\n\n    autopilot.target?.let { target ->\n        val zoom = zoom\n        rotateRad(autopilot.universe.now * PI2f / 10f, target.pos) {\n            translate(target.pos.x, target.pos.y) {\n                drawPath(\n                    path =\n                        createPolygon(\n                            radius = target.radius + autopilot.brakingDistance,\n                            sides = 15 // Autopilot introduced in Android 15\n                        ),\n                    color = color,\n                    style = Stroke(1f / zoom)\n                )\n                drawCircle(\n                    color,\n                    radius = target.radius + autopilot.landingAltitude / 2,\n                    center = Vec2.Zero,\n                    alpha = 0.25f,\n                    style = Stroke(autopilot.landingAltitude)\n                )\n            }\n        }\n        drawLine(\n            color,\n            start = autopilot.ship.pos,\n            end = autopilot.leadingPos,\n            strokeWidth = 1f / zoom\n        )\n        drawCircle(\n            color,\n            radius = 5f / zoom,\n            center = autopilot.leadingPos,\n            style = Stroke(1f / zoom)\n        )\n    }\n}\n\n\npackage com.android_baklava.egg\n\nimport android.content.ComponentName\nimport android.content.Context\nimport android.os.Build\nimport android.view.Gravity\nimport android.view.View\nimport android.widget.FrameLayout\nimport android.widget.ImageView\nimport com.android_baklava.egg.PlatLogoActivity.Starfield\nimport com.android_baklava.egg.landroid.DreamUniverse\nimport com.dede.basic.provider.BaseEasterEgg\nimport com.dede.basic.provider.ComponentProvider\nimport com.dede.basic.provider.EasterEgg\nimport com.dede.basic.provider.EasterEggProvider\nimport com.dede.basic.provider.SnapshotProvider\nimport com.dede.basic.provider.TimelineEvent\nimport com.dede.basic.requireDrawable\nimport dagger.Module\nimport dagger.Provides\nimport dagger.hilt.InstallIn\nimport dagger.hilt.components.SingletonComponent\nimport dagger.multibindings.IntoSet\nimport java.util.Calendar\nimport java.util.Random\nimport javax.inject.Singleton\n\n@Module\n@InstallIn(SingletonComponent::class)\nobject AndroidBaklavaEasterEgg : EasterEggProvider, ComponentProvider {\n\n    @Provides\n    @IntoSet\n    @Singleton\n    override fun provideEasterEgg(): BaseEasterEgg {\n        return object : EasterEgg(\n            iconRes = R.drawable.baklava_android16_patch_adaptive,\n            nameRes = R.string.baklava_egg_name,\n            nicknameRes = R.string.baklava_android_nickname,\n            fullApiLevelRange = Build.VERSION_CODES_FULL.BAKLAVA..Build.VERSION_CODES_FULL.BAKLAVA_1,\n            actionClass = PlatLogoActivity::class.java,\n        ) {\n            override fun provideSnapshotProvider(): SnapshotProvider {\n                return SP()\n            }\n        }\n    }\n\n    @Provides\n    @IntoSet\n    @Singleton\n    override fun provideTimelineEvents(): List<TimelineEvent> {\n        return listOf(\n            TimelineEvent(\n                2025, Calendar.MAY,\n                Build.VERSION_CODES_FULL.BAKLAVA,\n                \"Baklava.\"\n            ),\n            TimelineEvent(\n                2025, Calendar.DECEMBER,\n                Build.VERSION_CODES_FULL.BAKLAVA_1,\n                \"Baklava.\\nAndroid 16.1\",\n            )\n        )\n    }\n\n    @Provides\n    @IntoSet\n    @Singleton\n    override fun provideComponent(): ComponentProvider.Component {\n        return object : ComponentProvider.Component(\n            R.drawable.baklava_android16_patch_adaptive,\n            R.string.baklava_egg_name,\n            R.string.baklava_android_nickname,\n            Build.VERSION_CODES_FULL.BAKLAVA..Build.VERSION_CODES_FULL.BAKLAVA_1\n        ) {\n            override fun isSupported(): Boolean = true\n\n            override fun isEnabled(context: Context): Boolean {\n                val cn = ComponentName(context, DreamUniverse::class.java)\n                return cn.isEnabled(context)\n            }\n\n            override fun setEnabled(context: Context, enable: Boolean) {\n                val cn = ComponentName(context, DreamUniverse::class.java)\n                cn.setEnable(context, enable)\n            }\n        }\n    }\n\n    internal class SP : SnapshotProvider() {\n        override val includeBackground: Boolean\n            get() = true\n\n        override fun create(context: Context): View {\n            val dp = context.resources.displayMetrics.density\n            val random = Random()\n            val starfield = Starfield(random, dp * 2.0f)\n            starfield.setVelocity(\n                (random.nextFloat() - 0.5f) * 200.0f,\n                (random.nextFloat() - 0.5f) * 200.0f\n            )\n            val layout = FrameLayout(context)\n            layout.background = starfield\n\n            val logo = ImageView(context)\n            logo.setImageDrawable(context.requireDrawable(R.drawable.baklava_platlogo))\n            val lp: FrameLayout.LayoutParams = FrameLayout.LayoutParams(\n                FrameLayout.LayoutParams.MATCH_PARENT,\n                FrameLayout.LayoutParams.MATCH_PARENT\n            )\n            lp.gravity = Gravity.CENTER\n            layout.addView(logo, lp)\n\n            return layout\n        }\n    }\n}\n\n\npackage com.android_baklava.egg;\n\nimport android.app.Activity;\nimport android.content.ComponentName;\nimport android.content.Context;\nimport android.content.pm.PackageManager;\nimport android.provider.Settings;\nimport android.util.Log;\nimport android.widget.Toast;\n\nimport com.android_baklava.egg.flags.Flags;\nimport com.android_baklava.egg.landroid.DreamUniverse;\n\n/**\n * Launched from the PlatLogoActivity. Enables everything else in this easter egg.\n */\npublic class ComponentActivationActivity extends Activity {\n    private static final String TAG = \"EasterEgg\";\n\n    // check PlatLogoActivity.java for these\n    private static final String S_EGG_UNLOCK_SETTING = \"egg_mode_s\";\n    private static final String V_EGG_UNLOCK_SETTING = \"egg_mode_v\";\n\n    private void toastUp(String s) {\n        Toast toast = Toast.makeText(this, s, Toast.LENGTH_SHORT);\n        toast.show();\n    }\n\n    @Override\n    public void onStart() {\n        super.onStart();\n\n        lockUnlockComponents(this);\n\n        finish();\n    }\n\n    /**\n     * Check easter egg unlock state and update unlockable components to match.\n     */\n    public static void lockUnlockComponents(Context context) {\n        final PackageManager pm = context.getPackageManager();\n        final ComponentName[] cns;\n        final String unlockSettingsKey;\n        final boolean shouldReLock;\n        final long unlockValue;\n        if (Flags.flagFlag()) {\n            unlockSettingsKey = V_EGG_UNLOCK_SETTING;\n            unlockValue = 1; // since we're not toggling we actually don't need to check the setting\n            shouldReLock = false;\n            cns = new ComponentName[]{\n                    new ComponentName(context, DreamUniverse.class)\n            };\n        } else {\n            unlockSettingsKey = S_EGG_UNLOCK_SETTING;\n            unlockValue = Settings.System.getLong(context.getContentResolver(),\n                    unlockSettingsKey, 0);\n            shouldReLock = true;\n            cns = new ComponentName[]{\n//                    new ComponentName(context, NekoControlsService.class),\n//                    new ComponentName(context, PaintChipsActivity.class),\n//                    new ComponentName(context, PaintChipsWidget.class),\n                    new ComponentName(context, DreamUniverse.class)\n            };\n        }\n        for (ComponentName cn : cns) {\n            final boolean componentEnabled = pm.getComponentEnabledSetting(cn)\n                    == PackageManager.COMPONENT_ENABLED_STATE_ENABLED;\n            if (unlockValue == 0) {\n                if (componentEnabled) {\n                    Log.v(TAG, \"Disabling component: \" + cn);\n                    pm.setComponentEnabledSetting(cn,\n                            PackageManager.COMPONENT_ENABLED_STATE_DISABLED,\n                            PackageManager.DONT_KILL_APP);\n                    //toastUp(\"\\uD83D\\uDEAB\");\n                } else {\n                    Log.v(TAG, \"Already disabled: \" + cn);\n                }\n            } else {\n                if (!componentEnabled) {\n                    Log.v(TAG, \"Enabling component: \" + cn);\n                    pm.setComponentEnabledSetting(cn,\n                            PackageManager.COMPONENT_ENABLED_STATE_ENABLED,\n                            PackageManager.DONT_KILL_APP);\n                    //toastUp(\"\\uD83D\\uDC31\");\n                } else {\n                    Log.v(TAG, \"Already enabled: \" + cn);\n                }\n            }\n        }\n    }\n}\n\n\npackage com.android_baklava.egg;\n\nimport static android.os.VibrationEffect.Composition.PRIMITIVE_SPIN;\n\nimport static java.lang.Math.hypot;\n\nimport android.animation.ObjectAnimator;\nimport android.animation.TimeAnimator;\nimport android.annotation.SuppressLint;\nimport android.app.ActionBar;\nimport android.app.Activity;\nimport android.content.ActivityNotFoundException;\nimport android.content.ContentResolver;\nimport android.content.Intent;\nimport android.content.pm.ActivityInfo;\nimport android.graphics.Canvas;\nimport android.graphics.Color;\nimport android.graphics.ColorFilter;\nimport android.graphics.ColorSpace;\nimport android.graphics.Paint;\nimport android.graphics.PixelFormat;\nimport android.graphics.Rect;\nimport android.graphics.drawable.Drawable;\nimport android.os.Build;\nimport android.os.Bundle;\nimport android.os.CombinedVibration;\nimport android.os.Handler;\nimport android.os.HandlerThread;\nimport android.os.Message;\nimport android.os.VibrationEffect;\nimport android.os.VibratorManager;\nimport android.provider.Settings;\nimport android.util.DisplayMetrics;\nimport android.util.Log;\nimport android.view.Gravity;\nimport android.view.HapticFeedbackConstants;\nimport android.view.KeyEvent;\nimport android.view.MotionEvent;\nimport android.view.View;\nimport android.widget.FrameLayout;\nimport android.widget.ImageView;\n\nimport androidx.annotation.ChecksSdkIntAtLeast;\nimport androidx.annotation.NonNull;\nimport androidx.annotation.Nullable;\nimport androidx.annotation.RequiresApi;\nimport androidx.core.os.HandlerCompat;\nimport androidx.core.view.WindowCompat;\nimport androidx.core.view.WindowInsetsCompat;\nimport androidx.core.view.WindowInsetsControllerCompat;\n\nimport com.android_baklava.egg.landroid.MainActivity;\n\nimport java.util.Random;\n\n/**\n * @hide\n */\npublic class PlatLogoActivity extends Activity {\n    private static final String TAG = \"PlatLogoActivity\";\n\n    private static final long LAUNCH_TIME = 5000L;\n\n    private static final String EGG_UNLOCK_SETTING = \"egg_mode_baklava\";\n\n    private static final float MIN_WARP = 1f;\n    private static final float MAX_WARP = 16f; // must go faster\n    private static final boolean FINISH_AFTER_NEXT_STAGE_LAUNCH = false;\n\n    private ImageView mLogo;\n    private Starfield mStarfield;\n\n    private FrameLayout mLayout;\n\n    private TimeAnimator mAnim;\n    private ObjectAnimator mWarpAnim;\n    private Random mRandom;\n    private float mDp;\n\n    private RumblePack mRumble;\n\n    private boolean mAnimationsEnabled = true;\n\n    private final View.OnTouchListener mTouchListener = new View.OnTouchListener() {\n        @Override\n        public boolean onTouch(View v, MotionEvent event) {\n            switch (event.getActionMasked()) {\n                case MotionEvent.ACTION_DOWN:\n//                    measureTouchPressure(event);\n                    startWarp();\n                    break;\n                case MotionEvent.ACTION_UP:\n                case MotionEvent.ACTION_CANCEL:\n                    stopWarp();\n                    break;\n            }\n            return true;\n        }\n\n    };\n\n    private final Runnable mLaunchNextStage = () -> {\n        stopWarp();\n        launchNextStage(false);\n    };\n\n    private final TimeAnimator.TimeListener mTimeListener = new TimeAnimator.TimeListener() {\n        @Override\n        public void onTimeUpdate(TimeAnimator animation, long totalTime, long deltaTime) {\n            mStarfield.update(deltaTime);\n            final float warpFrac = (mStarfield.getWarp() - MIN_WARP) / (MAX_WARP - MIN_WARP);\n            if (mAnimationsEnabled) {\n                mLogo.setTranslationX(mRandom.nextFloat() * warpFrac * 5 * mDp);\n                mLogo.setTranslationY(mRandom.nextFloat() * warpFrac * 5 * mDp);\n            }\n            if (warpFrac > 0f) {\n                mRumble.rumble(warpFrac);\n            }\n            mLayout.postInvalidate();\n        }\n    };\n\n    private class RumblePack implements Handler.Callback {\n        private static final int MSG = 6464;\n        private static final int INTERVAL = 50;\n\n        private final VibratorManager mVibeMan;\n        private final HandlerThread mVibeThread;\n        private final Handler mVibeHandler;\n        private boolean mSpinPrimitiveSupported;\n\n        private long mLastVibe = 0;\n\n        @SuppressLint(\"MissingPermission\")\n        @Override\n        public boolean handleMessage(Message msg) {\n            final float warpFrac = msg.arg1 / 100f;\n            if (mSpinPrimitiveSupported) {\n                if (msg.getWhen() > mLastVibe + INTERVAL) {\n                    mLastVibe = msg.getWhen();\n                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && mVibeMan != null) {\n                        mVibeMan.vibrate(CombinedVibration.createParallel(\n                                VibrationEffect.startComposition()\n                                        .addPrimitive(PRIMITIVE_SPIN, (float) Math.pow(warpFrac, 3.0))\n                                        .compose()\n                        ));\n                    }\n                }\n            } else {\n                if (mRandom.nextFloat() < warpFrac) {\n                    mLogo.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);\n                }\n            }\n            return false;\n        }\n        RumblePack() {\n            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {\n                mVibeMan = getSystemService(VibratorManager.class);\n                mSpinPrimitiveSupported = mVibeMan.getDefaultVibrator()\n                        .areAllPrimitivesSupported(PRIMITIVE_SPIN);\n            } else {\n                mVibeMan = null;\n                mSpinPrimitiveSupported = false;\n            }\n\n            mVibeThread = new HandlerThread(\"VibratorThread\");\n            mVibeThread.start();\n            mVibeHandler = HandlerCompat.createAsync(mVibeThread.getLooper(), this);\n        }\n\n        public void destroy() {\n            mVibeThread.quit();\n        }\n\n        private void rumble(float warpFrac) {\n            if (!mVibeThread.isAlive()) return;\n\n            final Message msg = Message.obtain();\n            msg.what = MSG;\n            msg.arg1 = (int) (warpFrac * 100);\n            mVibeHandler.removeMessages(MSG);\n            mVibeHandler.sendMessage(msg);\n        }\n\n    }\n\n    @Override\n    protected void onDestroy() {\n        mRumble.destroy();\n\n        super.onDestroy();\n    }\n\n    @Override\n    protected void onCreate(Bundle savedInstanceState) {\n        super.onCreate(savedInstanceState);\n\n        getWindow().getDecorView().setFitsSystemWindows(false);\n        getWindow().setNavigationBarColor(Color.TRANSPARENT);\n        getWindow().setStatusBarColor(Color.TRANSPARENT);\n        WindowInsetsControllerCompat windowInsetsController = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());\n        windowInsetsController.hide(WindowInsetsCompat.Type.systemBars());\n\n        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {\n            // This will be silently ignored on displays that don't support HDR color, which is fine\n            getWindow().setColorMode(ActivityInfo.COLOR_MODE_HDR);\n        }\n\n        final ActionBar ab = getActionBar();\n        if (ab != null) ab.hide();\n\n        try {\n            mAnimationsEnabled = Settings.Global.getFloat(getContentResolver(),\n                    Settings.Global.ANIMATOR_DURATION_SCALE) > 0f;\n        } catch (Settings.SettingNotFoundException e) {\n            mAnimationsEnabled = true;\n        }\n\n        mRumble = new RumblePack();\n\n        mLayout = new FrameLayout(this);\n        mRandom = new Random();\n        mDp = getResources().getDisplayMetrics().density;\n        mStarfield = new Starfield(mRandom, mDp * 2f);\n        mStarfield.setVelocity(\n                200f * (mRandom.nextFloat() - 0.5f),\n                200f * (mRandom.nextFloat() - 0.5f));\n        mLayout.setBackground(mStarfield);\n\n        final DisplayMetrics dm = getResources().getDisplayMetrics();\n        final float dp = dm.density;\n        final int minSide = Math.min(dm.widthPixels, dm.heightPixels);\n        final int widgetSize = (int) (minSide * 0.75);\n        final FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(widgetSize, widgetSize);\n        lp.gravity = Gravity.CENTER;\n\n        mLogo = new ImageView(this);\n        mLogo.setImageResource(R.drawable.baklava_platlogo);\n        mLogo.setOnTouchListener(mTouchListener);\n        mLogo.requestFocus();\n        mLayout.addView(mLogo, lp);\n\n        Log.v(TAG, \"Hello\");\n\n        setContentView(mLayout);\n    }\n\n    private void startAnimating() {\n        mAnim = new TimeAnimator();\n        mAnim.setTimeListener(mTimeListener);\n        mAnim.start();\n    }\n\n    private void stopAnimating() {\n        mAnim.cancel();\n        mAnim = null;\n    }\n\n    @Override\n    public boolean onKeyDown(int keyCode, KeyEvent event) {\n        if (keyCode == KeyEvent.KEYCODE_SPACE) {\n            if (event.getRepeatCount() == 0) {\n                startWarp();\n            }\n            return true;\n        }\n        return super.onKeyDown(keyCode,event);\n    }\n\n    @Override\n    public boolean onKeyUp(int keyCode, KeyEvent event) {\n        if (keyCode == KeyEvent.KEYCODE_SPACE) {\n            stopWarp();\n            return true;\n        }\n        return super.onKeyUp(keyCode,event);\n    }\n\n    private void startWarp() {\n        stopWarp();\n        mWarpAnim = ObjectAnimator.ofFloat(mStarfield, \"warp\", MIN_WARP, MAX_WARP)\n                .setDuration(LAUNCH_TIME);\n        mWarpAnim.start();\n\n        mLogo.postDelayed(mLaunchNextStage, LAUNCH_TIME + 1000L);\n    }\n\n    private void stopWarp() {\n        if (mWarpAnim != null) {\n            mWarpAnim.cancel();\n            mWarpAnim.removeAllListeners();\n            mWarpAnim = null;\n        }\n        mStarfield.setWarp(1f);\n        mLogo.removeCallbacks(mLaunchNextStage);\n    }\n\n    @Override\n    public void onResume() {\n        super.onResume();\n        startAnimating();\n    }\n\n    @Override\n    public void onPause() {\n        stopWarp();\n        stopAnimating();\n        super.onPause();\n    }\n\n    private boolean shouldWriteSettings() {\n//        return getPackageName().equals(\"android\");\n        return true;\n    }\n\n    private void launchNextStage(boolean locked) {\n        final ContentResolver cr = getContentResolver();\n        try {\n            if (shouldWriteSettings()) {\n                Log.v(TAG, \"Saving egg locked=\" + locked);\n//                syncTouchPressure();\n                Settings.System.putLong(cr,\n                        EGG_UNLOCK_SETTING,\n                        locked ? 0 : System.currentTimeMillis());\n            }\n        } catch (RuntimeException e) {\n            Log.e(TAG, \"Can't write settings\", e);\n        }\n\n        try {\n            final Intent eggActivity = new Intent(this, MainActivity.class);\n//                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK\n//                            | Intent.FLAG_ACTIVITY_CLEAR_TASK)\n//                    .addCategory(\"com.android.internal.category.PLATLOGO\");\n            Log.v(TAG, \"launching: \" + eggActivity);\n            startActivity(eggActivity);\n        } catch (ActivityNotFoundException ex) {\n            Log.e(\"com.android.internal.app.PlatLogoActivity\", \"No more eggs.\");\n        }\n        if (FINISH_AFTER_NEXT_STAGE_LAUNCH) {\n            finish(); // we're done here.\n        }\n    }\n\n//    static final String TOUCH_STATS = \"touch.stats\";\n//    double mPressureMin = 0, mPressureMax = -1;\n//\n//    private void measureTouchPressure(MotionEvent event) {\n//        final float pressure = event.getPressure();\n//        switch (event.getActionMasked()) {\n//            case MotionEvent.ACTION_DOWN:\n//                if (mPressureMax < 0) {\n//                    mPressureMin = mPressureMax = pressure;\n//                }\n//                break;\n//            case MotionEvent.ACTION_MOVE:\n//                if (pressure < mPressureMin) mPressureMin = pressure;\n//                if (pressure > mPressureMax) mPressureMax = pressure;\n//                break;\n//        }\n//    }\n//\n//    private void syncTouchPressure() {\n//        try {\n//            final String touchDataJson = Settings.System.getString(\n//                    getContentResolver(), TOUCH_STATS);\n//            final JSONObject touchData = new JSONObject(\n//                    touchDataJson != null ? touchDataJson : \"{}\");\n//            if (touchData.has(\"min\")) {\n//                mPressureMin = Math.min(mPressureMin, touchData.getDouble(\"min\"));\n//            }\n//            if (touchData.has(\"max\")) {\n//                mPressureMax = max(mPressureMax, touchData.getDouble(\"max\"));\n//            }\n//            if (mPressureMax >= 0) {\n//                touchData.put(\"min\", mPressureMin);\n//                touchData.put(\"max\", mPressureMax);\n//                if (shouldWriteSettings()) {\n//                    Settings.System.putString(getContentResolver(), TOUCH_STATS,\n//                            touchData.toString());\n//                }\n//            }\n//        } catch (Exception e) {\n//            Log.e(\"com.android.internal.app.PlatLogoActivity\", \"Can't write touch settings\", e);\n//        }\n//    }\n//\n//    @Override\n//    public void onStart() {\n//        super.onStart();\n//        syncTouchPressure();\n//    }\n//\n//    @Override\n//    public void onStop() {\n//        syncTouchPressure();\n//        super.onStop();\n//    }\n\n    static class Starfield extends Drawable {\n        private static final int NUM_STARS = 128;\n\n        private static final int NUM_PLANES = 4;\n\n        private static final float ROTATION = 45;\n        private final float[] mStars = new float[NUM_STARS * 4];\n        private float mVx, mVy;\n        private long mDt = 0;\n        private final Paint mStarPaint;\n\n        private final Random mRng;\n        private final float mSize;\n\n        private float mRadius = 0f;\n        private float mWarp = 1f;\n\n        private float mBuffer;\n\n        public void setWarp(float warp) {\n            mWarp = warp;\n        }\n\n        public float getWarp() {\n            return mWarp;\n        }\n\n        Starfield(Random rng, float size) {\n            mRng = rng;\n            mSize = size;\n            mStarPaint = new Paint();\n            mStarPaint.setStyle(Paint.Style.STROKE);\n            mStarPaint.setColor(Color.WHITE);\n        }\n\n        @Override\n        public void onBoundsChange(Rect bounds) {\n            mBuffer = mSize * NUM_PLANES * 2 * MAX_WARP;\n            mRadius = ((float) hypot(bounds.width(), bounds.height()) / 2f) + mBuffer;\n            // I didn't clarify this the last time, but we store both the beginning and\n            // end of each star's trail in this data structure. When we're not in warp that means\n            // that we've got each star in there twice. It's fine, we're gonna move it off-screen\n            for (int i = 0; i < NUM_STARS; i++) {\n                mStars[4 * i] = mRng.nextFloat() * 2 * mRadius - mRadius;\n                mStars[4 * i + 1] = mRng.nextFloat() * 2 * mRadius - mRadius;\n                // duplicate copy (for now)\n                mStars[4 * i + 2] = mStars[4 * i];\n                mStars[4 * i + 3] = mStars[4 * i + 1];\n            }\n        }\n\n        public void setVelocity(float x, float y) {\n            mVx = x;\n            mVy = y;\n        }\n\n        @Override\n        public void draw(@NonNull Canvas canvas) {\n            final float dtSec = mDt / 1000f;\n            final float dx = (mVx * dtSec * mWarp);\n            final float dy = (mVy * dtSec * mWarp);\n\n            final boolean inWarp = mWarp > 1f;\n\n            final float diameter = mRadius * 2f;\n            final float triameter = mRadius * 3f;\n\n            canvas.drawColor(Color.BLACK);\n\n            final float cx = getBounds().width() / 2f;\n            final float cy = getBounds().height() / 2f;\n            canvas.translate(cx, cy);\n\n            canvas.rotate(ROTATION);\n\n            if (mDt > 0 && mDt < 1000) {\n                canvas.translate(\n                        mRng.nextFloat() * (mWarp - 1f),\n                        mRng.nextFloat() * (mWarp - 1f)\n                );\n                for (int i = 0; i < NUM_STARS; i++) {\n                    final int plane = (int) ((((float) i) / NUM_STARS) * NUM_PLANES) + 1;\n                    mStars[4 * i + 2] = (mStars[4 * i + 2] + dx * plane + triameter) % diameter\n                            - mRadius;\n                    mStars[4 * i + 3] = (mStars[4 * i + 3] + dy * plane + triameter) % diameter\n                            - mRadius;\n                    mStars[4 * i + 0] = inWarp ? mStars[4 * i + 2] - dx * mWarp * plane : -10000;\n                    mStars[4 * i + 1] = inWarp ? mStars[4 * i + 3] - dy * mWarp * plane : -10000;\n                }\n            }\n            final int slice = (mStars.length / NUM_PLANES / 4) * 4;\n            for (int p = 0; p < NUM_PLANES; p++) {\n                final float value = (p + 1f) / (NUM_PLANES - 1);\n                if (isSRgbExtSupported) {\n                    mStarPaint.setColor(packHdrColor(value, 1.0f));\n                } else {\n                    mStarPaint.setColor(packColor(value, 1.0f));\n                }\n                mStarPaint.setStrokeWidth(mSize * (p + 1));\n                if (inWarp) {\n                    canvas.drawLines(mStars, p * slice, slice, mStarPaint);\n                }\n                canvas.drawPoints(mStars, p * slice, slice, mStarPaint);\n            }\n\n            if (inWarp) {\n                final float frac = (mWarp - MIN_WARP) / (MAX_WARP - MIN_WARP);\n                if (isSRgbExtSupported) {\n                    canvas.drawColor(packHdrColor(2.0f, frac * frac));\n                } else {\n                    canvas.drawColor(packColor(2.0f, frac * frac));\n                }\n            }\n        }\n\n        @Override\n        public void setAlpha(int alpha) {\n\n        }\n\n        @Override\n        public void setColorFilter(@Nullable ColorFilter colorFilter) {\n\n        }\n\n        @Override\n        public int getOpacity() {\n            return PixelFormat.OPAQUE;\n        }\n\n        public void update(long dt) {\n            mDt = dt;\n        }\n\n        @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.Q)\n        private static final boolean isSRgbExtSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q;\n\n        public static int packColor(float value, float alpha) {\n            int v = (int) (value * 255 + 0.5f);\n            int a = (int) (alpha * 255 + 0.5f);\n            return Color.argb(a, v, v, v);\n        }\n\n        private static ColorSpace sSrgbExt;\n        @RequiresApi(api = Build.VERSION_CODES.O)\n        public static long packHdrColor(float value, float alpha) {\n            if (sSrgbExt == null) {\n                sSrgbExt = ColorSpace.get(ColorSpace.Named.EXTENDED_SRGB);\n            }\n            return Color.valueOf(value, value, value, alpha, sSrgbExt).pack();\n        }\n    }\n}"</script>
+
+<script>
+  const _raw = document.getElementById('raw-source').textContent;
+  const _origFetch = window.fetch.bind(window);
+  window.fetch = function(input, init) {
+    if (typeof input === 'string' && input.endsWith('/source.txt')) {
+      return Promise.resolve(new Response(_raw, { status: 200 }));
+    }
+    return _origFetch(input, init);
+  };
+</script>
+</body>
+</html>

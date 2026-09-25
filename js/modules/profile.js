@@ -1,6 +1,7 @@
 window.ProfileModule = {
     container: null,
     projects: [],
+    isEasterEggActive: false,
 
     init(containerId) {
         this.container = document.getElementById(containerId);
@@ -73,14 +74,97 @@ window.ProfileModule = {
 
     initAvatar() {
         const avatarDiv = document.getElementById('avatarShake');
-        if (avatarDiv) {
-            avatarDiv.addEventListener('click', () => {
-                avatarDiv.style.transform = `translate(${(Math.random() - 0.5) * 40}px, ${(Math.random() - 0.5) * 30}px) scale(1.05) rotate(${(Math.random()-0.5)*10}deg)`;
-                setTimeout(() => avatarDiv.style.transform = '', 450);
-            });
-        }
         const img = document.getElementById('dynamic-qq-avatar');
         if (img) img.src = `https://q.qlogo.cn/headimg_dl?dst_uin=${APP_CONFIG.QQ_NUMBER}&spec=140&t=${Date.now()}`;
+        if (!avatarDiv) return;
+
+        let pressTimer = null;
+        const LONG_PRESS_MS = 800;
+
+        const startPress = (e) => {
+            if (this.isEasterEggActive) return;
+            pressTimer = setTimeout(() => this.triggerEasterEgg(avatarDiv), LONG_PRESS_MS);
+        };
+        const cancelPress = () => {
+            if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+        };
+
+        // 长按检测（鼠标 + 触摸）
+        avatarDiv.addEventListener('mousedown', startPress);
+        avatarDiv.addEventListener('touchstart', (e) => { e.preventDefault(); startPress(e); }, { passive: false });
+        avatarDiv.addEventListener('mouseup', cancelPress);
+        avatarDiv.addEventListener('mouseleave', cancelPress);
+        avatarDiv.addEventListener('touchend', cancelPress);
+        avatarDiv.addEventListener('touchcancel', cancelPress);
+
+        // 短按仍保留原来的抖动效果
+        avatarDiv.addEventListener('click', () => {
+            if (this.isEasterEggActive) return;
+            avatarDiv.style.transform = `translate(${(Math.random() - 0.5) * 40}px, ${(Math.random() - 0.5) * 30}px) scale(1.05) rotate(${(Math.random()-0.5)*10}deg)`;
+            setTimeout(() => avatarDiv.style.transform = '', 450);
+        });
+
+        // 关闭彩蛋
+        const closeBtn = document.getElementById('easter-egg-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => this.closeEasterEgg());
+        }
+    },
+
+    triggerEasterEgg(avatarDiv) {
+        this.isEasterEggActive = true;
+        const circle = document.getElementById('easter-egg-circle');
+        const overlay = document.getElementById('easter-egg-overlay');
+        const frame = document.getElementById('easter-egg-frame');
+        if (!circle || !overlay || !frame) return;
+
+        // 1. 剧烈摇动
+        avatarDiv.classList.add('avatar-shake');
+
+        // 2. 500ms 后变黑
+        setTimeout(() => {
+            avatarDiv.classList.add('avatar-black');
+        }, 500);
+
+        // 3. 750ms 后黑圈从头像位置扩散
+        setTimeout(() => {
+            const rect = avatarDiv.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+            // 计算覆盖全屏所需的半径（取对角线的一半）
+            const maxR = Math.sqrt(window.innerWidth ** 2 + window.innerHeight ** 2);
+            circle.style.left = cx + 'px';
+            circle.style.top = cy + 'px';
+            circle.style.width = maxR * 2 + 'px';
+            circle.style.height = maxR * 2 + 'px';
+            // 强制 reflow 后添加 expand
+            void circle.offsetWidth;
+            circle.classList.add('expand');
+        }, 750);
+
+        // 4. 1300ms 后显示内嵌 iframe
+        setTimeout(() => {
+            frame.src = 'easter-egg.html';
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }, 1300);
+    },
+
+    closeEasterEgg() {
+        const overlay = document.getElementById('easter-egg-overlay');
+        const frame = document.getElementById('easter-egg-frame');
+        const circle = document.getElementById('easter-egg-circle');
+        const avatarDiv = document.getElementById('avatarShake');
+
+        if (overlay) overlay.classList.remove('active');
+        if (frame) frame.src = 'about:blank';
+        if (circle) circle.classList.remove('expand');
+        if (avatarDiv) {
+            avatarDiv.classList.remove('avatar-shake', 'avatar-black');
+            avatarDiv.style.transform = '';
+        }
+        document.body.style.overflow = '';
+        this.isEasterEggActive = false;
     },
 
     initContact() {
