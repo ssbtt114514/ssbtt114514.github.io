@@ -1,0 +1,35 @@
+/* ============================================
+   responsive.css — 响应式
+   ============================================ */
+
+/* 平板：主页网格变单列 */
+@media (max-width: 900px) {
+    .profile-main { grid-template-columns: 1fr; }
+    .contact-buttons { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* 手机 */
+@media (max-width: 550px) {
+    .app-wrapper { padding: 14px 12px 28px; }
+    .glass-nav { padding: 10px 18px; }
+    .logo-area { font-size: 1.2rem; }
+    .tab-btn span { display: none; }
+    .tab-btn i { margin: 0; font-size: 1.15rem; }
+    .tab-btn { padding: 9px 13px; }
+    .glass-card { padding: 20px 16px; }
+    .section-title { font-size: 1.2rem; }
+    .avatar-circle-big { width: 115px; height: 115px; }
+    .display-name { font-size: 1.5rem; }
+    .featured-projects-grid { grid-template-columns: 1fr; }
+    .contact-buttons { grid-template-columns: 1fr 1fr; }
+    .video-modal-content { max-height: 90vh; border-radius: 18px; }
+    .video-modal-body { padding: 14px 16px 18px; }
+    .pages-container, .cube-stage { min-height: 500px; }
+}
+
+/* 横屏手机优化 */
+@media (max-height: 500px) and (orientation: landscape) {
+    .app-wrapper { padding: 12px 24px 24px; }
+    .pages-container, .cube-stage { min-height: 400px; }
+    .avatar-circle-big { width: 90px; height: 90px; }
+}

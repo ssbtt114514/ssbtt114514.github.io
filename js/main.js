@@ -11,6 +11,7 @@ const PAGE_MODULES = [
 ];
 
 let currentPageId = 'profile';
+let isAnimating = false;
 let loadingOverlay = null;
 
 function showLoading(msg = '初始化模块') {
@@ -52,12 +53,19 @@ function buildPages() {
         return;
     }
     pagesContainer.innerHTML = '';
+
+    // Create cube stage
+    const cubeStage = document.createElement('div');
+    cubeStage.className = 'cube-stage';
+    cubeStage.id = 'cubeStage';
+    pagesContainer.appendChild(cubeStage);
+
     PAGE_MODULES.forEach(page => {
         const pageDiv = document.createElement('div');
         pageDiv.id = `${page.id}Page`;
         pageDiv.className = 'page';
         if (page.id === currentPageId) pageDiv.classList.add('active-page');
-        pagesContainer.appendChild(pageDiv);
+        cubeStage.appendChild(pageDiv);
     });
     console.log('📄 页面容器创建完成，开始初始化各模块...');
 
@@ -85,19 +93,70 @@ function buildPages() {
     hideLoading();
 }
 
+function getPageIndex(pageId) {
+    return PAGE_MODULES.findIndex(p => p.id === pageId);
+}
+
 function switchPage(pageId) {
-    currentPageId = pageId;
-    PAGE_MODULES.forEach(page => {
-        const pageDiv = document.getElementById(`${page.id}Page`);
-        if (pageDiv) {
-            if (page.id === pageId) pageDiv.classList.add('active-page');
-            else pageDiv.classList.remove('active-page');
-        }
-    });
+    if (pageId === currentPageId || isAnimating) return;
+    isAnimating = true;
+
+    const oldIndex = getPageIndex(currentPageId);
+    const newIndex = getPageIndex(pageId);
+    const direction = newIndex > oldIndex ? 'right' : 'left';
+
+    const oldPage = document.getElementById(`${currentPageId}Page`);
+    const newPage = document.getElementById(`${pageId}Page`);
+    const cubeStage = document.getElementById('cubeStage');
+
+    // Lock container height during animation to prevent layout shift
+    if (oldPage && cubeStage) {
+        const oldHeight = oldPage.offsetHeight;
+        if (oldHeight > 0) cubeStage.style.minHeight = oldHeight + 'px';
+    }
+
+    // Update tab buttons
     document.querySelectorAll('.tab-btn').forEach(btn => {
         if (btn.getAttribute('data-page') === pageId) btn.classList.add('active');
         else btn.classList.remove('active');
     });
+
+    // Cube out animation for old page
+    if (oldPage) {
+        oldPage.classList.remove('active-page');
+        oldPage.classList.add(direction === 'right' ? 'cube-out-right' : 'cube-out-left');
+    }
+
+    // Prepare and cube in new page
+    if (newPage) {
+        // Make new page visible for animation
+        newPage.style.opacity = '0';
+        newPage.style.pointerEvents = 'none';
+        newPage.classList.add(direction === 'right' ? 'cube-in-right' : 'cube-in-left');
+
+        // After animation completes
+        setTimeout(() => {
+            if (oldPage) {
+                oldPage.classList.remove('cube-out-right', 'cube-out-left');
+                oldPage.style.opacity = '';
+                oldPage.style.pointerEvents = '';
+            }
+            if (newPage) {
+                newPage.classList.remove('cube-in-right', 'cube-in-left');
+                newPage.classList.add('active-page');
+                newPage.style.opacity = '';
+                newPage.style.pointerEvents = '';
+            }
+            // Release height lock
+            if (cubeStage) cubeStage.style.minHeight = '';
+            currentPageId = pageId;
+            isAnimating = false;
+        }, 900);
+    } else {
+        if (cubeStage) cubeStage.style.minHeight = '';
+        currentPageId = pageId;
+        isAnimating = false;
+    }
 }
 
 function initTheme() {
@@ -113,8 +172,66 @@ function initTheme() {
         const isDark = document.body.classList.toggle('dark');
         localStorage.setItem('theme', isDark ? 'dark' : 'light');
         themeBtn.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+        // 重新应用莫奈取色（暗色模式下颜色会加深）
+        if (window.ColorThemeModule) window.ColorThemeModule.reapply();
         if (window.GitHubModule && window.GitHubModule.refreshTheme) {
             window.GitHubModule.refreshTheme();
+        }
+    });
+}
+
+/**
+ * 头像莫奈动态取色
+ * 页面加载时从头像提取主色调，应用到背景和强调色
+ */
+function initColorTheme() {
+    if (!window.ColorThemeModule || !window.APP_CONFIG) return;
+    const avatarUrl = `https://q.qlogo.cn/headimg_dl?dst_uin=${APP_CONFIG.QQ_NUMBER}&spec=140&t=${Date.now()}`;
+    // 异步执行，不阻塞页面渲染
+    window.ColorThemeModule.initFromAvatar(avatarUrl).catch(() => {
+        console.log('[ColorTheme] 使用默认配色');
+    });
+}
+
+/**
+ * 液态玻璃鼠标跟随高光
+ * 使用事件委托 + rAF 节流，仅在卡片内移动时更新
+ */
+function initLiquidGlassHover() {
+    const container = document.getElementById('pagesContainer');
+    if (!container) return;
+
+    let rafId = null;
+    let pendingX = 0, pendingY = 0;
+    let activeEl = null;
+
+    container.addEventListener('mouseover', (e) => {
+        const card = e.target.closest('.glass-card, .featured-project-card');
+        if (!card || activeEl === card) return;
+        activeEl = card;
+        if (!card.querySelector('.lg-hover-highlight')) {
+            const hl = document.createElement('div');
+            hl.className = 'lg-hover-highlight';
+            card.appendChild(hl);
+        }
+    });
+
+    container.addEventListener('mousemove', (e) => {
+        if (!activeEl) return;
+        const rect = activeEl.getBoundingClientRect();
+        pendingX = e.clientX - rect.left;
+        pendingY = e.clientY - rect.top;
+        if (rafId) return;
+        rafId = requestAnimationFrame(() => {
+            const hl = activeEl.querySelector('.lg-hover-highlight');
+            if (hl) hl.style.transform = `translate(${pendingX}px, ${pendingY}px) translate(-50%, -50%)`;
+            rafId = null;
+        });
+    });
+
+    container.addEventListener('mouseout', (e) => {
+        if (activeEl && !activeEl.contains(e.relatedTarget)) {
+            activeEl = null;
         }
     });
 }
@@ -125,4 +242,6 @@ document.addEventListener('DOMContentLoaded', () => {
     buildTabs();
     buildPages();
     initTheme();
+    initLiquidGlassHover();
+    initColorTheme();
 });

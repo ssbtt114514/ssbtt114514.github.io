@@ -1,0 +1,61 @@
+/* ============================================
+   themes.css — 暗色模式
+   ============================================ */
+
+body.dark {
+    background: linear-gradient(135deg, #0f0c29 0%, #302b63 25%, #24243e 50%, #1a1a2e 75%, #16213e 100%);
+    background-size: 400% 400%;
+    animation: bgShift 22s ease infinite;
+    color: #fff;
+}
+body.dark::before { background: #6c5ce7; opacity: 0.28; }
+body.dark::after { background: #00cec9; opacity: 0.22; }
+body.dark * { color: #fff !important; }
+body.dark i, body.dark .fab, body.dark .fas, body.dark .far { color: #f0f3ff !important; }
+
+/* 暗色液态玻璃 */
+body.dark .lg {
+    background: linear-gradient(135deg, rgba(20,26,42,0.6) 0%, rgba(15,20,35,0.45) 50%, rgba(20,26,42,0.55) 100%);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.12);
+}
+body.dark .lg::before {
+    background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, transparent 70%);
+}
+body.dark .lg-btn {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.12);
+}
+
+body.dark .logo-area {
+    background: linear-gradient(130deg, #fff, #c0d0ff);
+    -webkit-background-clip: text; background-clip: text; color: transparent !important;
+}
+body.dark .display-name {
+    background: linear-gradient(135deg, #fff, #c0d0ff);
+    -webkit-background-clip: text; background-clip: text; color: transparent !important;
+}
+body.dark .profile-bio,
+body.dark .profile-subtitle { color: rgba(255,255,255,0.7) !important; }
+
+body.dark .tab-btn:not(.active),
+body.dark .filter-chip:not(.active),
+body.dark .search-box input,
+body.dark .bili-search-box input {
+    background: rgba(255,255,255,0.08) !important;
+    border-color: rgba(255,255,255,0.12) !important;
+}
+body.dark .search-box input::placeholder,
+body.dark .bili-search-box input::placeholder { color: rgba(255,255,255,0.45) !important; }
+
+body.dark .timeline-item { border-bottom-color: rgba(255,255,255,0.12) !important; }
+body.dark .featured-project-lang { color: #a0b8ff !important; }
+body.dark .video-tag { background: rgba(108,141,255,0.25) !important; }
+body.dark .video-modal-stats { border-bottom-color: rgba(255,255,255,0.12) !important; }
+body.dark .video-modal-btn.secondary { background: rgba(255,255,255,0.1) !important; }
+body.dark .video-modal-overlay { background: rgba(0,0,0,0.7) !important; }
+body.dark .contact-note,
+body.dark .profile-bio {
+    background: rgba(108,141,255,0.1) !important;
+    border-color: rgba(108,141,255,0.2) !important;
+}

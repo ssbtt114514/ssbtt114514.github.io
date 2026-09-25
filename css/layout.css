@@ -1,0 +1,111 @@
+/* ============================================
+   layout.css — 整体布局、导航、页面容器、主页网格
+   ============================================ */
+
+.app-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 28px 32px 48px;
+    position: relative;
+    z-index: 1;
+}
+
+/* ===== 顶部导航 ===== */
+.glass-nav {
+    border-radius: 20px;
+    padding: 12px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+.logo-area {
+    font-weight: 800;
+    font-size: 1.45rem;
+    background: linear-gradient(130deg, #2c3e66, var(--primary), var(--primary-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    letter-spacing: 0.5px;
+}
+.theme-toggle {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    font-size: 1.15rem;
+    cursor: pointer;
+    color: var(--text);
+    transition: transform 0.3s var(--spring);
+}
+.theme-toggle:hover { transform: rotate(20deg) scale(1.1); }
+
+/* ===== 标签页栏 ===== */
+.page-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 24px;
+    border-radius: 18px;
+    padding: 10px 16px;
+}
+
+/* ===== 3D 页面容器 ===== */
+.pages-container {
+    position: relative;
+    min-height: 700px;
+    perspective: 1800px;
+    perspective-origin: 50% 40%;
+}
+.cube-stage {
+    position: relative;
+    width: 100%;
+    min-height: 700px;
+    transform-style: preserve-3d;
+    transition: min-height 0.5s ease;
+}
+.page {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateZ(-1px);
+    contain: layout paint;
+}
+.page.active-page {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateZ(0);
+    position: relative;
+}
+
+/* ===== 主页网格：左头像 / 右项目 / 下联系 ===== */
+.profile-main {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+.profile-left {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.profile-right {
+    display: flex;
+    flex-direction: column;
+}
+.projects-card { flex: 1; }
+.profile-contact { margin-top: 0; }
+
+/* ===== 页脚 ===== */
+footer {
+    text-align: center;
+    margin-top: 36px;
+    opacity: 0.65;
+    font-size: 0.78rem;
+    color: #fff;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
