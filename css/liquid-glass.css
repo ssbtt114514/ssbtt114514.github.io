@@ -1,23 +1,16 @@
 /* ============================================
-   liquid-glass.css — 液态玻璃效果
-   通过 :where() 统一应用到所有玻璃组件
-   多层半透明 + 折射模糊 + 高光流动 + 边缘光泽
+   liquid-glass.css — 液态玻璃（性能优化版）
+   仅在大容器上使用 backdrop-filter，小元素用半透明背景
+   移除所有持续动画，保持静态高光
    ============================================ */
 
-/* 液态玻璃基底 — 统一应用 */
+/* 大容器：毛玻璃模糊（导航、卡片、标签栏、模态框） */
 :where(
     .lg,
     .glass-nav,
     .glass-card,
     .page-tabs,
-    .repo-tile,
-    .video-card,
-    .video-modal-content,
-    .featured-project-card,
-    .tab-btn:not(.active),
-    .filter-chip:not(.active),
-    .skill-badge,
-    .game-bubble
+    .video-modal-content
 ) {
     position: relative;
     background: var(--lg-bg);
@@ -25,30 +18,44 @@
     -webkit-backdrop-filter: var(--lg-blur);
     border: 1px solid var(--lg-border);
     box-shadow: var(--lg-shadow);
-    overflow: hidden;
-    isolation: isolate;
 }
 
-/* 强毛玻璃变体 */
-.lg-strong {
-    background: var(--lg-bg-strong);
-    backdrop-filter: blur(24px) saturate(200%) contrast(1.1);
-    -webkit-backdrop-filter: blur(24px) saturate(200%) contrast(1.1);
-}
-
-/* 顶部高光层 — 液面反射 */
+/* 中等容器：轻量毛玻璃（仓库、视频、项目卡片） */
 :where(
-    .lg, .glass-nav, .glass-card, .page-tabs, .repo-tile,
-    .video-card, .video-modal-content, .featured-project-card
+    .repo-tile,
+    .video-card,
+    .featured-project-card
+) {
+    position: relative;
+    background: var(--lg-bg);
+    backdrop-filter: blur(8px) saturate(140%);
+    -webkit-backdrop-filter: blur(8px) saturate(140%);
+    border: 1px solid var(--lg-border);
+    box-shadow: 0 4px 16px rgba(31, 38, 135, 0.1);
+}
+
+/* 小元素：仅半透明背景，无模糊（徽章、按钮、筛选标签） */
+:where(
+    .tab-btn:not(.active),
+    .filter-chip:not(.active),
+    .skill-badge,
+    .game-bubble
+) {
+    background: rgba(255, 255, 255, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* 静态顶部高光（仅大卡片，无动画） */
+:where(
+    .lg, .glass-nav, .glass-card, .page-tabs, .video-modal-content
 )::before {
     content: '';
     position: absolute;
     inset: 0 0 auto 0;
-    height: 55%;
+    height: 45%;
     background: linear-gradient(
         180deg,
-        rgba(255, 255, 255, 0.25) 0%,
-        rgba(255, 255, 255, 0.05) 60%,
+        rgba(255, 255, 255, 0.2) 0%,
         transparent 100%
     );
     border-radius: inherit;
@@ -56,35 +63,10 @@
     z-index: 0;
 }
 
-/* 流动光泽层 — 锥形渐变旋转 */
+/* 内容层高于高光层 */
 :where(
-    .lg, .glass-nav, .glass-card, .page-tabs, .repo-tile,
-    .video-card, .video-modal-content, .featured-project-card
-)::after {
-    content: '';
-    position: absolute;
-    top: -60%; left: -60%;
-    width: 220%; height: 220%;
-    background: conic-gradient(
-        from 0deg,
-        transparent 0deg,
-        rgba(255, 255, 255, 0.10) 45deg,
-        transparent 90deg,
-        transparent 180deg,
-        rgba(255, 255, 255, 0.06) 225deg,
-        transparent 270deg,
-        transparent 360deg
-    );
-    animation: lgShimmer 12s linear infinite;
-    pointer-events: none;
-    z-index: 0;
-    border-radius: inherit;
-}
-
-/* 内容层高于光泽层 */
-:where(
-    .lg, .glass-nav, .glass-card, .page-tabs, .repo-tile,
-    .video-card, .video-modal-content, .featured-project-card,
+    .lg, .glass-nav, .glass-card, .page-tabs, .video-modal-content,
+    .repo-tile, .video-card, .featured-project-card,
     .tab-btn, .filter-chip, .skill-badge, .game-bubble,
     .contact-btn, .theme-toggle
 ) > * {
@@ -92,41 +74,31 @@
     z-index: 1;
 }
 
-/* 液态按钮 — 用背景渐变替代 ::before 避免层叠问题 */
+/* 按钮：半透明渐变，无模糊 */
 .contact-btn,
 .theme-toggle {
-    position: relative;
-    background: linear-gradient(180deg, rgba(255,255,255,0.48) 0%, rgba(255,255,255,0.22) 100%);
-    backdrop-filter: blur(10px) saturate(150%);
-    -webkit-backdrop-filter: blur(10px) saturate(150%);
-    border: 1px solid rgba(255, 255, 255, 0.38);
-    overflow: hidden;
-    transition: all 0.3s var(--spring);
+    background: linear-gradient(180deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.2) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    transition: all 0.25s var(--spring);
 }
 .contact-btn:hover {
     background: linear-gradient(135deg, var(--primary), var(--primary-2));
     border-color: transparent;
-    box-shadow: 0 8px 22px var(--primary-glow);
-    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 6px 18px var(--primary-glow);
+    transform: translateY(-2px);
 }
 
-/* 鼠标跟随液态高光（JS 注入） */
+/* 鼠标跟随高光（简化版，仅卡片悬停时激活） */
 .lg-hover-highlight {
     position: absolute;
-    width: 280px; height: 280px;
+    width: 200px; height: 200px;
     border-radius: 50%;
-    background: radial-gradient(
-        circle,
-        rgba(255, 255, 255, 0.22) 0%,
-        rgba(255, 255, 255, 0.06) 40%,
-        transparent 70%
-    );
+    background: radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 70%);
     pointer-events: none;
     z-index: 0;
     opacity: 0;
-    transition: opacity 0.4s ease;
+    transition: opacity 0.3s ease;
     transform: translate(-50%, -50%);
-    will-change: transform, opacity;
 }
 .glass-card:hover .lg-hover-highlight,
 .featured-project-card:hover .lg-hover-highlight {

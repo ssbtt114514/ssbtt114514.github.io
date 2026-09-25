@@ -3,13 +3,10 @@
    ============================================ */
 
 body.dark {
-    background: linear-gradient(135deg, #0f0c29 0%, #302b63 25%, #24243e 50%, #1a1a2e 75%, #16213e 100%);
-    background-size: 400% 400%;
-    animation: bgShift 22s ease infinite;
+    background: linear-gradient(135deg, #0f0c29 0%, #302b63 40%, #16213e 100%);
+    background-attachment: fixed;
     color: #fff;
 }
-body.dark::before { background: #6c5ce7; opacity: 0.28; }
-body.dark::after { background: #00cec9; opacity: 0.22; }
 body.dark * { color: #fff !important; }
 body.dark i, body.dark .fab, body.dark .fas, body.dark .far { color: #f0f3ff !important; }
 

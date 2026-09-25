@@ -1,78 +1,56 @@
 /* ============================================
-   animations.css — 关键帧动画
-   仅使用 transform / opacity（GPU 合成层）
+   animations.css — 关键帧动画（性能优化版）
+   仅保留用户触发的切页动画，移除所有持续动画
    ============================================ */
 
-/* 背景渐变流动 */
-@keyframes bgShift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+/* ===== 立方体旋转切页（仅切换时触发，0.6s 后结束） ===== */
+/* 动画期间禁用 backdrop-filter 避免双重模糊渲染 */
+.page.cube-out-right,
+.page.cube-out-left,
+.page.cube-in-right,
+.page.cube-in-left {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+.page.cube-out-right *,
+.page.cube-out-left *,
+.page.cube-in-right *,
+.page.cube-in-left * {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
 }
 
-/* 环境光球浮动 */
-@keyframes orb1 {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    50% { transform: translate(90px, 70px) scale(1.15); }
-}
-@keyframes orb2 {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    50% { transform: translate(-70px, -50px) scale(1.1); }
-}
-
-/* 液态玻璃光泽旋转 */
-@keyframes lgShimmer {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-/* 头像渐变流动 */
-@keyframes avatarGrad {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-/* ===== 立方体旋转切页 ===== */
 .page.cube-out-right {
-    animation: cubeOutR 0.9s var(--cube-ease) forwards;
+    animation: cubeOutR 0.6s var(--cube-ease) forwards;
     pointer-events: none;
-    will-change: transform, opacity;
 }
 .page.cube-out-left {
-    animation: cubeOutL 0.9s var(--cube-ease) forwards;
+    animation: cubeOutL 0.6s var(--cube-ease) forwards;
     pointer-events: none;
-    will-change: transform, opacity;
 }
 .page.cube-in-right {
-    animation: cubeInR 0.9s var(--cube-ease) forwards;
+    animation: cubeInR 0.6s var(--cube-ease) forwards;
     pointer-events: all;
-    will-change: transform, opacity;
 }
 .page.cube-in-left {
-    animation: cubeInL 0.9s var(--cube-ease) forwards;
+    animation: cubeInL 0.6s var(--cube-ease) forwards;
     pointer-events: all;
-    will-change: transform, opacity;
 }
 
 @keyframes cubeOutR {
     0%   { transform: rotateY(0deg) translateZ(0); opacity: 1; }
-    50%  { transform: rotateY(42deg) translateZ(-50px); opacity: 0.45; }
     100% { transform: rotateY(90deg) translateZ(-100px); opacity: 0; }
 }
 @keyframes cubeOutL {
     0%   { transform: rotateY(0deg) translateZ(0); opacity: 1; }
-    50%  { transform: rotateY(-42deg) translateZ(-50px); opacity: 0.45; }
     100% { transform: rotateY(-90deg) translateZ(-100px); opacity: 0; }
 }
 @keyframes cubeInR {
     0%   { transform: rotateY(-90deg) translateZ(-100px); opacity: 0; }
-    50%  { transform: rotateY(-42deg) translateZ(-50px); opacity: 0.45; }
     100% { transform: rotateY(0deg) translateZ(0); opacity: 1; }
 }
 @keyframes cubeInL {
     0%   { transform: rotateY(90deg) translateZ(-100px); opacity: 0; }
-    50%  { transform: rotateY(42deg) translateZ(-50px); opacity: 0.45; }
     100% { transform: rotateY(0deg) translateZ(0); opacity: 1; }
 }
 

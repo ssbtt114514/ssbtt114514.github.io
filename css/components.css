@@ -81,8 +81,6 @@
     border-radius: 14px;
     border: 1px solid rgba(255, 255, 255, 0.45);
     background: rgba(255, 255, 255, 0.4);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
     font-size: 0.9rem;
     outline: none;
     color: var(--text);
@@ -180,7 +178,6 @@
     border-radius: 8px;
     font-size: 0.7rem;
     font-weight: 600;
-    backdrop-filter: blur(4px);
 }
 .video-info { padding: 14px 16px 16px; }
 .video-title {
@@ -268,7 +265,6 @@
     align-items: center;
     justify-content: center;
     font-size: 0.95rem;
-    backdrop-filter: blur(8px);
     transition: transform 0.25s;
 }
 .video-modal-close:hover { transform: rotate(90deg); }
@@ -316,15 +312,12 @@
 .avatar-circle-big {
     width: 140px; height: 140px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #667eea, #764ba2, #f093fb, #4facfe);
-    background-size: 300% 300%;
-    animation: avatarGrad 6s ease infinite;
+    background: linear-gradient(135deg, #667eea, #a855f7, #4facfe);
     padding: 4px;
-    box-shadow: 0 12px 36px rgba(108, 141, 255, 0.35);
+    box-shadow: 0 8px 24px rgba(108, 141, 255, 0.3);
     cursor: pointer;
     margin: 0 auto;
-    transition: transform 0.4s var(--spring);
-    will-change: transform;
+    transition: transform 0.3s var(--spring);
 }
 .avatar-circle-big:hover { transform: scale(1.06) rotate(3deg); }
 .avatar-img {

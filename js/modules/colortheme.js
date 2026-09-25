@@ -160,8 +160,7 @@ window.ColorThemeModule = {
         ).join(', ');
 
         document.body.style.background = `linear-gradient(135deg, ${stops})`;
-        document.body.style.backgroundSize = '400% 400%';
-        document.body.style.animation = 'bgShift 20s ease infinite';
+        document.body.style.backgroundAttachment = 'fixed';
 
         // 更新液态玻璃 token
         root.style.setProperty('--lg-border',

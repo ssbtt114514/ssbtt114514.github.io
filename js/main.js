@@ -147,11 +147,10 @@ function switchPage(pageId) {
                 newPage.style.opacity = '';
                 newPage.style.pointerEvents = '';
             }
-            // Release height lock
             if (cubeStage) cubeStage.style.minHeight = '';
             currentPageId = pageId;
             isAnimating = false;
-        }, 900);
+        }, 600);
     } else {
         if (cubeStage) cubeStage.style.minHeight = '';
         currentPageId = pageId;
