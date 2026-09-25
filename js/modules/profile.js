@@ -80,6 +80,8 @@ window.ProfileModule = {
 
         let pressTimer = null;
         const LONG_PRESS_MS = 800;
+        const TRIPLE_CLICK_WINDOW = 1000;
+        let clickTimes = [];
 
         const startPress = (e) => {
             if (this.isEasterEggActive) return;
@@ -97,9 +99,19 @@ window.ProfileModule = {
         avatarDiv.addEventListener('touchend', cancelPress);
         avatarDiv.addEventListener('touchcancel', cancelPress);
 
-        // 短按仍保留原来的抖动效果
+        // 点击：短按抖动 + 1秒内3次点击触发彩蛋
         avatarDiv.addEventListener('click', () => {
             if (this.isEasterEggActive) return;
+            const now = Date.now();
+            clickTimes.push(now);
+            // 只保留1秒内的点击记录
+            clickTimes = clickTimes.filter(t => now - t <= TRIPLE_CLICK_WINDOW);
+            if (clickTimes.length >= 3) {
+                clickTimes = [];
+                this.triggerEasterEgg(avatarDiv);
+                return;
+            }
+            // 短按抖动效果
             avatarDiv.style.transform = `translate(${(Math.random() - 0.5) * 40}px, ${(Math.random() - 0.5) * 30}px) scale(1.05) rotate(${(Math.random()-0.5)*10}deg)`;
             setTimeout(() => avatarDiv.style.transform = '', 450);
         });
