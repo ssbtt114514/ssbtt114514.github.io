@@ -1,141 +1,51 @@
-/* ============================================
-   animations.css — 关键帧动画（性能优化版）
-   仅保留用户触发的切页动画，移除所有持续动画
-   ============================================ */
+/* =========================================================
+   animations.css — expressive but performance-conscious motion
+   ========================================================= */
+@keyframes rise-in { from { opacity: 0; transform: translateY(12px) scale(.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes page-in { from { opacity: 0; transform: translate3d(18px, 0, 0) scale(.985); } to { opacity: 1; transform: translate3d(0,0,0) scale(1); } }
+@keyframes page-out { from { opacity: 1; transform: translate3d(0,0,0) scale(1); } to { opacity: 0; transform: translate3d(-18px, 0, 0) scale(.985); } }
+@keyframes cubeInR { from { transform: rotateY(-18deg) translate3d(32px, 0, -40px); opacity: 0; } to { transform: rotateY(0) translate3d(0,0,0); opacity: 1; } }
+@keyframes cubeInL { from { transform: rotateY(18deg) translate3d(-32px, 0, -40px); opacity: 0; } to { transform: rotateY(0) translate3d(0,0,0); opacity: 1; } }
+@keyframes cubeOutR { from { transform: rotateY(0) translate3d(0,0,0); opacity: 1; } to { transform: rotateY(18deg) translate3d(-32px,0,-40px); opacity: 0; } }
+@keyframes cubeOutL { from { transform: rotateY(0) translate3d(0,0,0); opacity: 1; } to { transform: rotateY(-18deg) translate3d(32px,0,-40px); opacity: 0; } }
+@keyframes monetFloat1 { from { transform: translate3d(-4vw,-2vw,0) scale(.96); } to { transform: translate3d(11vw,7vw,0) scale(1.08); } }
+@keyframes monetFloat2 { from { transform: translate3d(3vw,-2vw,0) scale(1.02); } to { transform: translate3d(-10vw,8vw,0) scale(.94); } }
+@keyframes monetFloat3 { from { transform: translate3d(-4vw,3vw,0) scale(.95); } to { transform: translate3d(9vw,-8vw,0) scale(1.06); } }
+@keyframes ring-rotate { to { transform: rotate(360deg); } }
+@keyframes sheen-sweep { 0%, 65% { transform: translateX(-70%) rotate(4deg); opacity: 0; } 72% { opacity: .8; } 100% { transform: translateX(75%) rotate(4deg); opacity: 0; } }
+@keyframes ripple { to { transform: scale(1.6); opacity: 0; } }
 
-/* ===== 立方体旋转切页（仅切换时触发，0.6s 后结束） ===== */
-/* 动画期间禁用 backdrop-filter 避免双重模糊渲染 */
-.page.cube-out-right,
-.page.cube-out-left,
-.page.cube-in-right,
-.page.cube-in-left {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-}
-.page.cube-out-right *,
-.page.cube-out-left *,
-.page.cube-in-right *,
-.page.cube-in-left * {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-}
+.page.cube-out-right { animation: cubeOutR 420ms var(--expressive) forwards; pointer-events:none; }
+.page.cube-out-left { animation: cubeOutL 420ms var(--expressive) forwards; pointer-events:none; }
+.page.cube-in-right { animation: cubeInR 500ms var(--expressive) forwards; pointer-events:auto; }
+.page.cube-in-left { animation: cubeInL 500ms var(--expressive) forwards; pointer-events:auto; }
 
-.page.cube-out-right {
-    animation: cubeOutR 0.6s var(--cube-ease) forwards;
-    pointer-events: none;
-}
-.page.cube-out-left {
-    animation: cubeOutL 0.6s var(--cube-ease) forwards;
-    pointer-events: none;
-}
-.page.cube-in-right {
-    animation: cubeInR 0.6s var(--cube-ease) forwards;
-    pointer-events: all;
-}
-.page.cube-in-left {
-    animation: cubeInL 0.6s var(--cube-ease) forwards;
-    pointer-events: all;
-}
+.monet-orb { position:absolute; width:48vmax; height:48vmax; border-radius:50%; filter: blur(48px); opacity:.42; will-change:transform; }
+.monet-orb-1 { left:-16vmax; top:-19vmax; background:var(--monet-2); animation: monetFloat1 var(--monet-speed) ease-in-out infinite alternate; }
+.monet-orb-2 { right:-18vmax; top:9vmax; background:var(--monet-3); animation: monetFloat2 calc(var(--monet-speed) * 1.18) ease-in-out infinite alternate; }
+.monet-orb-3 { left:23vmax; bottom:-24vmax; background:var(--monet-4); animation: monetFloat3 calc(var(--monet-speed) * 1.42) ease-in-out infinite alternate; }
 
-@keyframes cubeOutR {
-    0%   { transform: rotateY(0deg) translateZ(0); opacity: 1; }
-    100% { transform: rotateY(90deg) translateZ(-100px); opacity: 0; }
-}
-@keyframes cubeOutL {
-    0%   { transform: rotateY(0deg) translateZ(0); opacity: 1; }
-    100% { transform: rotateY(-90deg) translateZ(-100px); opacity: 0; }
-}
-@keyframes cubeInR {
-    0%   { transform: rotateY(-90deg) translateZ(-100px); opacity: 0; }
-    100% { transform: rotateY(0deg) translateZ(0); opacity: 1; }
-}
-@keyframes cubeInL {
-    0%   { transform: rotateY(90deg) translateZ(-100px); opacity: 0; }
-    100% { transform: rotateY(0deg) translateZ(0); opacity: 1; }
-}
+/* reveal，默认不强制隐藏，JS 添加 .motion-pending 后才启用 */
+.motion-pending { opacity: 0; transform: translateY(14px); }
+.motion-pending.motion-ready { opacity: 1; transform: translateY(0); transition: opacity 420ms var(--ease), transform 520ms var(--expressive); }
 
-/* 减少动画偏好 */
-@media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
-}
-
-
-/* ===== 动态莫奈：只动画 transform / opacity，避免每帧重算背景渐变 ===== */
-.monet-background {
-    position: fixed;
-    inset: -12vmax;
-    z-index: 0;
-    pointer-events: none;
-    overflow: hidden;
-    contain: strict;
-    background:
-        radial-gradient(45% 45% at 18% 20%, color-mix(in srgb, var(--monet-1) 78%, transparent), transparent 72%),
-        radial-gradient(42% 42% at 82% 24%, color-mix(in srgb, var(--monet-2) 72%, transparent), transparent 72%),
-        radial-gradient(48% 48% at 55% 82%, color-mix(in srgb, var(--monet-3) 70%, transparent), transparent 72%),
-        linear-gradient(135deg, var(--monet-1), var(--monet-2) 48%, var(--monet-3));
-    transform: translate3d(0,0,0);
-}
-
-.monet-background::after {
-    content: '';
+.md-ripple {
     position: absolute;
-    inset: 0;
-    background: linear-gradient(120deg, rgba(255,255,255,.10), transparent 38%, rgba(255,255,255,.06));
-    opacity: .8;
-    mix-blend-mode: soft-light;
-}
-
-.monet-orb {
-    position: absolute;
-    width: 48vmax;
-    height: 48vmax;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
-    filter: blur(42px);
-    opacity: .42;
-    will-change: transform;
-    transform: translate3d(0,0,0);
-}
-.monet-orb-1 {
-    left: -15vmax; top: -18vmax;
-    background: var(--monet-2);
-    animation: monetFloat1 var(--monet-speed) ease-in-out infinite alternate;
-}
-.monet-orb-2 {
-    right: -18vmax; top: 8vmax;
-    background: var(--monet-3);
-    animation: monetFloat2 calc(var(--monet-speed) * 1.25) ease-in-out infinite alternate;
-}
-.monet-orb-3 {
-    left: 25vmax; bottom: -24vmax;
-    background: var(--monet-4);
-    animation: monetFloat3 calc(var(--monet-speed) * 1.45) ease-in-out infinite alternate;
-}
-
-@keyframes monetFloat1 {
-    from { transform: translate3d(-2vmax, -1vmax, 0) scale(.96); }
-    to   { transform: translate3d(10vmax, 8vmax, 0) scale(1.08); }
-}
-@keyframes monetFloat2 {
-    from { transform: translate3d(2vmax, -3vmax, 0) scale(1.05); }
-    to   { transform: translate3d(-10vmax, 7vmax, 0) scale(.94); }
-}
-@keyframes monetFloat3 {
-    from { transform: translate3d(-4vmax, 2vmax, 0) scale(.95); }
-    to   { transform: translate3d(8vmax, -8vmax, 0) scale(1.06); }
-}
-
-/* 切页时明确提升动画层，结束后自动恢复 */
-.page.cube-out-right,
-.page.cube-out-left,
-.page.cube-in-right,
-.page.cube-in-left {
-    will-change: transform, opacity;
+    pointer-events: none;
+    background: color-mix(in srgb, var(--primary) 16%, white);
+    transform: translate(-50%, -50%) scale(1);
+    animation: ripple 520ms var(--ease) forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .monet-orb { animation: none !important; }
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+        animation-duration: 1ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 1ms !important;
+    }
+    .motion-pending { opacity: 1; transform: none; }
 }

@@ -1,4 +1,6 @@
-// 页面定义列表 (顺序决定tab显示顺序)
+/* =========================================================
+   main.js — application shell / navigation / motion
+   ========================================================= */
 const PAGE_MODULES = [
     { id: 'profile', name: '主页', icon: 'fas fa-user-astronaut', module: window.ProfileModule },
     { id: 'skills', name: '技能', icon: 'fas fa-laptop-code', module: window.SkillsModule },
@@ -15,44 +17,90 @@ let isAnimating = false;
 let loadingOverlay = null;
 const initializedModules = new Set();
 
-function showLoading(msg = '初始化模块') {
+function showLoading(msg = '正在准备页面') {
     if (!loadingOverlay) loadingOverlay = document.getElementById('loading-overlay');
-    if (loadingOverlay) {
-        const detailSpan = loadingOverlay.querySelector('#loading-detail');
-        if (detailSpan) detailSpan.textContent = msg;
-        loadingOverlay.style.display = 'flex';
-    }
+    if (!loadingOverlay) return;
+    const detail = loadingOverlay.querySelector('#loading-detail');
+    if (detail) detail.textContent = msg;
+    loadingOverlay.classList.add('visible');
+    loadingOverlay.setAttribute('aria-hidden', 'false');
 }
 
 function hideLoading() {
-    if (loadingOverlay) loadingOverlay.style.display = 'none';
+    if (!loadingOverlay) loadingOverlay = document.getElementById('loading-overlay');
+    if (!loadingOverlay) return;
+    loadingOverlay.classList.remove('visible');
+    loadingOverlay.setAttribute('aria-hidden', 'true');
 }
 
 function buildTabs() {
     const tabsContainer = document.getElementById('pageTabs');
-    if (!tabsContainer) {
-        console.error('找不到 #pageTabs 容器');
-        return;
-    }
+    if (!tabsContainer) return;
     tabsContainer.innerHTML = '';
-    PAGE_MODULES.forEach(page => {
+    tabsContainer.setAttribute('role', 'tablist');
+    tabsContainer.setAttribute('aria-label', '页面导航');
+
+    PAGE_MODULES.forEach((page, index) => {
         const btn = document.createElement('button');
         btn.className = 'tab-btn';
+        btn.type = 'button';
+        btn.dataset.page = page.id;
+        btn.setAttribute('role', 'tab');
+        btn.setAttribute('aria-selected', page.id === currentPageId ? 'true' : 'false');
+        btn.setAttribute('aria-controls', `${page.id}Page`);
+        btn.tabIndex = page.id === currentPageId ? 0 : -1;
         if (page.id === currentPageId) btn.classList.add('active');
-        btn.setAttribute('data-page', page.id);
-        btn.innerHTML = `<i class="${page.icon}"></i><span> ${page.name}</span>`;
+        btn.innerHTML = `<i class="${page.icon}" aria-hidden="true"></i><span>${page.name}</span>`;
         btn.addEventListener('click', () => switchPage(page.id));
+        btn.addEventListener('keydown', (event) => {
+            if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+            event.preventDefault();
+            let next = index;
+            if (event.key === 'ArrowRight') next = (index + 1) % PAGE_MODULES.length;
+            if (event.key === 'ArrowLeft') next = (index - 1 + PAGE_MODULES.length) % PAGE_MODULES.length;
+            if (event.key === 'Home') next = 0;
+            if (event.key === 'End') next = PAGE_MODULES.length - 1;
+            const nextBtn = tabsContainer.querySelector(`[data-page="${PAGE_MODULES[next].id}"]`);
+            nextBtn?.focus();
+            switchPage(PAGE_MODULES[next].id);
+        });
         tabsContainer.appendChild(btn);
     });
-    console.log('✅ 标签页构建完成');
+}
+
+function prepareReveal(pageEl) {
+    if (!pageEl) return;
+    const children = [...pageEl.querySelectorAll('.glass-card, .repo-tile, .video-card, .featured-project-card')].slice(0, 36);
+    children.forEach((el, index) => {
+        el.classList.add('motion-pending');
+        el.style.transitionDelay = `${Math.min(index * 24, 260)}ms`;
+    });
+    requestAnimationFrame(() => {
+        children.forEach(el => el.classList.add('motion-ready'));
+        window.setTimeout(() => children.forEach(el => el.style.transitionDelay = ''), 650);
+    });
+}
+
+function initModule(page, silent = false) {
+    if (!page?.module || typeof page.module.init !== 'function') return;
+    if (initializedModules.has(page.id)) return;
+    if (!silent) showLoading(`正在加载 ${page.name}…`);
+    try {
+        page.module.init(`${page.id}Page`);
+        initializedModules.add(page.id);
+        prepareReveal(document.getElementById(`${page.id}Page`));
+    } catch (error) {
+        console.error(`模块 ${page.id} 初始化失败`, error);
+        const pageDiv = document.getElementById(`${page.id}Page`);
+        if (pageDiv) pageDiv.innerHTML = `<div class="glass-card" style="text-align:center"><strong>模块加载失败</strong><p class="muted">${escapeHTML(error?.message || String(error))}</p></div>`;
+    } finally {
+        if (!silent) hideLoading();
+    }
 }
 
 function buildPages() {
     const pagesContainer = document.getElementById('pagesContainer');
-    if (!pagesContainer) {
-        console.error('找不到 #pagesContainer 容器');
-        return;
-    }
+    if (!pagesContainer) return;
     pagesContainer.innerHTML = '';
 
     const cubeStage = document.createElement('div');
@@ -61,213 +109,197 @@ function buildPages() {
     pagesContainer.appendChild(cubeStage);
 
     PAGE_MODULES.forEach(page => {
-        const pageDiv = document.createElement('div');
+        const pageDiv = document.createElement('section');
         pageDiv.id = `${page.id}Page`;
         pageDiv.className = 'page';
+        pageDiv.setAttribute('role', 'tabpanel');
+        pageDiv.setAttribute('aria-label', page.name);
+        pageDiv.hidden = page.id !== currentPageId;
         if (page.id === currentPageId) pageDiv.classList.add('active-page');
         cubeStage.appendChild(pageDiv);
     });
 
-    // 首屏只同步初始化当前模块；其它模块放到浏览器空闲时间，避免启动时卡顿。
-    const initModule = (page, silent = false) => {
-        if (!page.module || typeof page.module.init !== 'function') return;
-        if (!silent) showLoading(`正在加载 ${page.name} 模块...`);
-
-        try {
-            page.module.init(`${page.id}Page`);
-            initializedModules.add(page.id);
-            console.log(`✅ 模块 ${page.id} 初始化成功`);
-        } catch (err) {
-            console.error(`❌ 模块 ${page.id} 初始化失败:`, err);
-            const pageDiv = document.getElementById(`${page.id}Page`);
-            if (pageDiv) {
-                pageDiv.innerHTML =
-                    `<div class="glass-card" style="color:red;text-align:center;">模块加载失败，请检查控制台<br>${Utils.escapeHtml(err.message || err)}</div>`;
-            }
-        }
-    };
-
-    const first = PAGE_MODULES.find(p => p.id === currentPageId);
+    const first = PAGE_MODULES.find(page => page.id === currentPageId);
     if (first) initModule(first);
 
-    const rest = PAGE_MODULES.filter(p => p.id !== currentPageId);
-    const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 80));
-    idle(() => {
-        rest.forEach(page => initModule(page, true));
-    });
-
-    hideLoading();
+    const rest = PAGE_MODULES.filter(page => page.id !== currentPageId);
+    const idle = window.requestIdleCallback || (cb => window.setTimeout(cb, 120));
+    idle(() => rest.forEach(page => initModule(page, true)));
 }
-function getPageIndex(pageId) {
-    return PAGE_MODULES.findIndex(p => p.id === pageId);
+
+function getPageIndex(pageId) { return PAGE_MODULES.findIndex(page => page.id === pageId); }
+
+function updateTabs(pageId) {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        const selected = btn.dataset.page === pageId;
+        btn.classList.toggle('active', selected);
+        btn.setAttribute('aria-selected', selected ? 'true' : 'false');
+        btn.tabIndex = selected ? 0 : -1;
+    });
 }
 
 function switchPage(pageId) {
     if (pageId === currentPageId || isAnimating) return;
-    isAnimating = true;
-
     const oldIndex = getPageIndex(currentPageId);
     const newIndex = getPageIndex(pageId);
-    const direction = newIndex > oldIndex ? 'right' : 'left';
+    if (newIndex < 0) return;
+
+    const target = PAGE_MODULES[newIndex];
+    initModule(target, true);
 
     const oldPage = document.getElementById(`${currentPageId}Page`);
     const newPage = document.getElementById(`${pageId}Page`);
     const cubeStage = document.getElementById('cubeStage');
+    if (!newPage) return;
 
-    // 用户快速点击未完成空闲初始化的标签时，立即补初始化，避免空白页。
-    const targetModule = PAGE_MODULES.find(p => p.id === pageId);
-    if (targetModule && !initializedModules.has(pageId) &&
-        targetModule.module && typeof targetModule.module.init === 'function') {
-        try {
-            targetModule.module.init(`${pageId}Page`);
-            initializedModules.add(pageId);
-        } catch (err) {
-            console.error(`❌ 模块 ${pageId} 延迟初始化失败:`, err);
-        }
-    }
+    const direction = newIndex > oldIndex ? 'right' : 'left';
+    isAnimating = true;
+    updateTabs(pageId);
 
-    // Lock container height during animation to prevent layout shift
     if (oldPage && cubeStage) {
-        const oldHeight = oldPage.offsetHeight;
-        if (oldHeight > 0) cubeStage.style.minHeight = oldHeight + 'px';
-    }
-
-    // Update tab buttons
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        if (btn.getAttribute('data-page') === pageId) btn.classList.add('active');
-        else btn.classList.remove('active');
-    });
-
-    // Cube out animation for old page
-    if (oldPage) {
+        const height = oldPage.offsetHeight;
+        if (height) cubeStage.style.minHeight = `${height}px`;
         oldPage.classList.remove('active-page');
+        oldPage.hidden = false;
         oldPage.classList.add(direction === 'right' ? 'cube-out-right' : 'cube-out-left');
     }
 
-    // Prepare and cube in new page
-    if (newPage) {
-        // Make new page visible for animation
-        newPage.style.opacity = '0';
-        newPage.style.pointerEvents = 'none';
-        newPage.classList.add(direction === 'right' ? 'cube-in-right' : 'cube-in-left');
+    newPage.hidden = false;
+    newPage.style.opacity = '0';
+    newPage.style.pointerEvents = 'none';
+    newPage.classList.add(direction === 'right' ? 'cube-in-right' : 'cube-in-left');
 
-        // After animation completes
-        setTimeout(() => {
-            if (oldPage) {
-                oldPage.classList.remove('cube-out-right', 'cube-out-left');
-                oldPage.style.opacity = '';
-                oldPage.style.pointerEvents = '';
-            }
-            if (newPage) {
-                newPage.classList.remove('cube-in-right', 'cube-in-left');
-                newPage.classList.add('active-page');
-                newPage.style.opacity = '';
-                newPage.style.pointerEvents = '';
-            }
-            if (cubeStage) cubeStage.style.minHeight = '';
-            currentPageId = pageId;
-            isAnimating = false;
-        }, 600);
-    } else {
-        if (cubeStage) cubeStage.style.minHeight = '';
+    window.setTimeout(() => {
+        oldPage?.classList.remove('cube-out-right', 'cube-out-left');
+        if (oldPage) {
+            oldPage.style.opacity = '';
+            oldPage.style.pointerEvents = '';
+            oldPage.hidden = true;
+        }
+        newPage.classList.remove('cube-in-right', 'cube-in-left');
+        newPage.classList.add('active-page');
+        newPage.style.opacity = '';
+        newPage.style.pointerEvents = '';
+        newPage.hidden = false;
+        cubeStage?.style.removeProperty('min-height');
         currentPageId = pageId;
         isAnimating = false;
-    }
+        prepareReveal(newPage);
+        window.dispatchEvent(new CustomEvent('pagechange', { detail: { pageId } }));
+    }, 510);
 }
 
 function initTheme() {
     const themeBtn = document.getElementById('globalThemeSwitch');
     if (!themeBtn) return;
-    if (localStorage.getItem('theme') === 'dark') {
-        document.body.classList.add('dark');
-        themeBtn.innerHTML = '<i class="fas fa-sun"></i>';
-    } else {
-        themeBtn.innerHTML = '<i class="fas fa-moon"></i>';
-    }
-    themeBtn.addEventListener('click', () => {
-        const isDark = document.body.classList.toggle('dark');
-        localStorage.setItem('theme', isDark ? 'dark' : 'light');
-        themeBtn.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-        // 重新应用莫奈取色（暗色模式下颜色会加深）
-        if (window.ColorThemeModule) window.ColorThemeModule.reapply();
-        if (window.GitHubModule && window.GitHubModule.refreshTheme) {
-            window.GitHubModule.refreshTheme();
-        }
-    });
+    const apply = (dark) => {
+        document.body.classList.toggle('dark', dark);
+        localStorage.setItem('theme', dark ? 'dark' : 'light');
+        themeBtn.innerHTML = dark ? '<i class="fas fa-sun" aria-hidden="true"></i>' : '<i class="fas fa-moon" aria-hidden="true"></i>';
+        themeBtn.setAttribute('aria-label', dark ? '切换浅色模式' : '切换深色模式');
+        if (window.ColorThemeModule?.reapply) window.ColorThemeModule.reapply();
+        if (window.GitHubModule?.refreshTheme) window.GitHubModule.refreshTheme();
+    };
+    apply(localStorage.getItem('theme') === 'dark');
+    themeBtn.addEventListener('click', () => apply(!document.body.classList.contains('dark')));
 }
 
-/**
- * 头像莫奈动态取色
- * 页面加载时从头像提取主色调，应用到背景和强调色
- */
 function initColorTheme() {
     if (!window.ColorThemeModule || !window.APP_CONFIG) return;
     const avatarUrl = `https://q.qlogo.cn/headimg_dl?dst_uin=${APP_CONFIG.QQ_NUMBER}&spec=140&t=${Date.now()}`;
-    // 异步执行，不阻塞页面渲染
-    window.ColorThemeModule.initFromAvatar(avatarUrl).catch(() => {
-        console.log('[ColorTheme] 使用默认配色');
-    });
+    window.ColorThemeModule.initFromAvatar(avatarUrl).catch(() => console.info('[ColorTheme] 使用默认动态色'));
 }
 
-/**
- * 液态玻璃鼠标跟随高光
- * 使用事件委托 + rAF 节流，仅在卡片内移动时更新
- */
 function initLiquidGlassHover() {
     const container = document.getElementById('pagesContainer');
-    if (!container || !window.matchMedia('(hover: hover)').matches) return;
-
+    if (!container || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
     let rafId = 0;
     let activeEl = null;
-    let pendingX = 0, pendingY = 0;
+    let pendingX = 0;
+    let pendingY = 0;
 
-    container.addEventListener('pointerover', (e) => {
-        const card = e.target.closest('.glass-card, .featured-project-card');
+    container.addEventListener('pointerover', event => {
+        const card = event.target.closest('.glass-card, .featured-project-card');
         if (!card || !container.contains(card)) return;
-
-        if (activeEl !== card) {
-            activeEl = card;
-            let hl = card.querySelector(':scope > .lg-hover-highlight');
-            if (!hl) {
-                hl = document.createElement('div');
-                hl.className = 'lg-hover-highlight';
-                card.appendChild(hl);
-            }
+        activeEl = card;
+        let highlight = card.querySelector(':scope > .lg-hover-highlight');
+        if (!highlight) {
+            highlight = document.createElement('div');
+            highlight.className = 'lg-hover-highlight';
+            card.appendChild(highlight);
         }
     });
 
-    container.addEventListener('pointermove', (e) => {
+    container.addEventListener('pointermove', event => {
         if (!activeEl) return;
         const rect = activeEl.getBoundingClientRect();
-        pendingX = e.clientX - rect.left;
-        pendingY = e.clientY - rect.top;
-
+        pendingX = event.clientX - rect.left;
+        pendingY = event.clientY - rect.top;
         if (rafId) return;
         rafId = requestAnimationFrame(() => {
-            const hl = activeEl && activeEl.querySelector(':scope > .lg-hover-highlight');
-            if (hl) {
-                hl.style.transform =
-                    `translate3d(${pendingX}px,${pendingY}px,0) translate(-50%,-50%)`;
-            }
             if (activeEl) {
                 activeEl.style.setProperty('--lg-x', `${pendingX}px`);
                 activeEl.style.setProperty('--lg-y', `${pendingY}px`);
+                const highlight = activeEl.querySelector(':scope > .lg-hover-highlight');
+                highlight?.style.setProperty('transform', `translate3d(${pendingX}px,${pendingY}px,0) translate(-50%,-50%)`);
             }
             rafId = 0;
         });
     }, { passive: true });
 
-    container.addEventListener('pointerout', (e) => {
-        if (activeEl && !activeEl.contains(e.relatedTarget)) activeEl = null;
+    container.addEventListener('pointerout', event => {
+        if (activeEl && !activeEl.contains(event.relatedTarget)) activeEl = null;
     });
 }
 
+function initPointerAtmosphere() {
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    let rafId = 0;
+    let x = 50;
+    let y = 35;
+    window.addEventListener('pointermove', event => {
+        x = (event.clientX / window.innerWidth) * 100;
+        y = (event.clientY / window.innerHeight) * 100;
+        if (rafId) return;
+        rafId = requestAnimationFrame(() => {
+            document.documentElement.style.setProperty('--pointer-x', `${x}%`);
+            document.documentElement.style.setProperty('--pointer-y', `${y}%`);
+            rafId = 0;
+        });
+    }, { passive: true });
+}
+
+function initRipples() {
+    document.addEventListener('pointerdown', event => {
+        const target = event.target.closest('.tab-btn, .contact-btn, .filter-chip, .theme-toggle, .skill-badge, .game-bubble, .video-modal-btn');
+        if (!target || target.disabled) return;
+        const rect = target.getBoundingClientRect();
+        const ripple = document.createElement('span');
+        ripple.className = 'md-ripple';
+        ripple.style.left = `${event.clientX - rect.left}px`;
+        ripple.style.top = `${event.clientY - rect.top}px`;
+        target.appendChild(ripple);
+        window.setTimeout(() => ripple.remove(), 540);
+    });
+}
+
+function escapeHTML(value) {
+    const div = document.createElement('div');
+    div.textContent = value;
+    return div.innerHTML;
+}
+
+window.addEventListener('load', () => {
+    window.setTimeout(hideLoading, 250);
+});
+
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 DOM 加载完成，开始构建页面...');
     loadingOverlay = document.getElementById('loading-overlay');
     buildTabs();
     buildPages();
     initTheme();
     initLiquidGlassHover();
+    initPointerAtmosphere();
+    initRipples();
     initColorTheme();
 });

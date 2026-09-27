@@ -1,78 +1,43 @@
-/* ============================================
-   themes.css — 暗色模式
-   ============================================ */
-
+/* =========================================================
+   themes.css — light / dark Material You surfaces
+   ========================================================= */
 body.dark {
-    background: linear-gradient(135deg, #0f0c29 0%, #302b63 40%, #16213e 100%);
-    background-attachment: fixed;
-    color: #fff;
-}
-body.dark * { color: #fff !important; }
-body.dark i, body.dark .fab, body.dark .fas, body.dark .far { color: #f0f3ff !important; }
-
-/* 暗色液态玻璃 */
-body.dark .glass-nav,
-body.dark .glass-card,
-body.dark .page-tabs,
-body.dark .video-modal-content {
-    background: linear-gradient(135deg, rgba(20,26,42,0.55) 0%, rgba(15,20,35,0.4) 50%, rgba(20,26,42,0.5) 100%);
-    border-color: rgba(255, 255, 255, 0.12);
-    box-shadow: 0 8px 30px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.12);
-}
-body.dark .glass-nav::before,
-body.dark .glass-card::before,
-body.dark .page-tabs::before,
-body.dark .video-modal-content::before {
-    background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 70%);
-}
-body.dark .repo-tile,
-body.dark .video-card,
-body.dark .featured-project-card {
-    background: linear-gradient(145deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
-    border-color: rgba(255, 255, 255, 0.1);
-}
-body.dark .tab-btn:not(.active),
-body.dark .filter-chip:not(.active),
-body.dark .skill-badge,
-body.dark .game-bubble {
-    background: rgba(255,255,255,0.08);
-    border-color: rgba(255,255,255,0.1);
-}
-body.dark .contact-btn,
-body.dark .theme-toggle {
-    background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%);
-    border-color: rgba(255,255,255,0.12);
+    color-scheme: dark;
+    --bg: #141217;
+    --surface: rgba(32, 29, 36, .78);
+    --surface-strong: rgba(42, 38, 48, .9);
+    --surface-soft: rgba(255,255,255,.07);
+    --surface-tonal: color-mix(in srgb, var(--primary) 15%, #242028);
+    --outline: rgba(238, 229, 244, .13);
+    --outline-strong: rgba(238, 229, 244, .22);
+    --text: #f0eaf2;
+    --text-2: #c9becd;
+    --text-3: #9c919f;
+    --shadow-1: 0 4px 14px rgba(0,0,0,.2), 0 1px 2px rgba(0,0,0,.2);
+    --shadow-2: 0 16px 36px rgba(0,0,0,.28), 0 3px 8px rgba(0,0,0,.22);
+    --glass-alpha: .72;
+    background: var(--bg);
 }
 
-body.dark .logo-area {
-    background: linear-gradient(130deg, #fff, #c0d0ff);
-    -webkit-background-clip: text; background-clip: text; color: transparent !important;
+body.dark .monet-background {
+    background:
+        radial-gradient(60% 50% at 0% 0%, color-mix(in srgb, var(--monet-1) 26%, transparent), transparent 70%),
+        radial-gradient(55% 48% at 100% 16%, color-mix(in srgb, var(--monet-2) 24%, transparent), transparent 72%),
+        radial-gradient(62% 58% at 62% 100%, color-mix(in srgb, var(--monet-3) 23%, transparent), transparent 75%),
+        linear-gradient(145deg, color-mix(in srgb, var(--monet-1) 11%, var(--bg)), var(--bg));
 }
-body.dark .display-name {
-    background: linear-gradient(135deg, #fff, #c0d0ff);
-    -webkit-background-clip: text; background-clip: text; color: transparent !important;
-}
-body.dark .profile-bio,
-body.dark .profile-subtitle { color: rgba(255,255,255,0.7) !important; }
 
-body.dark .tab-btn:not(.active),
-body.dark .filter-chip:not(.active),
-body.dark .search-box input,
-body.dark .bili-search-box input {
-    background: rgba(255,255,255,0.08) !important;
-    border-color: rgba(255,255,255,0.12) !important;
+body.dark :where(.lg, .glass-nav, .glass-card, .page-tabs, .video-modal-content) {
+    background: linear-gradient(145deg, rgba(44,40,50,.78), rgba(28,25,32,.72));
+    border-color: var(--outline);
 }
-body.dark .search-box input::placeholder,
-body.dark .bili-search-box input::placeholder { color: rgba(255,255,255,0.45) !important; }
-
-body.dark .timeline-item { border-bottom-color: rgba(255,255,255,0.12) !important; }
-body.dark .featured-project-lang { color: #a0b8ff !important; }
-body.dark .video-tag { background: rgba(108,141,255,0.25) !important; }
-body.dark .video-modal-stats { border-bottom-color: rgba(255,255,255,0.12) !important; }
-body.dark .video-modal-btn.secondary { background: rgba(255,255,255,0.1) !important; }
-body.dark .video-modal-overlay { background: rgba(0,0,0,0.7) !important; }
-body.dark .contact-note,
-body.dark .profile-bio {
-    background: rgba(108,141,255,0.1) !important;
-    border-color: rgba(108,141,255,0.2) !important;
+body.dark :where(.repo-tile, .video-card, .featured-project-card) {
+    background: linear-gradient(145deg, rgba(255,255,255,.09), rgba(255,255,255,.045));
+    border-color: var(--outline);
 }
+body.dark :where(.tab-btn:not(.active), .filter-chip:not(.active), .skill-badge, .game-bubble, .contact-btn, .theme-toggle) {
+    background: rgba(255,255,255,.06);
+    border-color: var(--outline);
+}
+body.dark .profile-bio, body.dark .contact-note { background: var(--surface-tonal); }
+body.dark .video-modal-overlay { background: rgba(0,0,0,.58); }

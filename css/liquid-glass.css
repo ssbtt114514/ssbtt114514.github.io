@@ -1,184 +1,87 @@
-/* ============================================
-   liquid-glass.css — 液态玻璃（加强版）
-   主容器：强模糊 + 高光 + 内发光
-   网格卡片：无模糊，半透明渐变模拟玻璃质感
-   ============================================ */
-
-/* 主容器：强液态玻璃（导航、卡片、标签栏、模态框） */
-:where(
-    .lg,
-    .glass-nav,
-    .glass-card,
-    .page-tabs,
-    .video-modal-content
-) {
+/* =========================================================
+   liquid-glass.css — 液态玻璃材质层
+   Material 3 tonal surface + glass highlights。
+   ========================================================= */
+:where(.lg, .glass-nav, .glass-card, .page-tabs, .video-modal-content) {
     position: relative;
-    background: linear-gradient(135deg,
-        rgba(255, 255, 255, 0.32) 0%,
-        rgba(255, 255, 255, 0.14) 50%,
-        rgba(255, 255, 255, 0.22) 100%);
-    backdrop-filter: var(--lg-blur);
-    -webkit-backdrop-filter: var(--lg-blur);
-    border: 1px solid var(--lg-border);
-    box-shadow:
-        0 10px 34px rgba(31, 38, 135, 0.14),
-        inset 0 1px 0 rgba(255, 255, 255, 0.72),
-        inset 0 -1px 0 rgba(255, 255, 255, 0.12),
-        inset 1px 0 0 rgba(255, 255, 255, 0.18);
     overflow: hidden;
     isolation: isolate;
+    background: linear-gradient(145deg, rgba(255,255,255,.78), rgba(255,255,255,.54));
+    border: 1px solid color-mix(in srgb, var(--outline) 84%, white);
+    box-shadow: var(--shadow-1);
+    backdrop-filter: var(--lg-blur);
+    -webkit-backdrop-filter: var(--lg-blur);
 }
 
-/* 网格卡片：无模糊，半透明渐变模拟玻璃（性能优先） */
-:where(
-    .repo-tile,
-    .video-card,
-    .featured-project-card
-) {
-    position: relative;
-    background: linear-gradient(145deg,
-        rgba(255, 255, 255, 0.38) 0%,
-        rgba(255, 255, 255, 0.18) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    box-shadow: 0 4px 14px rgba(31, 38, 135, 0.08);
-}
-
-/* 小元素：仅半透明背景，无模糊 */
-:where(
-    .tab-btn:not(.active),
-    .filter-chip:not(.active),
-    .skill-badge,
-    .game-bubble
-) {
-    background: rgba(255, 255, 255, 0.32);
-    border: 1px solid rgba(255, 255, 255, 0.28);
-}
-
-/* 强顶部高光（主容器） */
-:where(
-    .lg, .glass-nav, .glass-card, .page-tabs, .video-modal-content
-)::before {
-    content: '';
+:where(.glass-nav, .glass-card, .page-tabs, .video-modal-content)::before {
+    content: "";
     position: absolute;
-    inset: 0 0 auto 0;
-    height: 50%;
-    background: linear-gradient(
-        180deg,
-        rgba(255, 255, 255, 0.35) 0%,
-        rgba(255, 255, 255, 0.08) 50%,
-        transparent 100%
-    );
-    border-radius: inherit;
+    inset: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(320px 180px at var(--lg-x, 50%) var(--lg-y, 0%), rgba(255,255,255,.32), transparent 62%),
+        linear-gradient(180deg, rgba(255,255,255,.24), transparent 42%);
+    opacity: .9;
+    z-index: 0;
+}
+
+:where(.glass-nav, .glass-card, .page-tabs, .video-modal-content)::after {
+    content: "";
+    position: absolute;
+    left: 7%; right: 7%; top: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.75), transparent);
+    opacity: .8;
     pointer-events: none;
     z-index: 0;
 }
 
-/* 底部微光（主容器） */
-:where(
-    .lg, .glass-nav, .glass-card, .page-tabs, .video-modal-content
-)::after {
-    content: '';
-    position: absolute;
-    inset: auto 0 0 0;
-    height: 30%;
-    background: linear-gradient(
-        0deg,
-        rgba(255, 255, 255, 0.08) 0%,
-        transparent 100%
-    );
-    border-radius: inherit;
-    pointer-events: none;
-    z-index: 0;
-}
-
-/* 内容层高于高光层 */
-:where(
-    .lg, .glass-nav, .glass-card, .page-tabs, .video-modal-content,
-    .repo-tile, .video-card, .featured-project-card,
-    .tab-btn, .filter-chip, .skill-badge, .game-bubble,
-    .contact-btn, .theme-toggle
-) > * {
+:where(.glass-nav, .glass-card, .page-tabs, .video-modal-content, .repo-tile, .video-card, .featured-project-card, .contact-btn, .skill-badge, .game-bubble, .tab-btn, .theme-toggle) > * {
     position: relative;
     z-index: 1;
 }
 
-/* 按钮：半透明渐变，无模糊 */
-.contact-btn,
-.theme-toggle {
-    background: linear-gradient(180deg, rgba(255,255,255,0.42) 0%, rgba(255,255,255,0.18) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.32);
-    transition: all 0.25s var(--spring);
-}
-.contact-btn:hover {
-    background: linear-gradient(135deg, var(--primary), var(--primary-2));
-    border-color: transparent;
-    box-shadow: 0 4px 14px var(--primary-glow);
-    transform: translateY(-2px);
+:where(.repo-tile, .video-card, .featured-project-card) {
+    position: relative;
+    background: linear-gradient(145deg, rgba(255,255,255,.64), rgba(255,255,255,.42));
+    border: 1px solid rgba(255,255,255,.42);
+    box-shadow: 0 4px 16px rgba(38,33,45,.045);
 }
 
-/* 鼠标跟随高光（轻量版） */
+:where(.tab-btn:not(.active), .filter-chip:not(.active), .skill-badge, .game-bubble, .contact-btn, .theme-toggle) {
+    background: color-mix(in srgb, var(--surface-strong) 72%, transparent);
+    border: 1px solid var(--outline);
+}
+
+.theme-toggle { box-shadow: var(--shadow-1); }
+
 .lg-hover-highlight {
     position: absolute;
-    width: 180px; height: 180px;
+    left: 0;
+    top: 0;
+    width: 220px;
+    height: 220px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
     pointer-events: none;
     z-index: 0;
     opacity: 0;
-    transition: opacity 0.3s ease;
     transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(255,255,255,.28), rgba(255,255,255,.08) 30%, transparent 68%);
+    mix-blend-mode: screen;
+    filter: blur(2px);
+    will-change: transform, opacity;
+    transition: opacity var(--motion);
 }
 .glass-card:hover .lg-hover-highlight,
-.featured-project-card:hover .lg-hover-highlight {
-    opacity: 1;
-}
+.featured-project-card:hover .lg-hover-highlight { opacity: 1; }
 
-
-/* ===== 动态液态玻璃：用合成层移动高光，而不是持续改变布局/滤镜 ===== */
-:where(.glass-nav, .glass-card, .page-tabs, .video-modal-content, .featured-project-card)::marker {
-    display: none;
-}
-
-:where(.glass-nav, .glass-card, .page-tabs, .video-modal-content, .featured-project-card)::after {
-    background:
-        radial-gradient(
-            420px 220px at var(--lg-x, 50%) var(--lg-y, 0%),
-            rgba(255,255,255,.18),
-            transparent 68%
-        ),
-        linear-gradient(0deg, rgba(255,255,255,.07), transparent);
-    opacity: .95;
-    transition: opacity .25s ease;
-}
-
-.lg-hover-highlight {
-    width: 220px;
-    height: 220px;
-    background:
-        radial-gradient(circle at 50% 50%,
-            rgba(255,255,255,.22) 0%,
-            rgba(255,255,255,.09) 28%,
-            transparent 70%);
-    filter: blur(1px);
-    mix-blend-mode: screen;
-    will-change: transform, opacity;
-}
-
-@media (hover: none), (pointer: coarse) {
-    .lg-hover-highlight { display: none; }
-}
+/* 液态玻璃的小型反射条 */
+.glass-sheen { position: absolute; inset: -40% 0 auto; height: 65%; pointer-events:none; background: linear-gradient(115deg, transparent 25%, rgba(255,255,255,.14) 48%, transparent 62%); transform: translateX(-60%) rotate(4deg); animation: sheen-sweep 7s var(--ease) infinite; }
 
 @media (max-width: 700px) {
     :where(.lg, .glass-nav, .glass-card, .page-tabs, .video-modal-content) {
-        backdrop-filter: blur(16px) saturate(165%) contrast(1.03);
-        -webkit-backdrop-filter: blur(16px) saturate(165%) contrast(1.03);
+        backdrop-filter: blur(15px) saturate(145%);
+        -webkit-backdrop-filter: blur(15px) saturate(145%);
     }
-}
-
-/* GPU/省电设备：保留玻璃透明感，减少昂贵的 backdrop-filter */
-@media (prefers-reduced-motion: reduce) {
-    :where(.lg, .glass-nav, .glass-card, .page-tabs, .video-modal-content) {
-        backdrop-filter: blur(12px) saturate(150%);
-        -webkit-backdrop-filter: blur(12px) saturate(150%);
-    }
+    .lg-hover-highlight { display: none; }
 }

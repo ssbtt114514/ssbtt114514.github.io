@@ -217,9 +217,23 @@ window.ColorThemeModule = {
      * 从头像 URL 初始化
      */
     async initFromAvatar(avatarUrl) {
+        const cacheKey = 'ssbtt-monet-palette-v2';
+        try {
+            const cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
+            if (cached && Array.isArray(cached.palette) && cached.palette.length >= 2) {
+                this.applyTheme(cached.palette);
+                // 后台刷新一次，头像变更后仍能自动更新。
+                const fresh = await this.extractFromImage(avatarUrl);
+                this.applyTheme(fresh || cached.palette);
+                if (fresh) localStorage.setItem(cacheKey, JSON.stringify({ palette: fresh, ts: Date.now() }));
+                return fresh || cached.palette;
+            }
+        } catch (_) { /* ignore cache failures */ }
+
         const palette = await this.extractFromImage(avatarUrl);
         if (palette) {
             this.applyTheme(palette);
+            try { localStorage.setItem(cacheKey, JSON.stringify({ palette, ts: Date.now() })); } catch (_) { /* ignore storage errors */ }
             console.log('[ColorTheme] 莫奈取色完成，提取 ' + palette.length + ' 种颜色');
         }
         return palette;

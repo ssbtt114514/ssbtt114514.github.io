@@ -1,52 +1,89 @@
-/* ============================================
-   base.css — 变量、重置、基础排版
-   ============================================ */
-
+/* =========================================================
+   Material You / Material 3 inspired design tokens
+   动态色由 ColorThemeModule 写入 --primary / --monet-*。
+   ========================================================= */
 :root {
-    --primary: #6c8dff;
-    --primary-2: #a855f7;
-    --primary-glow: rgba(108, 141, 255, 0.4);
-    --spring: cubic-bezier(0.34, 1.2, 0.64, 1);
-    --cube-ease: cubic-bezier(0.76, 0, 0.24, 1);
-    --radius: 24px;
-    --radius-sm: 16px;
-    --text: #1f2a3e;
-    --text-2: rgba(31, 42, 62, 0.65);
+    color-scheme: light;
+    --primary: #6750a4;
+    --primary-2: #7f67be;
+    --primary-glow: rgba(103, 80, 164, .24);
+    --on-primary: #fff;
+    --bg: #f8f7fb;
+    --surface: rgba(255, 255, 255, .74);
+    --surface-strong: rgba(255, 255, 255, .88);
+    --surface-soft: rgba(255, 255, 255, .56);
+    --surface-tonal: color-mix(in srgb, var(--primary) 9%, white);
+    --outline: rgba(55, 45, 75, .13);
+    --outline-strong: rgba(55, 45, 75, .21);
+    --text: #27242d;
+    --text-2: #655e6d;
+    --text-3: #837b89;
+    --shadow-1: 0 2px 6px rgba(44, 39, 53, .06), 0 10px 24px rgba(44, 39, 53, .05);
+    --shadow-2: 0 8px 24px rgba(44, 39, 53, .09), 0 20px 50px rgba(44, 39, 53, .07);
+    --radius-xl: 32px;
+    --radius-lg: 24px;
+    --radius-md: 18px;
+    --radius-sm: 14px;
+    --spring: cubic-bezier(.2, .8, .2, 1);
+    --expressive: cubic-bezier(.34, 1.28, .64, 1);
+    --ease: cubic-bezier(.2, 0, 0, 1);
+    --motion-fast: 160ms;
+    --motion: 280ms;
+    --motion-slow: 520ms;
 
-    /* Liquid Glass tokens */
-    --lg-bg: rgba(255, 255, 255, 0.30);
-    --lg-border: rgba(255, 255, 255, 0.42);
-    --lg-blur: blur(20px) saturate(175%) contrast(1.04);
-    --lg-shadow: 0 10px 34px rgba(31, 38, 135, 0.14), inset 0 1px 0 rgba(255,255,255,0.68);
-    /* 动态莫奈调色板，由 ColorThemeModule 写入 */
-    --monet-1: #667eea;
-    --monet-2: #764ba2;
-    --monet-3: #4facfe;
-    --monet-4: #8fd3f4;
-    --monet-speed: 18s;
+    /* Monet palette */
+    --monet-1: #8c7bb7;
+    --monet-2: #6fa5b8;
+    --monet-3: #d78b9d;
+    --monet-4: #9abf93;
+    --monet-speed: 24s;
+
+    /* Liquid glass tuning */
+    --lg-blur: blur(22px) saturate(155%);
+    --glass-alpha: .66;
 }
 
 * {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
 }
 
 html {
+    min-height: 100%;
+    scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-    font-family: 'Inter', 'Segoe UI', sans-serif;
     min-height: 100vh;
-    color: var(--text);
-    background: #667eea;
     overflow-x: hidden;
+    color: var(--text);
+    background: var(--bg);
+    font-family: Inter, "Google Sans", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.5;
     isolation: isolate;
 }
 
+body::selection { background: color-mix(in srgb, var(--primary) 24%, transparent); }
+
 a { color: inherit; text-decoration: none; }
-button { font-family: inherit; }
-input { font-family: inherit; }
+button, input { font: inherit; }
+button { color: inherit; }
+img { max-width: 100%; }
+
+:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--primary) 55%, white);
+    outline-offset: 3px;
+}
+
+/* 通用状态类 */
+.is-clickable { cursor: pointer; }
+.surface-tonal { background: var(--surface-tonal); }
+.muted { color: var(--text-2); }
+
+@supports not (color: color-mix(in srgb, #000 50%, #fff)) {
+    :root { --surface-tonal: #f0eafa; }
+}
