@@ -271,7 +271,7 @@ function initPointerAtmosphere() {
 
 function initRipples() {
     document.addEventListener('pointerdown', event => {
-        const target = event.target.closest('.tab-btn, .contact-btn, .filter-chip, .theme-toggle, .skill-badge, .game-bubble, .video-modal-btn');
+        const target = event.target.closest('.tab-btn, .contact-btn, .filter-chip, .theme-toggle, .skill-badge, .game-bubble, .video-modal-btn, .avatar-circle-big');
         if (!target || target.disabled) return;
         const rect = target.getBoundingClientRect();
         const ripple = document.createElement('span');

@@ -80,8 +80,6 @@ img { max-width: 100%; }
 }
 
 /* 通用状态类 */
-.is-clickable { cursor: pointer; }
-.surface-tonal { background: var(--surface-tonal); }
 .muted { color: var(--text-2); }
 
 @supports not (color: color-mix(in srgb, #000 50%, #fff)) {

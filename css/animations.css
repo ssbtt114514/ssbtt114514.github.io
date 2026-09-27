@@ -2,8 +2,6 @@
    animations.css — expressive but performance-conscious motion
    ========================================================= */
 @keyframes rise-in { from { opacity: 0; transform: translateY(12px) scale(.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
-@keyframes page-in { from { opacity: 0; transform: translate3d(18px, 0, 0) scale(.985); } to { opacity: 1; transform: translate3d(0,0,0) scale(1); } }
-@keyframes page-out { from { opacity: 1; transform: translate3d(0,0,0) scale(1); } to { opacity: 0; transform: translate3d(-18px, 0, 0) scale(.985); } }
 @keyframes cubeInR { from { transform: rotateY(-18deg) translate3d(32px, 0, -40px); opacity: 0; } to { transform: rotateY(0) translate3d(0,0,0); opacity: 1; } }
 @keyframes cubeInL { from { transform: rotateY(18deg) translate3d(-32px, 0, -40px); opacity: 0; } to { transform: rotateY(0) translate3d(0,0,0); opacity: 1; } }
 @keyframes cubeOutR { from { transform: rotateY(0) translate3d(0,0,0); opacity: 1; } to { transform: rotateY(18deg) translate3d(-32px,0,-40px); opacity: 0; } }
@@ -12,18 +10,19 @@
 @keyframes monetFloat2 { from { transform: translate3d(3vw,-2vw,0) scale(1.02); } to { transform: translate3d(-10vw,8vw,0) scale(.94); } }
 @keyframes monetFloat3 { from { transform: translate3d(-4vw,3vw,0) scale(.95); } to { transform: translate3d(9vw,-8vw,0) scale(1.06); } }
 @keyframes ring-rotate { to { transform: rotate(360deg); } }
-@keyframes sheen-sweep { 0%, 65% { transform: translateX(-70%) rotate(4deg); opacity: 0; } 72% { opacity: .8; } 100% { transform: translateX(75%) rotate(4deg); opacity: 0; } }
 @keyframes ripple { to { transform: scale(1.6); opacity: 0; } }
+@keyframes avatar-press { 0% { transform: scale(1); } 50% { transform: scale(.92); } 100% { transform: scale(1); } }
 
 .page.cube-out-right { animation: cubeOutR 420ms var(--expressive) forwards; pointer-events:none; }
 .page.cube-out-left { animation: cubeOutL 420ms var(--expressive) forwards; pointer-events:none; }
 .page.cube-in-right { animation: cubeInR 500ms var(--expressive) forwards; pointer-events:auto; }
 .page.cube-in-left { animation: cubeInL 500ms var(--expressive) forwards; pointer-events:auto; }
 
-.monet-orb { position:absolute; width:48vmax; height:48vmax; border-radius:50%; filter: blur(48px); opacity:.42; will-change:transform; }
-.monet-orb-1 { left:-16vmax; top:-19vmax; background:var(--monet-2); animation: monetFloat1 var(--monet-speed) ease-in-out infinite alternate; }
-.monet-orb-2 { right:-18vmax; top:9vmax; background:var(--monet-3); animation: monetFloat2 calc(var(--monet-speed) * 1.18) ease-in-out infinite alternate; }
-.monet-orb-3 { left:23vmax; bottom:-24vmax; background:var(--monet-4); animation: monetFloat3 calc(var(--monet-speed) * 1.42) ease-in-out infinite alternate; }
+/* 背景光球：降低模糊半径减少合成开销 */
+.monet-orb { position:absolute; width:42vmax; height:42vmax; border-radius:50%; filter: blur(36px); opacity:.38; will-change:transform; }
+.monet-orb-1 { left:-14vmax; top:-17vmax; background:var(--monet-2); animation: monetFloat1 var(--monet-speed) ease-in-out infinite alternate; }
+.monet-orb-2 { right:-16vmax; top:8vmax; background:var(--monet-3); animation: monetFloat2 calc(var(--monet-speed) * 1.18) ease-in-out infinite alternate; }
+.monet-orb-3 { left:20vmax; bottom:-21vmax; background:var(--monet-4); animation: monetFloat3 calc(var(--monet-speed) * 1.42) ease-in-out infinite alternate; }
 
 /* reveal，默认不强制隐藏，JS 添加 .motion-pending 后才启用 */
 .motion-pending { opacity: 0; transform: translateY(14px); }

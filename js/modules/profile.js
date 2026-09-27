@@ -78,37 +78,39 @@ window.ProfileModule = {
         if (img) img.src = `https://q.qlogo.cn/headimg_dl?dst_uin=${APP_CONFIG.QQ_NUMBER}&spec=140&t=${Date.now()}`;
         if (!avatarDiv) return;
 
-        // Pointer Events 同时覆盖鼠标、触摸和手写笔。
-        // 不再在 touchstart 上 preventDefault，避免 Android/iOS 浏览器因此取消 click，
-        // 从而导致“连续点击三次”彩蛋无法触发。
+        // Material Design 触发：Pointer Events 统一鼠标/触摸/手写笔
         let pressTimer = null;
         let longPressTriggered = false;
-        const LONG_PRESS_MS = 800;
+        const LONG_PRESS_MS = 600;
         const TRIPLE_CLICK_WINDOW = 1000;
         let clickTimes = [];
 
         const clearPressTimer = () => {
-            if (pressTimer) {
-                clearTimeout(pressTimer);
-                pressTimer = null;
-            }
+            if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
         };
 
+        // Material 按压反馈
         avatarDiv.addEventListener('pointerdown', () => {
             if (this.isEasterEggActive) return;
             longPressTriggered = false;
+            avatarDiv.classList.add('avatar-pressing');
             clearPressTimer();
             pressTimer = setTimeout(() => {
                 longPressTriggered = true;
                 clickTimes = [];
+                avatarDiv.classList.remove('avatar-pressing');
                 this.triggerEasterEgg(avatarDiv);
             }, LONG_PRESS_MS);
         });
 
         ['pointerup', 'pointercancel', 'pointerleave'].forEach(type => {
-            avatarDiv.addEventListener(type, clearPressTimer);
+            avatarDiv.addEventListener(type, () => {
+                avatarDiv.classList.remove('avatar-pressing');
+                clearPressTimer();
+            });
         });
 
+        // 点击：Material 抖动 + 1秒内3次触发彩蛋
         avatarDiv.addEventListener('click', () => {
             if (this.isEasterEggActive || longPressTriggered) {
                 longPressTriggered = false;
@@ -125,8 +127,9 @@ window.ProfileModule = {
                 return;
             }
 
-            avatarDiv.style.transform = `translate(${(Math.random() - 0.5) * 40}px, ${(Math.random() - 0.5) * 30}px) scale(1.05) rotate(${(Math.random()-0.5)*10}deg)`;
-            setTimeout(() => avatarDiv.style.transform = '', 450);
+            // Material 风格轻量抖动
+            avatarDiv.style.transform = `translate(${(Math.random() - 0.5) * 24}px, ${(Math.random() - 0.5) * 18}px) scale(1.04) rotate(${(Math.random()-0.5)*6}deg)`;
+            setTimeout(() => avatarDiv.style.transform = '', 320);
         });
 
         const closeBtn = document.getElementById('easter-egg-close');
@@ -140,36 +143,34 @@ window.ProfileModule = {
         const frame = document.getElementById('easter-egg-frame');
         if (!circle || !overlay || !frame) return;
 
-        // 1. 剧烈摇动
+        // Material 时序：摇动 → 变暗 → 圆形揭露 → 内容显现
         avatarDiv.classList.add('avatar-shake');
 
-        // 2. 500ms 后变黑
+        // 400ms 后头像变暗（Material fade）
         setTimeout(() => {
             avatarDiv.classList.add('avatar-black');
-        }, 500);
+        }, 400);
 
-        // 3. 750ms 后黑圈从头像位置扩散
+        // 600ms 后圆形揭露从头像中心扩散（Material Container Transform）
         setTimeout(() => {
             const rect = avatarDiv.getBoundingClientRect();
             const cx = rect.left + rect.width / 2;
             const cy = rect.top + rect.height / 2;
-            // 计算覆盖全屏所需的半径（取对角线的一半）
             const maxR = Math.sqrt(window.innerWidth ** 2 + window.innerHeight ** 2);
             circle.style.left = cx + 'px';
             circle.style.top = cy + 'px';
             circle.style.width = maxR * 2 + 'px';
             circle.style.height = maxR * 2 + 'px';
-            // 强制 reflow 后添加 expand
             void circle.offsetWidth;
             circle.classList.add('expand');
-        }, 750);
+        }, 600);
 
-        // 4. 1300ms 后显示内嵌 iframe
+        // 1100ms 后显示内嵌内容（Material Shared Axis）
         setTimeout(() => {
             frame.src = 'easter-egg.html';
             overlay.classList.add('active');
             document.body.style.overflow = 'hidden';
-        }, 1300);
+        }, 1100);
     },
 
     closeEasterEgg() {

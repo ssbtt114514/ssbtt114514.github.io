@@ -75,9 +75,6 @@
 .glass-card:hover .lg-hover-highlight,
 .featured-project-card:hover .lg-hover-highlight { opacity: 1; }
 
-/* 液态玻璃的小型反射条 */
-.glass-sheen { position: absolute; inset: -40% 0 auto; height: 65%; pointer-events:none; background: linear-gradient(115deg, transparent 25%, rgba(255,255,255,.14) 48%, transparent 62%); transform: translateX(-60%) rotate(4deg); animation: sheen-sweep 7s var(--ease) infinite; }
-
 @media (max-width: 700px) {
     :where(.lg, .glass-nav, .glass-card, .page-tabs, .video-modal-content) {
         backdrop-filter: blur(15px) saturate(145%);
