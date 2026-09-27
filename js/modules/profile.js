@@ -78,49 +78,59 @@ window.ProfileModule = {
         if (img) img.src = `https://q.qlogo.cn/headimg_dl?dst_uin=${APP_CONFIG.QQ_NUMBER}&spec=140&t=${Date.now()}`;
         if (!avatarDiv) return;
 
+        // Pointer Events 同时覆盖鼠标、触摸和手写笔。
+        // 不再在 touchstart 上 preventDefault，避免 Android/iOS 浏览器因此取消 click，
+        // 从而导致“连续点击三次”彩蛋无法触发。
         let pressTimer = null;
+        let longPressTriggered = false;
         const LONG_PRESS_MS = 800;
         const TRIPLE_CLICK_WINDOW = 1000;
         let clickTimes = [];
 
-        const startPress = (e) => {
+        const clearPressTimer = () => {
+            if (pressTimer) {
+                clearTimeout(pressTimer);
+                pressTimer = null;
+            }
+        };
+
+        avatarDiv.addEventListener('pointerdown', () => {
             if (this.isEasterEggActive) return;
-            pressTimer = setTimeout(() => this.triggerEasterEgg(avatarDiv), LONG_PRESS_MS);
-        };
-        const cancelPress = () => {
-            if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
-        };
+            longPressTriggered = false;
+            clearPressTimer();
+            pressTimer = setTimeout(() => {
+                longPressTriggered = true;
+                clickTimes = [];
+                this.triggerEasterEgg(avatarDiv);
+            }, LONG_PRESS_MS);
+        });
 
-        // 长按检测（鼠标 + 触摸）
-        avatarDiv.addEventListener('mousedown', startPress);
-        avatarDiv.addEventListener('touchstart', (e) => { e.preventDefault(); startPress(e); }, { passive: false });
-        avatarDiv.addEventListener('mouseup', cancelPress);
-        avatarDiv.addEventListener('mouseleave', cancelPress);
-        avatarDiv.addEventListener('touchend', cancelPress);
-        avatarDiv.addEventListener('touchcancel', cancelPress);
+        ['pointerup', 'pointercancel', 'pointerleave'].forEach(type => {
+            avatarDiv.addEventListener(type, clearPressTimer);
+        });
 
-        // 点击：短按抖动 + 1秒内3次点击触发彩蛋
         avatarDiv.addEventListener('click', () => {
-            if (this.isEasterEggActive) return;
+            if (this.isEasterEggActive || longPressTriggered) {
+                longPressTriggered = false;
+                return;
+            }
+
             const now = Date.now();
-            clickTimes.push(now);
-            // 只保留1秒内的点击记录
             clickTimes = clickTimes.filter(t => now - t <= TRIPLE_CLICK_WINDOW);
+            clickTimes.push(now);
+
             if (clickTimes.length >= 3) {
                 clickTimes = [];
                 this.triggerEasterEgg(avatarDiv);
                 return;
             }
-            // 短按抖动效果
+
             avatarDiv.style.transform = `translate(${(Math.random() - 0.5) * 40}px, ${(Math.random() - 0.5) * 30}px) scale(1.05) rotate(${(Math.random()-0.5)*10}deg)`;
             setTimeout(() => avatarDiv.style.transform = '', 450);
         });
 
-        // 关闭彩蛋
         const closeBtn = document.getElementById('easter-egg-close');
-        if (closeBtn) {
-            closeBtn.addEventListener('click', () => this.closeEasterEgg());
-        }
+        if (closeBtn) closeBtn.addEventListener('click', () => this.closeEasterEgg());
     },
 
     triggerEasterEgg(avatarDiv) {
