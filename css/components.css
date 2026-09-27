@@ -27,11 +27,11 @@
 .glass-card {
     border-radius: var(--radius);
     padding: 28px 26px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: transform 0.3s ease;
+    contain: layout paint;
 }
 .glass-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 14px 40px rgba(31, 38, 135, 0.18), inset 0 1px 0 rgba(255,255,255,0.6);
 }
 .section-title {
     font-size: 1.4rem;
@@ -130,11 +130,11 @@
     padding: 18px;
     scroll-snap-align: start;
     color: var(--text);
-    transition: all 0.3s ease;
+    transition: transform 0.25s ease;
+    contain: layout paint;
 }
 .repo-tile:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 28px rgba(108, 141, 255, 0.25);
+    transform: translateY(-3px);
 }
 @media (min-width: 700px) {
     .repo-grid { display: grid; grid-template-columns: repeat(2, 1fr); overflow-x: visible; flex-wrap: wrap; }
@@ -154,11 +154,11 @@
     overflow: hidden;
     cursor: pointer;
     display: block;
-    transition: all 0.3s var(--spring);
+    transition: transform 0.25s var(--spring);
+    contain: layout paint;
 }
 .video-card:hover {
-    transform: translateY(-5px) scale(1.01);
-    box-shadow: 0 16px 36px rgba(108, 141, 255, 0.22);
+    transform: translateY(-3px);
 }
 .video-thumb-wrap { position: relative; overflow: hidden; }
 .video-thumbnail {
@@ -374,13 +374,13 @@
     padding: 16px;
     color: inherit;
     display: block;
-    transition: all 0.3s var(--spring);
+    transition: transform 0.25s var(--spring), background 0.25s ease;
     cursor: pointer;
+    contain: layout paint;
 }
 .featured-project-card:hover {
-    transform: translateY(-4px) scale(1.02);
-    background: linear-gradient(135deg, rgba(108,141,255,0.2), rgba(168,85,247,0.18));
-    box-shadow: 0 10px 28px rgba(108, 141, 255, 0.28);
+    transform: translateY(-3px);
+    background: linear-gradient(135deg, rgba(108,141,255,0.18), rgba(168,85,247,0.15));
 }
 .featured-project-name {
     font-weight: 700;
