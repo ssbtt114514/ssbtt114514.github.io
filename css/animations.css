@@ -62,3 +62,80 @@
         transition-duration: 0.01ms !important;
     }
 }
+
+
+/* ===== 动态莫奈：只动画 transform / opacity，避免每帧重算背景渐变 ===== */
+.monet-background {
+    position: fixed;
+    inset: -12vmax;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+    contain: strict;
+    background:
+        radial-gradient(45% 45% at 18% 20%, color-mix(in srgb, var(--monet-1) 78%, transparent), transparent 72%),
+        radial-gradient(42% 42% at 82% 24%, color-mix(in srgb, var(--monet-2) 72%, transparent), transparent 72%),
+        radial-gradient(48% 48% at 55% 82%, color-mix(in srgb, var(--monet-3) 70%, transparent), transparent 72%),
+        linear-gradient(135deg, var(--monet-1), var(--monet-2) 48%, var(--monet-3));
+    transform: translate3d(0,0,0);
+}
+
+.monet-background::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, rgba(255,255,255,.10), transparent 38%, rgba(255,255,255,.06));
+    opacity: .8;
+    mix-blend-mode: soft-light;
+}
+
+.monet-orb {
+    position: absolute;
+    width: 48vmax;
+    height: 48vmax;
+    border-radius: 50%;
+    filter: blur(42px);
+    opacity: .42;
+    will-change: transform;
+    transform: translate3d(0,0,0);
+}
+.monet-orb-1 {
+    left: -15vmax; top: -18vmax;
+    background: var(--monet-2);
+    animation: monetFloat1 var(--monet-speed) ease-in-out infinite alternate;
+}
+.monet-orb-2 {
+    right: -18vmax; top: 8vmax;
+    background: var(--monet-3);
+    animation: monetFloat2 calc(var(--monet-speed) * 1.25) ease-in-out infinite alternate;
+}
+.monet-orb-3 {
+    left: 25vmax; bottom: -24vmax;
+    background: var(--monet-4);
+    animation: monetFloat3 calc(var(--monet-speed) * 1.45) ease-in-out infinite alternate;
+}
+
+@keyframes monetFloat1 {
+    from { transform: translate3d(-2vmax, -1vmax, 0) scale(.96); }
+    to   { transform: translate3d(10vmax, 8vmax, 0) scale(1.08); }
+}
+@keyframes monetFloat2 {
+    from { transform: translate3d(2vmax, -3vmax, 0) scale(1.05); }
+    to   { transform: translate3d(-10vmax, 7vmax, 0) scale(.94); }
+}
+@keyframes monetFloat3 {
+    from { transform: translate3d(-4vmax, 2vmax, 0) scale(.95); }
+    to   { transform: translate3d(8vmax, -8vmax, 0) scale(1.06); }
+}
+
+/* 切页时明确提升动画层，结束后自动恢复 */
+.page.cube-out-right,
+.page.cube-out-left,
+.page.cube-in-right,
+.page.cube-in-left {
+    will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .monet-orb { animation: none !important; }
+}

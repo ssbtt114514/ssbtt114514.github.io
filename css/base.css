@@ -14,10 +14,16 @@
     --text-2: rgba(31, 42, 62, 0.65);
 
     /* Liquid Glass tokens */
-    --lg-bg: rgba(255, 255, 255, 0.32);
-    --lg-border: rgba(255, 255, 255, 0.4);
-    --lg-blur: blur(22px) saturate(200%) contrast(1.05);
-    --lg-shadow: 0 8px 32px rgba(31, 38, 135, 0.12), inset 0 1px 0 rgba(255,255,255,0.6);
+    --lg-bg: rgba(255, 255, 255, 0.30);
+    --lg-border: rgba(255, 255, 255, 0.42);
+    --lg-blur: blur(20px) saturate(175%) contrast(1.04);
+    --lg-shadow: 0 10px 34px rgba(31, 38, 135, 0.14), inset 0 1px 0 rgba(255,255,255,0.68);
+    /* 动态莫奈调色板，由 ColorThemeModule 写入 */
+    --monet-1: #667eea;
+    --monet-2: #764ba2;
+    --monet-3: #4facfe;
+    --monet-4: #8fd3f4;
+    --monet-speed: 18s;
 }
 
 * {
@@ -36,10 +42,9 @@ body {
     font-family: 'Inter', 'Segoe UI', sans-serif;
     min-height: 100vh;
     color: var(--text);
-    /* 静态渐变背景，无动画 */
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 35%, #4facfe 100%);
-    background-attachment: fixed;
+    background: #667eea;
     overflow-x: hidden;
+    isolation: isolate;
 }
 
 a { color: inherit; text-decoration: none; }

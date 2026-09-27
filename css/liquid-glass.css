@@ -17,14 +17,16 @@
         rgba(255, 255, 255, 0.32) 0%,
         rgba(255, 255, 255, 0.14) 50%,
         rgba(255, 255, 255, 0.22) 100%);
-    backdrop-filter: blur(22px) saturate(200%) contrast(1.05);
-    -webkit-backdrop-filter: blur(22px) saturate(200%) contrast(1.05);
+    backdrop-filter: var(--lg-blur);
+    -webkit-backdrop-filter: var(--lg-blur);
     border: 1px solid var(--lg-border);
     box-shadow:
-        0 8px 32px rgba(31, 38, 135, 0.12),
-        inset 0 1px 0 rgba(255, 255, 255, 0.6),
-        inset 0 -1px 0 rgba(255, 255, 255, 0.1),
-        inset 1px 0 0 rgba(255, 255, 255, 0.15);
+        0 10px 34px rgba(31, 38, 135, 0.14),
+        inset 0 1px 0 rgba(255, 255, 255, 0.72),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.12),
+        inset 1px 0 0 rgba(255, 255, 255, 0.18);
+    overflow: hidden;
+    isolation: isolate;
 }
 
 /* 网格卡片：无模糊，半透明渐变模拟玻璃（性能优先） */
@@ -129,4 +131,54 @@
 .glass-card:hover .lg-hover-highlight,
 .featured-project-card:hover .lg-hover-highlight {
     opacity: 1;
+}
+
+
+/* ===== 动态液态玻璃：用合成层移动高光，而不是持续改变布局/滤镜 ===== */
+:where(.glass-nav, .glass-card, .page-tabs, .video-modal-content, .featured-project-card)::marker {
+    display: none;
+}
+
+:where(.glass-nav, .glass-card, .page-tabs, .video-modal-content, .featured-project-card)::after {
+    background:
+        radial-gradient(
+            420px 220px at var(--lg-x, 50%) var(--lg-y, 0%),
+            rgba(255,255,255,.18),
+            transparent 68%
+        ),
+        linear-gradient(0deg, rgba(255,255,255,.07), transparent);
+    opacity: .95;
+    transition: opacity .25s ease;
+}
+
+.lg-hover-highlight {
+    width: 220px;
+    height: 220px;
+    background:
+        radial-gradient(circle at 50% 50%,
+            rgba(255,255,255,.22) 0%,
+            rgba(255,255,255,.09) 28%,
+            transparent 70%);
+    filter: blur(1px);
+    mix-blend-mode: screen;
+    will-change: transform, opacity;
+}
+
+@media (hover: none), (pointer: coarse) {
+    .lg-hover-highlight { display: none; }
+}
+
+@media (max-width: 700px) {
+    :where(.lg, .glass-nav, .glass-card, .page-tabs, .video-modal-content) {
+        backdrop-filter: blur(16px) saturate(165%) contrast(1.03);
+        -webkit-backdrop-filter: blur(16px) saturate(165%) contrast(1.03);
+    }
+}
+
+/* GPU/省电设备：保留玻璃透明感，减少昂贵的 backdrop-filter */
+@media (prefers-reduced-motion: reduce) {
+    :where(.lg, .glass-nav, .glass-card, .page-tabs, .video-modal-content) {
+        backdrop-filter: blur(12px) saturate(150%);
+        -webkit-backdrop-filter: blur(12px) saturate(150%);
+    }
 }

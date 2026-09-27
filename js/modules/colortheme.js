@@ -62,7 +62,8 @@ window.ColorThemeModule = {
      * 降采样 → 量化 → 按饱和度/亮度筛选 → 按频次排序
      */
     _extractPalette(img, maxColors = 10) {
-        const size = 64;
+        // 48×48 足够稳定，同时比原来的 64×64 少 44% 像素处理量。
+        const size = 48;
         const canvas = document.createElement('canvas');
         canvas.width = size;
         canvas.height = size;
@@ -70,49 +71,72 @@ window.ColorThemeModule = {
         ctx.drawImage(img, 0, 0, size, size);
         const data = ctx.getImageData(0, 0, size, size).data;
 
-        // 量化颜色（步长 24，约 11^3 = 1331 种）
         const buckets = new Map();
         for (let i = 0; i < data.length; i += 4) {
             const a = data[i + 3];
             if (a < 125) continue;
-            const r = Math.round(data[i] / 24) * 24;
-            const g = Math.round(data[i + 1] / 24) * 24;
-            const b = Math.round(data[i + 2] / 24) * 24;
-            const key = r + ',' + g + ',' + b;
-            buckets.set(key, (buckets.get(key) || 0) + 1);
-        }
 
-        // 按频次排序
-        const sorted = Array.from(buckets.entries()).sort((a, b) => b[1] - a[1]);
-
-        // 筛选有色彩的颜色（排除近灰/过暗/过亮），构建莫奈调色板
-        const vibrant = [];
-        const muted = [];
-        for (const [key, count] of sorted) {
-            const [r, g, b] = key.split(',').map(Number);
+            // 16 步量化，减少颜色桶数量，让调色板更稳定。
+            const r = Math.min(255, Math.round(data[i] / 16) * 16);
+            const g = Math.min(255, Math.round(data[i + 1] / 16) * 16);
+            const b = Math.min(255, Math.round(data[i + 2] / 16) * 16);
             const hsl = this._rgbToHsl(r, g, b);
-            const entry = { r, g, b, hsl, count };
-            // 莫奈取色：偏好中高饱和度、中等亮度的颜色
-            if (hsl.s > 0.18 && hsl.l > 0.2 && hsl.l < 0.85) {
-                vibrant.push(entry);
-            } else {
-                muted.push(entry);
-            }
-            if (vibrant.length >= maxColors) break;
+
+            // 去掉接近纯黑/纯白和低信息灰色，但保留柔和的莫奈色。
+            if (hsl.l < 0.06 || hsl.l > 0.96) continue;
+            const key = r + ',' + g + ',' + b;
+            const old = buckets.get(key);
+            buckets.set(key, old ? old + 1 : 1);
         }
 
-        //  vibrant 不足时用 muted 补充
-        const palette = vibrant.concat(muted).slice(0, maxColors);
-        if (palette.length < 2) {
-            // 极端情况：用平均色
-            let sr = 0, sg = 0, sb = 0, n = 0;
-            for (const [key] of sorted.slice(0, 5)) {
-                const [r, g, b] = key.split(',').map(Number);
-                sr += r; sg += g; sb += b; n++;
+        const sorted = Array.from(buckets.entries())
+            .sort((a, b) => b[1] - a[1]);
+
+        // 用“频率 + 饱和度 + 中等亮度 + 色相间距”挑选真正互补的颜色。
+        const candidates = sorted.map(([key, count]) => {
+            const [r, g, b] = key.split(',').map(Number);
+            return { r, g, b, hsl: this._rgbToHsl(r, g, b), count };
+        });
+
+        const palette = [];
+        for (const item of candidates) {
+            const { s, l } = item.hsl;
+            const score = item.count *
+                (0.55 + Math.min(1, s * 1.8)) *
+                (0.75 + (1 - Math.abs(l - 0.52)));
+
+            item.score = score;
+            if (palette.length === 0) {
+                palette.push(item);
+                continue;
             }
-            palette.push({ r: sr / n, g: sg / n, b: sb / n, hsl: { h: 0.6, s: 0.5, l: 0.5 }, count: 1 });
+
+            const separated = palette.every(p => {
+                let d = Math.abs(item.hsl.h - p.hsl.h);
+                d = Math.min(d, 1 - d);
+                return d > 0.055 || Math.abs(item.hsl.l - p.hsl.l) > 0.16;
+            });
+
+            if (separated) palette.push(item);
+            if (palette.length >= maxColors) break;
         }
-        return palette;
+
+        // 若色相过于集中，用高频颜色补齐。
+        for (const item of candidates) {
+            if (palette.length >= maxColors) break;
+            if (!palette.includes(item)) palette.push(item);
+        }
+
+        if (palette.length < 2) {
+            const fallback = candidates[0] || {
+                r: 102, g: 126, b: 234,
+                hsl: this._rgbToHsl(102, 126, 234),
+                count: 1
+            };
+            palette.push(fallback);
+        }
+
+        return palette.slice(0, maxColors);
     },
 
     /**
@@ -124,6 +148,20 @@ window.ColorThemeModule = {
         this.isDark = document.body.classList.contains('dark');
 
         const root = document.documentElement;
+        // 把完整调色板暴露给 CSS。背景动画只移动 transform，不在每帧修改颜色。
+        const monet = palette.slice(0, 4);
+        const monetColors = monet.map((c, i) => {
+            const v = this.isDark ? this._darken(c, 0.22) : c;
+            const rgb = `rgb(${Math.round(v.r)}, ${Math.round(v.g)}, ${Math.round(v.b)})`;
+            root.style.setProperty(`--monet-${i + 1}`, rgb);
+            return rgb;
+        });
+        while (monetColors.length < 4) {
+            const fallback = monetColors[monetColors.length - 1] || 'rgb(102,126,234)';
+            root.style.setProperty(`--monet-${monetColors.length + 1}`, fallback);
+            monetColors.push(fallback);
+        }
+
 
         // 按"活力值"排序：饱和度 × 亮度适中度
         const byVibrance = [...palette].sort((a, b) => {
@@ -159,8 +197,9 @@ window.ColorThemeModule = {
             `rgb(${Math.round(c.r)},${Math.round(c.g)},${Math.round(c.b)}) ${Math.round(i / (bgColors.length - 1) * 100)}%`
         ).join(', ');
 
-        document.body.style.background = `linear-gradient(135deg, ${stops})`;
-        document.body.style.backgroundAttachment = 'fixed';
+        // 保留 body 的纯色兜底；动态渐变交给独立的 .monet-background，
+        // 避免频繁修改 body background 导致整页重绘。
+        document.body.style.background = `rgb(${Math.round(p.r)},${Math.round(p.g)},${Math.round(p.b)})`;
 
         // 更新液态玻璃 token
         root.style.setProperty('--lg-border',

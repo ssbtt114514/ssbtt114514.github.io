@@ -13,6 +13,7 @@ const PAGE_MODULES = [
 let currentPageId = 'profile';
 let isAnimating = false;
 let loadingOverlay = null;
+const initializedModules = new Set();
 
 function showLoading(msg = '初始化模块') {
     if (!loadingOverlay) loadingOverlay = document.getElementById('loading-overlay');
@@ -54,7 +55,6 @@ function buildPages() {
     }
     pagesContainer.innerHTML = '';
 
-    // Create cube stage
     const cubeStage = document.createElement('div');
     cubeStage.className = 'cube-stage';
     cubeStage.id = 'cubeStage';
@@ -67,32 +67,37 @@ function buildPages() {
         if (page.id === currentPageId) pageDiv.classList.add('active-page');
         cubeStage.appendChild(pageDiv);
     });
-    console.log('📄 页面容器创建完成，开始初始化各模块...');
 
-    PAGE_MODULES.forEach(page => {
-        showLoading(`正在加载 ${page.name} 模块...`);
-        if (page.module && typeof page.module.init === 'function') {
-            try {
-                page.module.init(`${page.id}Page`);
-                console.log(`✅ 模块 ${page.id} 初始化成功`);
-            } catch (err) {
-                console.error(`❌ 模块 ${page.id} 初始化失败:`, err);
-                const pageDiv = document.getElementById(`${page.id}Page`);
-                if (pageDiv) {
-                    pageDiv.innerHTML = `<div class="glass-card" style="color:red; text-align:center;">模块加载失败，请检查控制台<br>${err.message}</div>`;
-                }
-            }
-        } else {
-            console.warn(`⚠️ 模块 ${page.id} 未定义或缺少 init 方法`);
+    // 首屏只同步初始化当前模块；其它模块放到浏览器空闲时间，避免启动时卡顿。
+    const initModule = (page, silent = false) => {
+        if (!page.module || typeof page.module.init !== 'function') return;
+        if (!silent) showLoading(`正在加载 ${page.name} 模块...`);
+
+        try {
+            page.module.init(`${page.id}Page`);
+            initializedModules.add(page.id);
+            console.log(`✅ 模块 ${page.id} 初始化成功`);
+        } catch (err) {
+            console.error(`❌ 模块 ${page.id} 初始化失败:`, err);
             const pageDiv = document.getElementById(`${page.id}Page`);
             if (pageDiv) {
-                pageDiv.innerHTML = `<div class="glass-card" style="text-align:center;">模块未就绪，请刷新页面</div>`;
+                pageDiv.innerHTML =
+                    `<div class="glass-card" style="color:red;text-align:center;">模块加载失败，请检查控制台<br>${Utils.escapeHtml(err.message || err)}</div>`;
             }
         }
+    };
+
+    const first = PAGE_MODULES.find(p => p.id === currentPageId);
+    if (first) initModule(first);
+
+    const rest = PAGE_MODULES.filter(p => p.id !== currentPageId);
+    const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 80));
+    idle(() => {
+        rest.forEach(page => initModule(page, true));
     });
+
     hideLoading();
 }
-
 function getPageIndex(pageId) {
     return PAGE_MODULES.findIndex(p => p.id === pageId);
 }
@@ -108,6 +113,18 @@ function switchPage(pageId) {
     const oldPage = document.getElementById(`${currentPageId}Page`);
     const newPage = document.getElementById(`${pageId}Page`);
     const cubeStage = document.getElementById('cubeStage');
+
+    // 用户快速点击未完成空闲初始化的标签时，立即补初始化，避免空白页。
+    const targetModule = PAGE_MODULES.find(p => p.id === pageId);
+    if (targetModule && !initializedModules.has(pageId) &&
+        targetModule.module && typeof targetModule.module.init === 'function') {
+        try {
+            targetModule.module.init(`${pageId}Page`);
+            initializedModules.add(pageId);
+        } catch (err) {
+            console.error(`❌ 模块 ${pageId} 延迟初始化失败:`, err);
+        }
+    }
 
     // Lock container height during animation to prevent layout shift
     if (oldPage && cubeStage) {
@@ -198,40 +215,50 @@ function initColorTheme() {
  */
 function initLiquidGlassHover() {
     const container = document.getElementById('pagesContainer');
-    if (!container) return;
+    if (!container || !window.matchMedia('(hover: hover)').matches) return;
 
-    let rafId = null;
-    let pendingX = 0, pendingY = 0;
+    let rafId = 0;
     let activeEl = null;
+    let pendingX = 0, pendingY = 0;
 
-    container.addEventListener('mouseover', (e) => {
+    container.addEventListener('pointerover', (e) => {
         const card = e.target.closest('.glass-card, .featured-project-card');
-        if (!card || activeEl === card) return;
-        activeEl = card;
-        if (!card.querySelector('.lg-hover-highlight')) {
-            const hl = document.createElement('div');
-            hl.className = 'lg-hover-highlight';
-            card.appendChild(hl);
+        if (!card || !container.contains(card)) return;
+
+        if (activeEl !== card) {
+            activeEl = card;
+            let hl = card.querySelector(':scope > .lg-hover-highlight');
+            if (!hl) {
+                hl = document.createElement('div');
+                hl.className = 'lg-hover-highlight';
+                card.appendChild(hl);
+            }
         }
     });
 
-    container.addEventListener('mousemove', (e) => {
+    container.addEventListener('pointermove', (e) => {
         if (!activeEl) return;
         const rect = activeEl.getBoundingClientRect();
         pendingX = e.clientX - rect.left;
         pendingY = e.clientY - rect.top;
+
         if (rafId) return;
         rafId = requestAnimationFrame(() => {
-            const hl = activeEl.querySelector('.lg-hover-highlight');
-            if (hl) hl.style.transform = `translate(${pendingX}px, ${pendingY}px) translate(-50%, -50%)`;
-            rafId = null;
+            const hl = activeEl && activeEl.querySelector(':scope > .lg-hover-highlight');
+            if (hl) {
+                hl.style.transform =
+                    `translate3d(${pendingX}px,${pendingY}px,0) translate(-50%,-50%)`;
+            }
+            if (activeEl) {
+                activeEl.style.setProperty('--lg-x', `${pendingX}px`);
+                activeEl.style.setProperty('--lg-y', `${pendingY}px`);
+            }
+            rafId = 0;
         });
-    });
+    }, { passive: true });
 
-    container.addEventListener('mouseout', (e) => {
-        if (activeEl && !activeEl.contains(e.relatedTarget)) {
-            activeEl = null;
-        }
+    container.addEventListener('pointerout', (e) => {
+        if (activeEl && !activeEl.contains(e.relatedTarget)) activeEl = null;
     });
 }
 

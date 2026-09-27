@@ -18,6 +18,13 @@
 </head>
 <body>
 
+<!-- 动态莫奈背景：颜色由头像调色板驱动，动画主要使用 transform/opacity，降低重绘成本 -->
+<div class="monet-background" aria-hidden="true">
+    <div class="monet-orb monet-orb-1"></div>
+    <div class="monet-orb monet-orb-2"></div>
+    <div class="monet-orb monet-orb-3"></div>
+</div>
+
 <!-- 全局加载遮罩 -->
 <div id="loading-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); color:white; display:flex; align-items:center; justify-content:center; z-index:10000; font-size:1.5rem; backdrop-filter:blur(4px); flex-direction:column; gap:10px;">
     <i class="fas fa-spinner fa-pulse" style="font-size:2rem;"></i>
