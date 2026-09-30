@@ -276,6 +276,8 @@ function openPerson(name){
   const row = ds.rows.find(r => r.name === name);
   if (!row) return;
   const recs = historyOf(name);
+  // 重建前先销毁抽屉内可能残留的图表实例（防止指向已分离 DOM）
+  disposeChartsWithin('#sheetBody');
   $('#sheetBody').innerHTML = personHTML(row, recs, ds);
   $('#sheetWrap').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -286,6 +288,7 @@ function openPerson(name){
     if (radarEl) {
       const axes = ds.subjects.filter(s => row.subjects[s]?.score != null);
       renderRadarChart(radarEl, axes, axes.map(s => row.subjects[s].score / (ds._max[s] || 1) * 100), PRIMARY_HEX);
+      resizeChart(radarEl);
     }
     // 初始化各科成绩折线图
     const slEl = $('#subjectLineChart');
@@ -297,9 +300,10 @@ function openPerson(name){
         axes.map(s => row.subjects[s].rank),
         axes.map(s => SUBJ_COLORS[s])
       );
+      resizeChart(slEl);
     }
     // 初始化历史折线图
-    if (recs.length > 1) drawHistory(recs, 'total');
+    if (recs.length > 1) { drawHistory(recs, 'total'); resizeChart($('#hChart')); }
   }));
   if (recs.length > 1) {
     $('#hChips').addEventListener('click', e => {
@@ -307,6 +311,8 @@ function openPerson(name){
       if (!b) return;
       $$('#hChips .chip').forEach(c => c.classList.toggle('on', c === b));
       drawHistory(recs, b.dataset.metric);
+      // 切换后下一帧校正尺寸，确保任何布局下都正常出图
+      requestAnimationFrame(() => resizeChart($('#hChart')));
     });
   }
 }
@@ -314,10 +320,8 @@ function openPerson(name){
 function closeSheet(){
   $('#sheetWrap').classList.remove('open');
   document.body.style.overflow = '';
-  // 销毁抽屉内的 ECharts 实例
-  disposeChart($('#radarChart'));
-  disposeChart($('#subjectLineChart'));
-  disposeChart($('#hChart'));
+  // 销毁抽屉内的所有 ECharts 实例
+  disposeChartsWithin('#sheetBody');
 }
 
 /* ================= 考试管理弹窗 ================= */

@@ -15,14 +15,30 @@ function getChart(el){
   if (!el) return null;
   if (_chartInstances.has(el)) return _chartInstances.get(el);
   const c = echarts.init(el, null, { renderer: 'canvas' });
+  // 初始化后立即校正尺寸，避免在元素刚创建/隐藏时拿到 0 宽高
+  c.resize();
   _chartInstances.set(el, c);
   return c;
+}
+
+function resizeChart(el){
+  const c = _chartInstances.get(el);
+  if (c) c.resize();
 }
 
 function disposeChart(el){
   if (_chartInstances.has(el)) {
     _chartInstances.get(el).dispose();
     _chartInstances.delete(el);
+  }
+}
+
+/* 销毁某个容器内的所有图表（抽屉重建前调用，防止实例指向已分离 DOM） */
+function disposeChartsWithin(rootSel){
+  const root = typeof rootSel === 'string' ? document.querySelector(rootSel) : rootSel;
+  if (!root) return;
+  for (const [el, c] of [..._chartInstances]) {
+    if (root.contains(el)) { c.dispose(); _chartInstances.delete(el); }
   }
 }
 
