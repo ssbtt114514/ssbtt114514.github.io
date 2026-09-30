@@ -1,83 +1,105 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="light">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>成绩排名系统</title>
-<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%230d9488'/%3E%3Crect x='5' y='12' width='4' height='7' rx='1.2' fill='white'/%3E%3Crect x='10' y='7' width='4' height='12' rx='1.2' fill='white'/%3E%3Crect x='15' y='10' width='4' height='9' rx='1.2' fill='white'/%3E%3C/svg%3E">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>成绩排名分析台 · RankBoard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Noto+Serif+SC:wght@700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%230e7490'/%3E%3Crect x='5' y='12' width='4' height='7' rx='1.2' fill='white'/%3E%3Crect x='10' y='7' width='4' height='12' rx='1.2' fill='white'/%3E%3Crect x='15' y='10' width='4' height='9' rx='1.2' fill='white'/%3E%3C/svg%3E">
 </head>
 <body>
-<div class="bg-mesh"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div><div class="orb o4"></div></div>
-<div class="grain"></div>
-<div class="app" id="app">
-  <!-- ===== 视图：榜单 ===== -->
-  <header class="topbar">
-    <h1><span class="logo-dot"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 19V11M12 19V5M19 19v-6" stroke="white" stroke-width="2.6" stroke-linecap="round"/></svg></span>成绩排名系统</h1>
-    <button class="icon-btn rippable" id="btnManage" title="管理考试" aria-label="管理考试">
-      <svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M4 7h11M19 7h1M4 12h1M9 12h11M4 17h7M15 17h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="17.5" cy="7" r="2.3" stroke="currentColor" stroke-width="2"/><circle cx="7" cy="12" r="2.3" stroke="currentColor" stroke-width="2"/><circle cx="13" cy="17" r="2.3" stroke="currentColor" stroke-width="2"/></svg>
-    </button>
-    <button class="icon-btn rippable" id="btnImportTop" title="导入表格" aria-label="导入表格">
-      <svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M12 16V4m0 0L8 8m4-4 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16v2.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-    </button>
+<div class="bg"><i class="field f1"></i><i class="field f2"></i><i class="field f3"></i><i class="field f4"></i></div>
+<div class="noise"></div>
+
+<div class="shell">
+  <header class="appbar glass">
+    <div class="logo">榜</div>
+    <div class="brand"><h1><span>成绩排名分析台</span></h1><p>RANK BOARD · SCORE STUDIO</p></div>
+    <div class="appbar-actions">
+      <button class="btn tonal rip" id="btnManage" title="管理考试">⚙ 管理</button>
+      <button class="btn tonal rip" id="btnImport">📂 导入数据</button>
+      <button class="icon-btn rip" id="btnTheme" title="切换主题">🌙</button>
+    </div>
   </header>
 
-  <div class="chip-row" id="examChips"></div>
-  <div class="search-wrap">
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.2-3.2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-    <input class="search" id="search" type="search" placeholder="搜索姓名…" autocomplete="off">
-  </div>
-  <nav class="tab-bar" id="tabBar" role="tablist"><span class="tab-indicator" id="tabIndicator"></span></nav>
+  <main>
+    <!-- 空态 -->
+    <section id="emptyState">
+      <div class="glass drop" id="dropCard">
+        <div class="papers" aria-hidden="true"><span class="pp p1"></span><span class="pp p2"></span><span class="pp p3"></span></div>
+        <h2 class="display"><span>把成绩单，变成一目了然的榜单</span></h2>
+        <p>支持 CSV 格式，可多选文件（每个文件视为一场考试）或直接选择 <code>list</code> 文件夹。<br>自动识别：姓名 / 班名 / 总分 / 年名 / 九科成绩及年名，缺失科目自动隐藏。</p>
+        <div class="drop-btns">
+          <button class="btn filled rip" id="btnPickFiles">选择 CSV 文件</button>
+          <button class="btn tonal rip" id="btnPickFolder">选择文件夹</button>
+        </div>
+        <p class="hint">🔒 所有数据仅在本地浏览器处理，不会上传 · 可拖拽文件到此处</p>
+      </div>
+    </section>
 
-  <main id="listView">
-    <section class="podium" id="podium"></section>
-    <section class="rank-list" id="rankList"></section>
+    <!-- 应用 -->
+    <section id="app" hidden>
+      <div class="exambar glass"><span class="lab">考试场次</span><span id="examChips" style="display:contents"></span></div>
+      <section class="overview">
+        <div class="stats glass">
+          <div class="stat"><span class="s-label">参考人数</span><b class="gnum" id="stCount">0</b><span class="s-sub" id="stCountSub">人</span></div>
+          <div class="stat"><span class="s-label">最高总分</span><b class="gnum" id="stMax">0</b><span class="s-sub">分</span></div>
+          <div class="stat"><span class="s-label">平均总分</span><b class="gnum" id="stAvg">0</b><span class="s-sub">分</span></div>
+          <div class="stat"><span class="s-label">榜单科目</span><b class="gnum" id="stSub">0</b><span class="s-sub" id="stSubSub">科</span></div>
+        </div>
+        <div class="glass podium-card">
+          <h3>🏆 前三名</h3>
+          <div class="podium" id="podium"></div>
+        </div>
+      </section>
+      <div class="layout">
+        <section class="ranking glass">
+          <div class="ranking-head">
+            <h2 class="display">排名榜</h2>
+            <div class="search"><input id="searchInput" placeholder="搜索姓名…"></div>
+          </div>
+          <div class="tabs" id="rankTabs"></div>
+          <div class="thead"><span>名次</span><span>学生</span><span id="thMid">班内</span><span id="thScore">总分</span></div>
+          <ol id="rankList"></ol>
+        </section>
+        <aside class="side">
+          <div class="glass kings"><h3>👑 单科之王</h3><div id="kings"></div></div>
+          <div class="glass note"><h3 style="font:900 14px 'Noto Serif SC';margin-bottom:10px">📁 数据来源</h3><div id="srcList"></div><p style="margin-top:10px">点击任意一行可查看该生各科明细与历史轨迹；切换顶部场次可独立或汇总查看。</p></div>
+        </aside>
+      </div>
+    </section>
   </main>
-
-  <!-- ===== 视图：学生详情 ===== -->
-  <main class="detail" id="detailView" hidden></main>
 </div>
 
-<!-- FAB 导入菜单 -->
-<div class="fab-scrim" id="fabScrim"></div>
-<div class="fab-wrap" id="fabWrap">
-  <div class="fab-item">
-    <span class="label-fab">导入文件夹（list 结构）</span>
-    <button class="fi-ic rippable" id="fabFolder" title="导入文件夹" aria-label="导入文件夹">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.2h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
-    </button>
-  </div>
-  <div class="fab-item">
-    <span class="label-fab">导入 CSV 表格</span>
-    <button class="fi-ic rippable" id="fabFile" title="导入表格" aria-label="导入表格">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14 3v5h5" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
-    </button>
-  </div>
-  <button class="fab rippable" id="fab" aria-label="导入">
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
-  </button>
+<button class="fab rip" id="fab" title="追加导入">＋</button>
+
+<!-- 个人详情底部抽屉 -->
+<div class="sheet-wrap" id="sheetWrap">
+  <div class="sheet-back"></div>
+  <div class="sheet glass" id="sheetBody"></div>
 </div>
 
-<!-- 管理考试弹窗 -->
-<div class="scrim" id="manageScrim">
-  <div class="dialog glass-strong" role="dialog" aria-modal="true" aria-label="管理考试">
-    <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="color:var(--primary)"><path d="M4 7h11M19 7h1M4 12h1M9 12h11M4 17h7M15 17h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="17.5" cy="7" r="2.3" stroke="currentColor" stroke-width="2"/><circle cx="7" cy="12" r="2.3" stroke="currentColor" stroke-width="2"/><circle cx="13" cy="17" r="2.3" stroke="currentColor" stroke-width="2"/></svg>管理考试</h3>
-    <p class="d-sub">修改名称会自动按日期重新排序；「汇总」按各次考试平均分计算。</p>
+<!-- 考试管理弹窗 -->
+<div class="mgr-wrap" id="mgrWrap">
+  <div class="mgr-back"></div>
+  <div class="mgr-dialog glass">
+    <h3>⚙ 考试管理</h3>
     <div id="manageList"></div>
-    <div class="d-actions"><button class="btn-text rippable" id="mgClose">完成</button></div>
+    <div style="display:flex;justify-content:flex-end;margin-top:16px">
+      <button class="btn tonal rip" id="mgrClose">完成</button>
+    </div>
   </div>
 </div>
 
-<div class="snack" id="snack"></div>
-<input type="file" id="fileInput" multiple hidden>
-<input type="file" id="folderInput" webkitdirectory directory multiple hidden>
-</script>
-<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
-<script>if(typeof echarts==="undefined")document.write('<script src="js/lib/echarts.min.js"><\/script>');</script>
+<div class="toast" id="toast"></div>
+<input type="file" id="fileCsv" multiple hidden>
+<input type="file" id="fileDir" webkitdirectory hidden>
+
 <script src="js/csv.js"></script>
-<script src="js/store.js"></script>
 <script src="js/charts.js"></script>
+<script src="js/store.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>
