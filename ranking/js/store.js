@@ -69,28 +69,32 @@ function historyOf(name){
   })).filter(r => r.row).sort((a, b) => (a.date?.getTime() ?? 0) - (b.date?.getTime() ?? 0));
 }
 
+/* ---------- 安全存储（跟踪保护/隐私模式下 localStorage 可能被禁用） ---------- */
+const SafeStore = {
+  get(k){ try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v){ try { localStorage.setItem(k, v); return true; } catch (e) { return false; } },
+  remove(k){ try { localStorage.removeItem(k); } catch (e) {} }
+};
+
 /* ---------- 本地持久化 ---------- */
 function persistExams(){
-  try {
-    const data = state.exams.map(e => ({ label: e.label, csv: e._csv }));
-    localStorage.setItem(LS_KEY, JSON.stringify(data));
-  } catch (e) { /* 配额超限忽略 */ }
+  const data = state.exams.map(e => ({ label: e.label, csv: e._csv }));
+  SafeStore.set(LS_KEY, JSON.stringify(data));
 }
 
 function loadPersisted(){
-  try {
-    const raw = localStorage.getItem(LS_KEY);
-    if (!raw) return false;
-    const arr = JSON.parse(raw);
-    if (!Array.isArray(arr) || arr.length === 0) return false;
-    let loaded = 0;
-    arr.forEach(x => {
-      if (x && x.csv) {
-        try { replaceExam(buildExam(x.label, x.csv)); loaded++; } catch (e) {}
-      }
-    });
-    return loaded > 0;
-  } catch (e) { return false; }
+  const raw = SafeStore.get(LS_KEY);
+  if (!raw) return false;
+  let arr;
+  try { arr = JSON.parse(raw); } catch (e) { return false; }
+  if (!Array.isArray(arr) || arr.length === 0) return false;
+  let loaded = 0;
+  arr.forEach(x => {
+    if (x && x.csv) {
+      try { replaceExam(buildExam(x.label, x.csv)); loaded++; } catch (e) {}
+    }
+  });
+  return loaded > 0;
 }
 
 /* ---------- 自动读取 list/manifest.json ---------- */
@@ -100,39 +104,56 @@ function loadByManifest(){
     .then(m => Array.isArray(m) ? m : (m.exams || []));
 }
 
-async function autoload(){
-  const loaded = [];
-  // 1) 尝试目录列表（仅本地 Python 服务器可用）
-  try {
-    const r = await fetch('list/', { cache: 'no-store' });
-    if (r.ok) {
-      const text = await r.text();
-      const hrefs = [...text.matchAll(/href=["']([^"']+)["']/g)].map(m => m[1]);
-      const folders = [...new Set(hrefs
-        .map(h => decodeURIComponent(h.split('?')[0]))
-        .filter(h => h.endsWith('/') && h !== '../' && !/^https?:/.test(h))
-        .map(h => h.slice(0, -1)))];
-      for (const f of folders) {
-        try {
-          const t = await fetch(`list/${f}/main.csv`).then(rr => rr.ok ? rr.text() : Promise.reject());
-          replaceExam(buildExam(prettify(f), t));
-          loaded.push(f);
-        } catch (e) {}
-      }
-    }
-  } catch (e) {}
-  if (loaded.length) return loaded;
+/* 是否本地开发环境（本地服务器才有目录列表） */
+const isLocalHost = ['localhost','127.0.0.1','0.0.0.0',''].includes(location.hostname);
 
-  // 2) GitHub Pages：读取 manifest.json
-  try {
-    const items = await loadByManifest();
-    for (const it of items) {
-      const name = typeof it === 'string' ? it : it.name;
-      const path = typeof it === 'string' ? `list/${name}/main.csv` : it.path;
-      const t = await fetch(path).then(rr => rr.ok ? rr.text() : Promise.reject());
-      replaceExam(buildExam(prettify(name), t));
-      loaded.push(name);
-    }
-  } catch (e) {}
+/* 从目录列表读取（仅本地 Python http.server，会生成可解析的 index） */
+async function loadFromDirectory(){
+  const loaded = [];
+  const r = await fetch('list/', { cache: 'no-store' });
+  if (!r.ok) return loaded;
+  const text = await r.text();
+  const hrefs = [...text.matchAll(/href=["']([^"']+)["']/g)].map(m => m[1]);
+  const folders = [...new Set(hrefs
+    .map(h => decodeURIComponent(h.split('?')[0]))
+    .filter(h => h.endsWith('/') && h !== '../' && !/^https?:/.test(h))
+    .map(h => h.slice(0, -1)))];
+  for (const f of folders) {
+    try {
+      const t = await fetch(`list/${f}/main.csv`).then(rr => rr.ok ? rr.text() : Promise.reject());
+      replaceExam(buildExam(prettify(f), t));
+      loaded.push(f);
+    } catch (e) {}
+  }
   return loaded;
+}
+
+/* 从 manifest 读取（GitHub Pages 等静态托管，无目录列表） */
+async function loadFromManifest(){
+  const loaded = [];
+  const items = await loadByManifest();
+  for (const it of items) {
+    const name = typeof it === 'string' ? it : it.name;
+    const path = typeof it === 'string' ? `list/${name}/main.csv` : it.path;
+    const t = await fetch(path).then(rr => rr.ok ? rr.text() : Promise.reject());
+    replaceExam(buildExam(prettify(name), t));
+    loaded.push(name);
+  }
+  return loaded;
+}
+
+async function autoload(){
+  // 本地开发：优先目录列表（新增文件夹无需改 manifest）
+  if (isLocalHost) {
+    try {
+      const d = await loadFromDirectory();
+      if (d.length) return d;
+    } catch (e) {}
+  }
+  // 静态托管（GitHub Pages）：直接读 manifest，避免对 list/ 的 404
+  try {
+    return await loadFromManifest();
+  } catch (e) {}
+  // 本地环境 manifest 也失败则不再尝试目录（上面已试）
+  return [];
 }

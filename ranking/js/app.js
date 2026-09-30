@@ -396,13 +396,13 @@ async function handleFiles(fileList){
 /* ================= 事件与初始化 ================= */
 
 function initTheme(){
-  document.documentElement.dataset.theme = localStorage.getItem('rb-theme') || 'light';
+  document.documentElement.dataset.theme = SafeStore.get('rb-theme') || 'light';
   const syncIcon = () => { $('#btnTheme').textContent = document.documentElement.dataset.theme === 'dark' ? '☀️' : '🌙'; };
   syncIcon();
   $('#btnTheme').onclick = () => {
     const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
     document.documentElement.dataset.theme = t;
-    localStorage.setItem('rb-theme', t);
+    SafeStore.set('rb-theme', t);
     syncIcon();
   };
 }
