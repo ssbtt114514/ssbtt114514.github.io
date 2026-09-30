@@ -1,5 +1,5 @@
 /* ============================================================
-   csv.js — CSV 解析与考试构建
+   csv.js — CSV 解析（PapaParse）与考试构建
    ============================================================ */
 const SUBJECTS = ['语文','数学','英语','物理','地理','生物','化学','历史','政治'];
 const SUBJ_COLORS = {
@@ -9,30 +9,7 @@ const SUBJ_COLORS = {
 const PRIMARY_HEX = '#0e7490';
 const AV_COLORS = ['#0e7490','#7c3aed','#db2777','#ea580c','#059669','#2563eb','#b45309'];
 
-/* ---------- CSV 解析（支持引号、逗号、制表符、换行） ---------- */
-function parseCSV(text){
-  text = String(text).replace(/^\uFEFF/, '');
-  const rows = [];
-  let row = [], cur = '', inQ = false;
-  for (let i = 0; i < text.length; i++) {
-    const c = text[i];
-    if (inQ) {
-      if (c === '"') {
-        if (text[i+1] === '"') { cur += '"'; i++; }
-        else inQ = false;
-      } else cur += c;
-    } else {
-      if (c === '"') inQ = true;
-      else if (c === ',' || c === '\t') { row.push(cur); cur = ''; }
-      else if (c === '\n') { row.push(cur); rows.push(row); row = []; cur = ''; }
-      else if (c !== '\r') cur += c;
-    }
-  }
-  if (cur !== '' || row.length) { row.push(cur); rows.push(row); }
-  return rows.filter(r => r.some(c => String(c).trim() !== ''));
-}
-
-/* ---------- 考试日期解析（文件夹名如 2026-3-5） ---------- */
+/* ---------- 日期解析 ---------- */
 function guessDate(label){
   let m = String(label).match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
   if (m) return new Date(+m[1], +m[2]-1, +m[3]);
@@ -41,7 +18,6 @@ function guessDate(label){
   return null;
 }
 
-/* ---------- 日期美化 ---------- */
 function prettify(label){
   const m = String(label).match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/)
     || String(label).match(/^.*?(\d{4})(\d{2})(\d{2}).*$/);
@@ -51,14 +27,12 @@ function prettify(label){
 
 /* ---------- 自动补全排名 ---------- */
 function ensureRanks(ex){
-  // 总分排名
   if (ex.rows.some(r => r.totalRank == null) && ex.rows.some(r => r.total != null)) {
     const vals = ex.rows.map(r => r.total).filter(v => v != null).sort((a, b) => b - a);
     ex.rows.forEach(r => {
       if (r.totalRank == null && r.total != null) r.totalRank = vals.indexOf(r.total) + 1;
     });
   }
-  // 各科排名
   for (const s of ex.subjects) {
     if (ex.rows.some(r => r.subjects[s]?.rank == null) && ex.rows.some(r => r.subjects[s]?.score != null)) {
       const vals = ex.rows.map(r => r.subjects[s]?.score).filter(v => v != null).sort((a, b) => b - a);
@@ -71,18 +45,24 @@ function ensureRanks(ex){
   }
 }
 
-/* ---------- 装饰：计算最大值 ---------- */
+/* ---------- 装饰：最大值 ---------- */
 function decorateDS(ds){
   ds._max = { total: Math.max(0, ...ds.rows.map(r => r.total ?? -1)) };
   for (const s of ds.subjects) ds._max[s] = Math.max(0, ...ds.rows.map(r => r.subjects[s]?.score ?? -1));
   return ds;
 }
 
-/* ---------- 从 CSV 文本构建考试对象 ---------- */
+/* ---------- 从 CSV 文本构建考试对象（PapaParse） ---------- */
 function buildExam(label, text){
-  const grid = parseCSV(text);
-  if (grid.length < 2) throw new Error('内容为空');
-  const header = grid[0].map(h => String(h).trim());
+  const result = Papa.parse(text, {
+    header: false,
+    skipEmptyLines: 'greedy',
+    dynamicTyping: false
+  });
+  const grid = result.data;
+  if (!grid || grid.length < 2) throw new Error('内容为空');
+
+  const header = grid[0].map(h => String(h ?? '').trim());
   const find = cands => {
     for (const c of cands) {
       const i = header.indexOf(c);
@@ -158,7 +138,7 @@ function buildExam(label, text){
   return ex;
 }
 
-/* ---------- 汇总多场考试（平均值） ---------- */
+/* ---------- 汇总多场考试 ---------- */
 function mergeExams(exams){
   const map = new Map();
   for (const ex of exams) {
@@ -203,7 +183,7 @@ function mergeExams(exams){
   return ex;
 }
 
-/* ---------- 文件读取（自动检测 UTF-8 / GBK） ---------- */
+/* ---------- 文件读取（UTF-8 / GBK 自动检测） ---------- */
 function readSmart(file){
   return new Promise((res, rej) => {
     const fr = new FileReader();

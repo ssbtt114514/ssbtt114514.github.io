@@ -214,7 +214,7 @@ function personHTML(row, recs, ds){
   }).join('');
   const axes = ds.subjects.filter(s => row.subjects[s]?.score != null);
   const radar = axes.length >= 3
-    ? radarSVG(axes, axes.map(s => row.subjects[s].score / (maxs[s] || 1)), PRIMARY_HEX)
+    ? '<div id="radarChart" class="chart-box"></div>'
     : '<p class="mut" style="padding:20px;text-align:center">有效科目不足 3 科，暂不绘制雷达图</p>';
   const metrics = ['total', ...new Set(recs.flatMap(r => Object.keys(r.row.subjects).filter(s => r.row.subjects[s].score != null)))];
   let history;
@@ -223,7 +223,7 @@ function personHTML(row, recs, ds){
       <div class="hchips" id="hChips">
         ${metrics.map(m => `<button class="chip mini rip ${m === 'total' ? 'on' : ''}" data-metric="${m}">${m === 'total' ? '总分' : m}</button>`).join('')}
       </div>
-      <div id="hChart"></div>
+      <div id="hChart" class="chart-box"></div>
       <table class="htab"><thead><tr><th>考试</th><th>总分</th><th>年名</th><th>班名</th></tr></thead><tbody>
         ${recs.map(r => `<tr><td>${esc(r.label)}</td><td class="gnum">${fmtScore(r.row.total)}</td><td class="gnum">${r.row.totalRank ?? '–'}</td><td class="gnum">${r.row.classRank ?? '–'}</td></tr>`).join('')}
       </tbody></table>
@@ -257,9 +257,14 @@ function drawHistory(recs, metric){
     label: r.label,
     v: metric === 'total' ? r.row.total : r.row.subjects[metric]?.score
   })).filter(p => p.v != null);
-  $('#hChart').innerHTML = pts.length
-    ? lineSVG(pts.map(p => p.label), pts.map(p => p.v), color)
-    : '<p class="mut">该科目在历次考试中无数据</p>';
+  const el = $('#hChart');
+  if (!pts.length) {
+    disposeChart(el);
+    el.innerHTML = '<p class="mut">该科目在历次考试中无数据</p>';
+    return;
+  }
+  el.innerHTML = '';
+  renderHistoryChart(el, pts.map(p => p.label), pts.map(p => p.v), color);
 }
 
 function openPerson(name){
@@ -270,11 +275,18 @@ function openPerson(name){
   $('#sheetBody').innerHTML = personHTML(row, recs, ds);
   $('#sheetWrap').classList.add('open');
   document.body.style.overflow = 'hidden';
-  requestAnimationFrame(() => requestAnimationFrame(() =>
-    $$('#sheetBody .bar i').forEach(el => el.style.width = el.dataset.w + '%')
-  ));
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    $$('#sheetBody .bar i').forEach(el => el.style.width = el.dataset.w + '%');
+    // 初始化雷达图
+    const radarEl = $('#radarChart');
+    if (radarEl) {
+      const axes = ds.subjects.filter(s => row.subjects[s]?.score != null);
+      renderRadarChart(radarEl, axes, axes.map(s => row.subjects[s].score / (ds._max[s] || 1) * 100), PRIMARY_HEX);
+    }
+    // 初始化历史折线图
+    if (recs.length > 1) drawHistory(recs, 'total');
+  }));
   if (recs.length > 1) {
-    drawHistory(recs, 'total');
     $('#hChips').addEventListener('click', e => {
       const b = e.target.closest('[data-metric]');
       if (!b) return;
@@ -287,6 +299,9 @@ function openPerson(name){
 function closeSheet(){
   $('#sheetWrap').classList.remove('open');
   document.body.style.overflow = '';
+  // 销毁抽屉内的 ECharts 实例
+  disposeChart($('#radarChart'));
+  disposeChart($('#hChart'));
 }
 
 /* ================= 考试管理弹窗 ================= */
