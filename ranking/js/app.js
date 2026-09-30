@@ -247,6 +247,8 @@ function personHTML(row, recs, ds){
         <div class="s-grid">${cards || '<p class="mut">无科目数据</p>'}</div>
         <div class="radar-box">${radar}</div>
       </div>
+      <h3 style="margin:18px 0 4px">📈 各科成绩走势</h3>
+      <div id="subjectLineChart" class="chart-box"></div>
     </section>
     ${history}`;
 }
@@ -283,6 +285,17 @@ function openPerson(name){
       const axes = ds.subjects.filter(s => row.subjects[s]?.score != null);
       renderRadarChart(radarEl, axes, axes.map(s => row.subjects[s].score / (ds._max[s] || 1) * 100), PRIMARY_HEX);
     }
+    // 初始化各科成绩折线图
+    const slEl = $('#subjectLineChart');
+    if (slEl) {
+      const axes = ds.subjects.filter(s => row.subjects[s]?.score != null);
+      renderSubjectLineChart(
+        slEl, axes,
+        axes.map(s => row.subjects[s].score),
+        axes.map(s => row.subjects[s].rank),
+        axes.map(s => SUBJ_COLORS[s])
+      );
+    }
     // 初始化历史折线图
     if (recs.length > 1) drawHistory(recs, 'total');
   }));
@@ -301,6 +314,7 @@ function closeSheet(){
   document.body.style.overflow = '';
   // 销毁抽屉内的 ECharts 实例
   disposeChart($('#radarChart'));
+  disposeChart($('#subjectLineChart'));
   disposeChart($('#hChart'));
 }
 

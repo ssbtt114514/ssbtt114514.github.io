@@ -52,6 +52,30 @@ function decorateDS(ds){
   return ds;
 }
 
+/* ---------- 残缺数据补全 ----------
+   1) 缺总分：已知科目求和
+   2) 缺恰好一门科目、总分已知：总分 − 其余科目之和
+   3) 排名由 ensureRanks 依据分数统一重算
+*/
+function inferMissing(p, subjects){
+  const known = subjects.filter(s => p.subjects[s]?.score != null);
+  const missing = subjects.filter(s => p.subjects[s]?.score == null);
+  const sumKnown = known.reduce((a, s) => a + p.subjects[s].score, 0);
+
+  if (p.total == null && known.length) {
+    // 缺总分 → 科目求和
+    p.total = +sumKnown.toFixed(1);
+    p._totalInferred = true;
+  } else if (p.total != null && missing.length === 1 && known.length) {
+    // 缺一门科目 → 总分反推
+    const inferred = p.total - sumKnown;
+    if (inferred >= 0) {
+      p.subjects[missing[0]].score = +inferred.toFixed(1);
+      p.subjects[missing[0]]._inferred = true;
+    }
+  }
+}
+
 /* ---------- 从 CSV 文本构建考试对象（PapaParse） ---------- */
 function buildExam(label, text){
   const result = Papa.parse(text, {
@@ -106,21 +130,15 @@ function buildExam(label, text){
       totalRank: iTR > -1 ? num(g[iTR]) : null,
       subjects: {}
     };
-    if (p.total == null) {
-      let sum = 0, has = false;
-      for (const s of subjects) {
-        const v = num(g[subIdx[s].score]);
-        if (v != null) { sum += v; has = true; }
-      }
-      if (has) p.total = sum;
-    }
+    // 先解析各科
     for (const s of subjects) {
-      const sc = num(g[subIdx[s].score]);
       p.subjects[s] = {
-        score: sc,
+        score: num(g[subIdx[s].score]),
         rank: subIdx[s].rank > -1 ? num(g[subIdx[s].rank]) : null
       };
     }
+    // 残缺补全
+    inferMissing(p, subjects);
     rows.push(p);
   }
   if (!rows.length) throw new Error('无有效数据行');

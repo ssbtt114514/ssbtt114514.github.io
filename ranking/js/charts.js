@@ -92,6 +92,7 @@ function renderRadarChart(el, labels, values, color){
   chart.setOption({
     radar: {
       indicator: labels.map(l => ({ name: l, max: 100 })),
+      shape: 'polygon',
       radius: '65%',
       center: ['50%', '52%'],
       axisName: { color: 'rgba(120,120,140,0.9)', fontSize: 12 },
@@ -101,15 +102,73 @@ function renderRadarChart(el, labels, values, color){
     },
     series: [{
       type: 'radar',
-      data: [{
-        value: values,
-        name: '成绩占比',
-        symbol: 'circle',
-        symbolSize: 6,
-        lineStyle: { color, width: 2.5 },
-        itemStyle: { color },
-        areaStyle: { color: color + '33' }
-      }]
+      symbol: 'circle',
+      symbolSize: 6,
+      lineStyle: { color, width: 2.5, join: 'round', cap: 'round' },
+      itemStyle: { color, borderColor: '#fff', borderWidth: 1.5 },
+      areaStyle: { color: color + '33' },
+      data: [{ value: values, name: '成绩占比' }]
+    }]
+  }, true);
+}
+
+/* ---------- 科目成绩折线图（单次考试也可显示） ---------- */
+function renderSubjectLineChart(el, labels, scores, ranks, colors){
+  const chart = getChart(el);
+  if (!chart) return;
+  chart.setOption({
+    grid: { left: 50, right: 50, top: 40, bottom: 40 },
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: 'rgba(20,20,30,0.85)',
+      borderColor: 'rgba(255,255,255,0.1)',
+      textStyle: { color: '#fff', fontSize: 13 },
+      formatter: ps => {
+        const i = ps[0].dataIndex;
+        return `${labels[i]}<br/>${ps[0].marker} 得分：${scores[i] ?? '—'}`
+          + (ranks[i] != null ? `<br/>年名：${ranks[i]}` : '');
+      }
+    },
+    legend: { show: false },
+    xAxis: {
+      type: 'category',
+      data: labels,
+      boundaryGap: false,
+      axisLine: { lineStyle: { color: 'rgba(120,120,140,0.3)' } },
+      axisLabel: { color: 'rgba(120,120,140,0.85)', fontSize: 12 }
+    },
+    yAxis: [
+      {
+        type: 'value',
+        name: '得分',
+        scale: true,
+        splitLine: { lineStyle: { color: 'rgba(120,120,140,0.12)' } },
+        axisLabel: { color: 'rgba(120,120,140,0.8)', fontSize: 11 },
+        nameTextStyle: { color: 'rgba(120,120,140,0.8)' }
+      }
+    ],
+    series: [{
+      type: 'line',
+      data: scores,
+      smooth: true,
+      symbol: 'circle',
+      symbolSize: 9,
+      lineStyle: { color: PRIMARY_HEX, width: 3 },
+      itemStyle: {
+        color: p => colors[p.dataIndex] || PRIMARY_HEX,
+        borderColor: '#fff', borderWidth: 2
+      },
+      areaStyle: {
+        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+          { offset: 0, color: PRIMARY_HEX + '44' },
+          { offset: 1, color: PRIMARY_HEX + '00' }
+        ])
+      },
+      label: {
+        show: true, position: 'top',
+        color: 'rgba(120,120,140,0.9)', fontSize: 11,
+        formatter: p => p.data ?? ''
+      }
     }]
   }, true);
 }
