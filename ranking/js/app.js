@@ -265,7 +265,9 @@ function drawHistory(recs, metric){
     el.innerHTML = '<p class="mut">该科目在历次考试中无数据</p>';
     return;
   }
-  el.innerHTML = '';
+  // 仅当没有缓存实例（此前显示的是“无数据”提示）时才清理 DOM；
+  // 已有 ECharts 实例时不能用 innerHTML=''，否则会销毁其内部 canvas。
+  if (!_chartInstances.has(el)) el.innerHTML = '';
   renderHistoryChart(el, pts.map(p => p.label), pts.map(p => p.v), color);
 }
 

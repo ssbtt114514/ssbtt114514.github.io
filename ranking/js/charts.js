@@ -40,7 +40,19 @@ function renderHistoryChart(el, labels, values, color){
   const chart = getChart(el);
   if (!chart) return;
   chart.setOption({
-    grid: { left: 50, right: 24, top: 30, bottom: 40 },
+    grid: { left: 50, right: 24, top: 30, bottom: 62 },
+    dataZoom: [
+      { type: 'inside', start: 0, end: 100, zoomOnMouseWheel: true, moveOnMouseWheel: false, moveOnMouseMove: true },
+      {
+        type: 'slider', start: 0, end: 100, height: 18, bottom: 14,
+        borderColor: 'transparent', backgroundColor: 'rgba(120,120,140,0.08)',
+        fillerColor: 'rgba(14,116,144,0.18)', handleSize: '100%',
+        handleStyle: { color: color, borderColor: '#fff' },
+        moveHandleSize: 0, showDetail: false,
+        dataBackground: { lineStyle: { color: color }, areaStyle: { color: color + '33' } },
+        selectedDataBackground: { lineStyle: { color: color }, areaStyle: { color: color + '55' } }
+      }
+    ],
     tooltip: {
       trigger: 'axis',
       backgroundColor: 'rgba(20,20,30,0.85)',
@@ -118,6 +130,9 @@ function renderSubjectLineChart(el, labels, scores, ranks, colors){
   if (!chart) return;
   chart.setOption({
     grid: { left: 50, right: 50, top: 40, bottom: 40 },
+    dataZoom: [
+      { type: 'inside', start: 0, end: 100, zoomOnMouseWheel: true, moveOnMouseWheel: false, moveOnMouseMove: true }
+    ],
     tooltip: {
       trigger: 'axis',
       backgroundColor: 'rgba(20,20,30,0.85)',
