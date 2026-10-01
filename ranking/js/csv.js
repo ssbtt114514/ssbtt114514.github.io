@@ -25,23 +25,28 @@ function prettify(label){
   return label;
 }
 
-/* ---------- 自动补全排名 ---------- */
+/* ---------- 自动补全排名（竞赛排名 1224：同分同名次） ----------
+   scoreOf / getRank / setRank 以访问器形式传入，统一处理总分与各科。 */
+function assignRanks(rows, scoreOf, getRank, setRank){
+  const valid = rows.filter(r => scoreOf(r) != null);
+  if (!valid.length || valid.every(r => getRank(r) != null)) return;
+  const sorted = valid.map(scoreOf).sort((a, b) => b - a);
+  valid.forEach(r => {
+    if (getRank(r) == null) setRank(r, sorted.indexOf(scoreOf(r)) + 1);
+  });
+}
+
 function ensureRanks(ex){
-  if (ex.rows.some(r => r.totalRank == null) && ex.rows.some(r => r.total != null)) {
-    const vals = ex.rows.map(r => r.total).filter(v => v != null).sort((a, b) => b - a);
-    ex.rows.forEach(r => {
-      if (r.totalRank == null && r.total != null) r.totalRank = vals.indexOf(r.total) + 1;
-    });
-  }
+  // 总分排名
+  assignRanks(ex.rows, r => r.total, r => r.totalRank, (r, v) => r.totalRank = v);
+  // 各科排名
   for (const s of ex.subjects) {
-    if (ex.rows.some(r => r.subjects[s]?.rank == null) && ex.rows.some(r => r.subjects[s]?.score != null)) {
-      const vals = ex.rows.map(r => r.subjects[s]?.score).filter(v => v != null).sort((a, b) => b - a);
-      ex.rows.forEach(r => {
-        if (r.subjects[s] && r.subjects[s].rank == null && r.subjects[s].score != null) {
-          r.subjects[s].rank = vals.indexOf(r.subjects[s].score) + 1;
-        }
-      });
-    }
+    assignRanks(
+      ex.rows,
+      r => r.subjects[s]?.score,
+      r => r.subjects[s]?.rank,
+      (r, v) => { if (r.subjects[s]) r.subjects[s].rank = v; }
+    );
   }
 }
 

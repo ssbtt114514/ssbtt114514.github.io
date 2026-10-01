@@ -153,8 +153,8 @@ function renderList(flip = true){
 function renderKings(){
   const ds = currentDS();
   $('#kings').innerHTML = ds.subjects.map(s => {
-    const top = sortedFor(ds, s)[0];
-    if (!top || top.subjects[s]?.score == null) return '';
+    const top = topScorer(ds, s);
+    if (!top) return '';
     return `<div class="king">
       <i class="sdot" style="background:${SUBJ_COLORS[s]}"></i>
       <span class="ks">${s}</span><b>${esc(top.name)}</b>
@@ -390,9 +390,9 @@ async function handleFiles(fileList){
     }
   }
   if (added) {
-    if (state.exams.length === 1) state.mode = state.exams[0].id;
-    else if (!state.mode || !['all', ...state.exams.map(x => x.id)].includes(state.mode))
-      state.mode = state.exams[state.exams.length - 1].id;
+    // 首次导入直接展示新数据，否则保留用户当前选择（无效再自动校正）
+    if (state.exams.length === added && !state.mode) ensureMode();
+    else { state.mode = state.exams[state.exams.length - 1].id; }
     persistExams();
     renderAll();
     toast(`✅ 已导入 ${added} 场考试，共 ${state.exams.reduce((a, b) => a + b.rows.length, 0)} 条记录`);
@@ -476,10 +476,10 @@ async function init(){
   initTheme();
   initEvents();
 
-  // 优先自动读取 manifest（GitHub Pages）
+  // 优先自动读取（GitHub Pages 走 manifest，本地走目录列表）
   const autoloaded = await autoload();
   if (autoloaded.length) {
-    state.mode = state.exams[state.exams.length - 1].id;
+    ensureMode();
     renderAll();
     toast(`📂 已自动读取 ${autoloaded.length} 场考试`);
     return;
@@ -487,7 +487,7 @@ async function init(){
 
   // 其次读取本地存储
   if (loadPersisted()) {
-    state.mode = state.exams[state.exams.length - 1].id;
+    ensureMode();
     renderAll();
     return;
   }

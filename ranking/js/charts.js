@@ -3,7 +3,6 @@
    ============================================================ */
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
-const uid = () => Math.random().toString(36).slice(2, 9);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 const fmtScore = n => n == null ? '—' : (Number.isInteger(n) ? String(n) : n.toFixed(1));

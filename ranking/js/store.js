@@ -17,9 +17,8 @@ function replaceExam(ex){
 
 function removeExam(id){
   state.exams = state.exams.filter(e => e.id !== id);
-  if (state.mode === id) state.mode = state.exams.length ? state.exams[state.exams.length - 1].id : null;
-  if (state.mode === 'all' && state.exams.length <= 1) state.mode = state.exams[0]?.id ?? null;
   mergeCache = null;
+  ensureMode();
   persistExams();
 }
 
@@ -46,6 +45,17 @@ function currentDS(){
   return state.exams.find(e => e.id === state.mode) || state.exams[state.exams.length - 1];
 }
 
+/* 校正当前选中模式：无效则落到最新一场；汇总需 >1 场 */
+function ensureMode(){
+  const valid = ['all', ...state.exams.map(e => e.id)];
+  if (!state.mode || !valid.includes(state.mode)) {
+    state.mode = state.exams.length ? state.exams[state.exams.length - 1].id : null;
+  }
+  if (state.mode === 'all' && state.exams.length <= 1) {
+    state.mode = state.exams[0]?.id ?? null;
+  }
+}
+
 /* ---------- 排序 ---------- */
 function sortedFor(ds, view){
   const arr = [...ds.rows];
@@ -58,6 +68,16 @@ function sortedFor(ds, view){
     );
   }
   return arr;
+}
+
+/* 单科最高分学生（单次遍历 O(n)，避免为每科各做一次排序） */
+function topScorer(ds, subject){
+  let best = null;
+  for (const r of ds.rows) {
+    const sc = r.subjects[subject]?.score;
+    if (sc != null && (!best || sc > best.subjects[subject].score)) best = r;
+  }
+  return best;
 }
 
 /* ---------- 历史轨迹 ---------- */
@@ -115,8 +135,8 @@ async function loadFromDirectory(){
   const text = await r.text();
   const hrefs = [...text.matchAll(/href=["']([^"']+)["']/g)].map(m => m[1]);
   const folders = [...new Set(hrefs
-    .map(h => decodeURIComponent(h.split('?')[0]))
-    .filter(h => h.endsWith('/') && h !== '../' && !/^https?:/.test(h))
+    .map(h => decodeURIComponent(h.split('?')[0].split('#')[0]))
+    .filter(h => h.endsWith('/') && !/^(\.\.?)?\/$/.test(h) && !/^https?:/.test(h))
     .map(h => h.slice(0, -1)))];
   for (const f of folders) {
     try {
