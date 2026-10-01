@@ -8,6 +8,17 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 const fmtScore = n => n == null ? '—' : (Number.isInteger(n) ? String(n) : n.toFixed(1));
 
+/* 统一动画配置：入场逐个生长 + 数据切换平滑过渡 */
+const ANIM = {
+  animation: true,
+  animationDuration: 1100,
+  animationEasing: 'cubicOut',
+  animationDelay: idx => idx * 90,
+  animationDurationUpdate: 650,
+  animationEasingUpdate: 'cubicInOut',
+  animationDelayUpdate: idx => idx * 50
+};
+
 /* ECharts 实例缓存 */
 const _chartInstances = new Map();
 
@@ -56,6 +67,7 @@ function renderHistoryChart(el, labels, values, color){
   const chart = getChart(el);
   if (!chart) return;
   chart.setOption({
+    ...ANIM,
     grid: { left: 50, right: 24, top: 30, bottom: 62 },
     dataZoom: [
       { type: 'inside', start: 0, end: 100, zoomOnMouseWheel: true, moveOnMouseWheel: false, moveOnMouseMove: true },
@@ -118,6 +130,7 @@ function renderRadarChart(el, labels, values, color){
   const chart = getChart(el);
   if (!chart) return;
   chart.setOption({
+    ...ANIM,
     radar: {
       indicator: labels.map(l => ({ name: l, max: 100 })),
       shape: 'polygon',
@@ -145,6 +158,7 @@ function renderSubjectLineChart(el, labels, scores, ranks, colors){
   const chart = getChart(el);
   if (!chart) return;
   chart.setOption({
+    ...ANIM,
     grid: { left: 50, right: 50, top: 40, bottom: 40 },
     dataZoom: [
       { type: 'inside', start: 0, end: 100, zoomOnMouseWheel: true, moveOnMouseWheel: false, moveOnMouseMove: true }
