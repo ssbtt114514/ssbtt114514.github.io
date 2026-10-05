@@ -1,6 +1,24 @@
 {
   "projects": [
     {
+      "name": "StudyMap 学习思维导图",
+      "url": "StudyMap/",
+      "app": true,
+      "icon": "fas fa-project-diagram",
+      "color": "#0e7490",
+      "description": "学科思维导图，覆盖语文/数学/英语/物理/化学/地理/生物/历史，支持 Markdown 与 KaTeX 公式渲染。",
+      "language": "HTML / JS"
+    },
+    {
+      "name": "成绩排名分析台 RankBoard",
+      "url": "ranking/",
+      "app": true,
+      "icon": "fas fa-trophy",
+      "color": "#db2777",
+      "description": "多场次成绩排名与汇总，PapaParse 解析、ECharts 图表、个人详情抽屉与历史轨迹、残缺数据补全。",
+      "language": "HTML / JS"
+    },
+    {
       "name": "seewo手册",
       "url": "https://github.com/ssbtt114514/seewo.help",
       "button": true,

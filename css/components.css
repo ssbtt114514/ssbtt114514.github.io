@@ -318,6 +318,16 @@
 .featured-project-card::before { content:""; position:absolute; inset:0; background:linear-gradient(135deg, color-mix(in srgb, var(--primary) 8%, transparent), transparent 55%); pointer-events:none; opacity:.85; }
 .featured-project-card:hover .featured-project-name { color: var(--primary); }
 
+/* 站内应用卡片（StudyMap / ranking） */
+.featured-project-card.is-app .featured-project-name { display:flex; align-items:center; gap:9px; }
+.featured-project-card.is-app:hover .featured-project-name { color: inherit; }
+.app-icon { width:30px; height:30px; flex:0 0 30px; border-radius:9px; display:grid; place-items:center; font-size:.82rem; }
+.featured-project-card.is-app .featured-project-meta { justify-content:space-between; margin-top:14px; }
+.featured-project-card.is-app .featured-project-lang { color: var(--text-2); font-weight:700; }
+.app-enter { color: var(--c, var(--primary)); font-weight:800; font-size:.7rem; transition: transform .2s ease; }
+.featured-project-card.is-app:hover .app-enter { transform: translateX(3px); }
+.featured-project-card.is-app::before { background:linear-gradient(135deg, color-mix(in srgb, var(--c, var(--primary)) 10%, transparent), transparent 60%); }
+
 @media (prefers-reduced-motion: reduce) {
     .avatar-circle-big::after, .loading-icon, .loading-progress span { animation: none !important; }
 }

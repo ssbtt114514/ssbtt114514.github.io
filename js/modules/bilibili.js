@@ -61,6 +61,8 @@ window.BilibiliModule = {
             this.projects = [];
             for (let i = 0; i < projectsConfig.length; i++) {
                 const proj = projectsConfig[i];
+                // 站内应用（StudyMap/ranking）已在"著名项目"展示，此处仅列 GitHub 仓库
+                if (proj.app) continue;
                 try {
                     const urlParts = new URL(proj.url).pathname.split('/').filter(Boolean);
                     if (urlParts.length < 2) continue;

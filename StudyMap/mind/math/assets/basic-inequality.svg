@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="360" viewBox="0 0 720 360">
+  <rect width="720" height="360" rx="32" fill="#f6f8fc"/>
+  <text x="360" y="72" text-anchor="middle" font-family="system-ui, sans-serif" font-size="30" font-weight="700" fill="#202124">基本不等式</text>
+  <text x="360" y="150" text-anchor="middle" font-family="serif" font-size="46" fill="#1a1a1a">(a + b) / 2  ≥  √(ab)</text>
+  <text x="360" y="210" text-anchor="middle" font-family="system-ui, sans-serif" font-size="22" fill="#5f6368">a &gt; 0，b &gt; 0</text>
+  <path d="M160 280 H560" stroke="#adb5bd" stroke-width="2"/>
+  <text x="235" y="322" text-anchor="middle" font-family="system-ui, sans-serif" font-size="20" fill="#3c4043">积一定 → 和最小</text>
+  <text x="485" y="322" text-anchor="middle" font-family="system-ui, sans-serif" font-size="20" fill="#3c4043">和一定 → 积最大</text>
+</svg>

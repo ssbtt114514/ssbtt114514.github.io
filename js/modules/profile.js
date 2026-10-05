@@ -227,6 +227,20 @@ window.ProfileModule = {
             this.projects = [];
             for (let i = 0; i < projectsConfig.length; i++) {
                 const proj = projectsConfig[i];
+                // 站内应用（StudyMap / ranking 等子目录），无需请求 GitHub API
+                if (proj.app) {
+                    this.projects.push({
+                        name: proj.name,
+                        html_url: proj.url,
+                        description: proj.description || '暂无描述',
+                        stargazers_count: null,
+                        forks_count: null,
+                        language: proj.language || 'Web App',
+                        config: proj,
+                        isApp: true
+                    });
+                    continue;
+                }
                 try {
                     const urlParts = new URL(proj.url).pathname.split('/').filter(Boolean);
                     if (urlParts.length < 2) continue;
@@ -266,18 +280,40 @@ window.ProfileModule = {
         grid.innerHTML = '';
         this.projects.forEach(p => {
             const card = document.createElement('a');
-            card.className = 'featured-project-card';
+            card.className = 'featured-project-card' + (p.isApp ? ' is-app' : '');
             card.href = p.html_url;
-            card.target = '_blank';
-            const desc = p.description ? p.description.substring(0, 70) + (p.description.length > 70 ? '…' : '') : '暂无描述';
-            card.innerHTML = `
-                <div class="featured-project-name"><i class="fab fa-github"></i> ${Utils.escapeHtml(p.name)}</div>
-                <div class="featured-project-desc">${Utils.escapeHtml(desc)}</div>
-                <div class="featured-project-meta">
+            // 站内应用同标签页打开，外部仓库新开标签页
+            card.target = p.isApp ? '_self' : '_blank';
+
+            const desc = p.description
+                ? p.description.substring(0, 80) + (p.description.length > 80 ? '…' : '')
+                : '暂无描述';
+
+            let head, meta, footer;
+            if (p.isApp) {
+                head = `<div class="featured-project-name">
+                    <span class="app-icon" style="background:${p.config.color}1f;color:${p.config.color}">
+                        <i class="${p.config.icon}"></i>
+                    </span>${Utils.escapeHtml(p.name)}</div>`;
+                meta = '';
+                footer = `<div class="featured-project-meta">
+                    <span class="featured-project-lang">${Utils.escapeHtml(p.language)}</span>
+                    <span class="app-enter" style="--c:${p.config.color}">进入应用 →</span>
+                </div>`;
+            } else {
+                head = `<div class="featured-project-name"><i class="fab fa-github"></i> ${Utils.escapeHtml(p.name)}</div>`;
+                meta = `<div class="featured-project-meta">
                     <span><i class="fas fa-star"></i> ${p.stargazers_count}</span>
                     <span><i class="fas fa-code-branch"></i> ${p.forks_count}</span>
                     <span class="featured-project-lang">${p.language || 'Mixed'}</span>
-                </div>
+                </div>`;
+                footer = '';
+            }
+
+            card.innerHTML = `
+                ${head}
+                <div class="featured-project-desc">${Utils.escapeHtml(desc)}</div>
+                ${meta}${footer}
             `;
             grid.appendChild(card);
         });

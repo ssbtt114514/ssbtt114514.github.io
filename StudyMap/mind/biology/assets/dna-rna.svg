@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="380" viewBox="0 0 720 380">
+  <rect width="720" height="380" rx="32" fill="#f6f8fc"/>
+  <text x="360" y="56" text-anchor="middle" font-family="system-ui, sans-serif" font-size="28" font-weight="700" fill="#202124">DNA / RNA 核心区别</text>
+  <g font-family="system-ui, sans-serif" font-size="24" fill="#202124">
+    <text x="160" y="125" text-anchor="middle" font-weight="700">DNA</text>
+    <text x="560" y="125" text-anchor="middle" font-weight="700">RNA</text>
+    <text x="160" y="178" text-anchor="middle">脱氧核糖</text>
+    <text x="560" y="178" text-anchor="middle">核糖</text>
+    <text x="160" y="230" text-anchor="middle">A · G · C · T</text>
+    <text x="560" y="230" text-anchor="middle">A · G · C · U</text>
+    <text x="160" y="282" text-anchor="middle">一般双链</text>
+    <text x="560" y="282" text-anchor="middle">一般单链</text>
+  </g>
+  <path d="M360 100 V315" stroke="#c4c7c5" stroke-width="2" stroke-dasharray="8 8"/>
+</svg>
