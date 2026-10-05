@@ -131,31 +131,50 @@
     return output.join('/');
   }
 
-  function prepareMarkdownImages(markdown, markdownFile, resolveAsset) {
-    const replaceUrl = (url) => resolveAsset(normalizeRelative(url, markdownFile));
+  /* 原始 markdown 引用 → 项目根相对 key（绝对/数据 URL 原样保留），只解析一次 */
+  function toAssetKey(url, baseFile){
+    if (!url || url.startsWith('#') || isAbsoluteUrl(url)) return url;
+    return normalizeRelative(url, baseFile);
+  }
+
+  /* 根相对 key → http 模式下的绝对 URL（index.html 位于项目根，直接以其为基准） */
+  function keyToHttpUrl(key){
+    if (!key || isAbsoluteUrl(key)) return key;
+    try {
+      return new URL(key, location.href).href;
+    } catch {
+      return key;
+    }
+  }
+
+  /* 本地文件 → blob URL（统一登记，便于切换时回收） */
+  function blobFor(file){
+    const url = URL.createObjectURL(file);
+    state.localObjectUrls.add(url);
+    return url;
+  }
+
+  function prepareMarkdownImages(markdown, baseFile, mode){
+    // transform 阶段：http 模式用绝对 URL；embedded/local-folder 保留根相对 key，
+    // 待解析完成后再替换为 data/blob，避免非 http 协议被清洗。
+    const resolve = (raw) => {
+      const key = toAssetKey(raw, baseFile);
+      return mode === 'http' ? keyToHttpUrl(key) : key;
+    };
 
     // Markdown: ![alt](url "title") / ![alt](<url>)
     let result = markdown.replace(/!\[([^\]]*)\]\(\s*(?:<([^>]+)>|([^\s)]+))(?:\s+(['"][^'"]*['"]))?\s*\)/g,
       (full, alt, angleUrl, normalUrl, title) => {
         const source = angleUrl || normalUrl;
-        const replaced = replaceUrl(source);
+        const replaced = resolve(source);
         return `![${alt}](${replaced}${title ? ` ${title}` : ''})`;
       });
 
     // HTML <img src="...">
     result = result.replace(/(<img\b[^>]*?\bsrc\s*=\s*["'])([^"']+)(["'][^>]*>)/gi,
-      (full, prefix, url, suffix) => `${prefix}${replaceUrl(url)}${suffix}`);
+      (full, prefix, url, suffix) => `${prefix}${resolve(url)}${suffix}`);
 
     return result;
-  }
-
-  function resolveHttpAsset(url, markdownFile) {
-    if (!url || isAbsoluteUrl(url)) return url;
-    try {
-      return new URL(url, new URL(markdownFile, location.href)).href;
-    } catch {
-      return url;
-    }
   }
 
   function resolveEmbeddedAsset(key, fallbackBaseFile) {
@@ -190,42 +209,19 @@
     return { text: await response.text(), base: key, mode: 'http' };
   }
 
-  function resolveAssetForMode(url, base, mode) {
-    if (!url || isAbsoluteUrl(url)) return url;
-    const key = normalizeRelative(url, base);
-
-    // IMPORTANT: do not inject data:/blob: URLs before Markdown is transformed.
-    // markmap-lib/markdown-it may reject non-http schemes while sanitizing image URLs.
-    // Keep a normal project-relative URL during transform, then replace it in the
-    // already-generated node HTML afterwards. This makes SVG/PNG/JPG reliable.
-    if (mode === 'embedded' || mode === 'local-folder') return key;
-
-    return resolveHttpAsset(key, base);
-  }
-
   function replaceHtmlImageSources(root, baseFile, mode) {
     if (!root) return;
 
+    // 此时 src 对 http 模式已是绝对 URL（保留）；embedded/local 为根相对 key。
     const getReplacement = (src) => {
       if (!src || isAbsoluteUrl(src)) return src;
-      const normalizedSrc = pathKey(src);
-      const key = normalizedSrc.startsWith('mind/') ? normalizedSrc : normalizeRelative(src, baseFile);
-
-      if (mode === 'embedded') {
-        // Embedded assets are inserted only AFTER Markdown parsing, bypassing
-        // URL sanitization while keeping file:// mode fully self-contained.
-        return resolveEmbeddedAsset(key, baseFile);
-      }
-
+      const key = pathKey(src);
+      if (mode === 'embedded') return resolveEmbeddedAsset(key, baseFile);
       if (mode === 'local-folder') {
         const file = state.localFiles.get(key);
-        if (!file) return src;
-        const blobUrl = URL.createObjectURL(file);
-        state.localObjectUrls.add(blobUrl);
-        return blobUrl;
+        return file ? blobFor(file) : src;
       }
-
-      return src;
+      return keyToHttpUrl(key);
     };
 
     walkTree(root, (node) => {
@@ -233,6 +229,18 @@
       node.content = node.content.replace(
         /(<img\b[^>]*?\bsrc\s*=\s*["'])([^"']+)(["'][^>]*>)/gi,
         (full, prefix, src, suffix) => `${prefix}${getReplacement(src)}${suffix}`,
+      );
+    });
+  }
+
+  /* 为学科内链 <a href="subject:..."> 增加 internal-link 类（用于 ⇢ 标识） */
+  function tagInternalLinks(root){
+    if (!root) return;
+    walkTree(root, (node) => {
+      if (typeof node.content !== 'string' || !node.content.includes('subject:')) return;
+      node.content = node.content.replace(
+        /<a\b(?![^>]*\bclass=)([^>]*?)\bhref=["']subject:([^"']+)["']([^>]*)>/gi,
+        (full, before, id, after) => `<a${before} href="subject:${id}" class="internal-link"${after}>`
       );
     });
   }
@@ -246,23 +254,16 @@
       const source = img.getAttribute('src') || '';
       if (!source || isAbsoluteUrl(source)) continue;
 
-      const key = source.startsWith('mind/')
-        ? pathKey(source)
-        : normalizeRelative(source, baseFile);
-
+      // source 为根相对 key，直接按模式解析，不再与 base 目录二次拼接。
+      const key = pathKey(source);
       if (mode === 'embedded') {
         const replacement = resolveEmbeddedAsset(key, baseFile);
-        if (replacement && replacement !== key) {
-          img.setAttribute('src', replacement);
-        }
+        if (replacement && replacement !== key) img.setAttribute('src', replacement);
       } else if (mode === 'local-folder') {
         const file = state.localFiles.get(key);
-        if (!file) continue;
-        const blobUrl = URL.createObjectURL(file);
-        state.localObjectUrls.add(blobUrl);
-        img.setAttribute('src', blobUrl);
+        if (file) img.setAttribute('src', blobFor(file));
       } else {
-        img.setAttribute('src', resolveHttpAsset(key, baseFile));
+        img.setAttribute('src', keyToHttpUrl(key));
       }
     }
   }
@@ -312,8 +313,7 @@
   async function renderMarkdown(markdown, baseFile, mode) {
     els.svg.replaceChildren();
 
-    const prepared = prepareMarkdownImages(markdown, baseFile,
-      (url) => resolveAssetForMode(url, baseFile, mode));
+    const prepared = prepareMarkdownImages(markdown, baseFile, mode);
 
     const { root, features } = state.transformer.transform(prepared);
 
@@ -321,6 +321,7 @@
     // data/blob/file schemes are avoided during parsing, where they may be
     // rejected, and are only inserted into the final HTML node content.
     replaceHtmlImageSources(root, baseFile, mode);
+    tagInternalLinks(root);
     state.root = root;
 
     await ensureAssets(features);
@@ -408,6 +409,51 @@
     requestAnimationFrame(() => state.markmap?.fit());
   }
 
+  /* 解析"学科内链"，返回目标学科 id；非内链返回 null。
+     支持：subject:biology、?subject=biology、#/subject/biology */
+  function parseInternalSubject(href){
+    if (!href) return null;
+    let m = href.match(/^subject:([a-z0-9_-]+)/i);
+    if (m) return m[1];
+    try {
+      const u = new URL(href, location.href);
+      const qs = u.searchParams.get('subject');
+      if (qs) return qs;
+      m = u.hash.match(/subject\/([a-z0-9_-]+)/i);
+      if (m) return m[1];
+    } catch { /* 相对协议外链接忽略 */ }
+    return null;
+  }
+
+  /* 链接跳转：事件委托（捕获阶段），点击 <a> 时导航且不触发节点折叠。 */
+  function bindLinkNavigation(){
+    els.svg.addEventListener('click', (event) => {
+      const anchor = event.target.closest?.('a');
+      if (!anchor) return;
+      const href = anchor.getAttribute('href') || anchor.getAttribute('xlink:href') || '';
+
+      // 学科内链 → 切换学科
+      const targetId = parseInternalSubject(href);
+      if (targetId) {
+        event.preventDefault();
+        event.stopPropagation();
+        const subject = state.subjects.find((s) => s.id === targetId);
+        if (subject) {
+          loadSubject(subject);
+          setStatus(`已跳转到 · ${subject.name}`);
+        }
+        return;
+      }
+
+      // 外部链接：新开标签页，并阻止节点折叠
+      if (isAbsoluteUrl(href)) {
+        event.stopPropagation();
+        anchor.setAttribute('target', '_blank');
+        anchor.setAttribute('rel', 'noopener noreferrer');
+      }
+    }, true);
+  }
+
   els.fit.addEventListener('click', fit);
   els.reset.addEventListener('click', reset);
   els.expand.addEventListener('click', () => setExpanded(true));
@@ -483,5 +529,6 @@
 
   renderList();
   updateHeader(state.current);
+  bindLinkNavigation();
   loadSubject(state.current);
 })();

@@ -52,3 +52,7 @@
 
 ## 图示
 - ![DNA 与 RNA 对比](assets/dna-rna.svg)
+
+## 相关学科
+- [化学 · 有机与反应](subject:chemistry)
+- [语文 · 科普阅读](subject:chinese)

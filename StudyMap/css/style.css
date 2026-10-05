@@ -105,3 +105,20 @@ button { cursor: pointer; }
 #mindmap foreignObject img[src*=".svg?"] {
   object-fit: contain;
 }
+
+/* 链接跳转：节点内的可点击链接 */
+#mindmap foreignObject a {
+  color: #2563eb;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(37,99,235,.35);
+  cursor: pointer;
+  transition: color .15s ease, border-color .15s ease;
+}
+#mindmap foreignObject a:hover {
+  color: #1d4ed8;
+  border-bottom-color: rgba(29,78,216,.7);
+}
+#mindmap foreignObject a.internal-link::after {
+  content: " ⇢";
+  font-size: .9em;
+}
