@@ -37,14 +37,15 @@
   }
 
   const SUBJECTS = [
-    { id: 'math', name: '数学', icon: '∑', file: 'mind/math/main.md', title: '高中数学', description: '公式、方法、题型与典型应用' },
-    { id: 'biology', name: '生物', icon: '⌬', file: 'mind/biology/main.md', title: '高中生物', description: '分子、细胞与遗传等知识框架' },
-    { id: 'english', name: '英语', icon: 'A', file: 'mind/english/main.md', title: '高中英语', description: '词汇、语法、阅读与写作框架' },
-    { id: 'chinese', name: '语文', icon: '文', file: 'mind/chinese/main.md', title: '高中语文', description: '现代文、古诗文、语言文字运用' },
-    { id: 'physics', name: '物理', icon: '↗', file: 'mind/physics/main.md', title: '高中物理', description: '力学、电学与物理模型' },
-    { id: 'chemistry', name: '化学', icon: '⚗', file: 'mind/chemistry/main.md', title: '高中化学', description: '物质、反应、结构与实验' },
-    { id: 'history', name: '历史', icon: '史', file: 'mind/history/main.md', title: '高中历史', description: '时间线、制度、事件与因果关系' },
-    { id: 'geography', name: '地理', icon: '⌖', file: 'mind/geography/main.md', title: '高中地理', description: '自然地理、人文地理与区域分析' },
+    { id: 'chinese', name: '语文', icon: '文', file: 'mind/chinese/main.md', title: '语文 · 必修上册', description: '统编版必修上册 · 按单元整理' },
+    { id: 'math', name: '数学', icon: '∑', file: 'mind/math/main.md', title: '数学 · 必修第一册', description: '人教A版必修第一册 · 按章整理' },
+    { id: 'english', name: '英语', icon: 'A', file: 'mind/english/main.md', title: '英语 · 必修第一册', description: '人教版必修第一册 · 按 Unit 整理' },
+    { id: 'physics', name: '物理', icon: '物', file: 'mind/physics/main.md', title: '物理 · 必修第一册', description: '人教版必修第一册 · 按章整理' },
+    { id: 'chemistry', name: '化学', icon: '化', file: 'mind/chemistry/main.md', title: '化学 · 必修第一册', description: '人教版必修第一册 · 按章整理' },
+    { id: 'biology', name: '生物', icon: '生', file: 'mind/biology/main.md', title: '生物 · 必修1 分子与细胞', description: '人教版必修1 · 按章整理' },
+    { id: 'politics', name: '政治', icon: '政', file: 'mind/politics/main.md', title: '思想政治 · 必修1 中国特色社会主义', description: '统编版必修1 · 按课整理' },
+    { id: 'history', name: '历史', icon: '史', file: 'mind/history/main.md', title: '历史 · 中外历史纲要(上)', description: '统编版纲要上 · 按单元/课整理' },
+    { id: 'geography', name: '地理', icon: '地', file: 'mind/geography/main.md', title: '地理 · 必修第一册', description: '人教版必修第一册 · 按章整理' },
   ];
 
   const state = {
