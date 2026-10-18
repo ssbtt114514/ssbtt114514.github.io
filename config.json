@@ -1,6 +1,15 @@
 {
   "projects": [
     {
+      "name": "俄罗斯方块 Plus",
+      "url": "game/",
+      "app": true,
+      "icon": "fas fa-grip-lines",
+      "color": "#7c3aed",
+      "description": "进阶版俄罗斯方块，多维阶段进化、道具系统、3D 引擎渲染，支持移动端触控。",
+      "language": "TS / Three.js"
+    },
+    {
       "name": "StudyMap 学习思维导图",
       "url": "StudyMap/",
       "app": true,

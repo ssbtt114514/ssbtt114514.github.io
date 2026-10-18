@@ -1,0 +1,59 @@
+# Tetris Plus 自动构建工作流
+# 当 tetris-plus 源码变更推送到 main 时，自动构建并将产物同步到根目录的 game/ 文件夹。
+# 也支持手动触发（workflow_dispatch）。
+
+name: Build Tetris Plus → game/
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'tetris-plus/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-game:
+    name: 构建并同步 game/
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出仓库
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: tetris-plus/package-lock.json
+
+      - name: 安装依赖
+        working-directory: tetris-plus
+        run: npm ci
+
+      - name: 构建
+        working-directory: tetris-plus
+        run: npm run build
+
+      - name: 同步构建产物到 game/
+        run: |
+          rm -rf game
+          mkdir -p game
+          cp -r tetris-plus/dist/. game/
+
+      - name: 提交构建产物
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add game
+          if ! git diff --cached --quiet; then
+            git commit -m "build(game): 更新 Tetris Plus 构建产物"
+            git push
+          else
+            echo "game/ 无变化，跳过提交"
+          fi

@@ -1,0 +1,9 @@
+{
+  "custom": true, "W": 12, "D": 12, "H": 24, "dim": 3,
+  "speed": 0.6, "drop": 0.8, "pause": true,
+  "eventsEnabled": true, "perLock": 0.1,
+  "weights": { "antigrav": 1, "bombrain": 1, "rain": 3, "collapse": 1 },
+  "rainRate": 0.5, "rainDuration": 40,
+  "attrs": { "grav": 0.2, "gas": 0.25, "liquid": 0.25, "dye": 0.3 },
+  "startItems": { "tnt": 3, "cross": 2, "line": 2, "sponge": 2, "bucket": 2, "wall": 1 }
+}

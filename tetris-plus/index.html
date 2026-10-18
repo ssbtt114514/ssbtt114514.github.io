@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<title>俄罗斯方块 Plus</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#0b0e14;color:#dfe6f2;
+    font-family:system-ui,"Microsoft YaHei",sans-serif;overscroll-behavior:none}
+  #c{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+  .panel{position:absolute;background:rgba(10,14,22,.88);border:1px solid #2a3650;border-radius:10px;padding:10px 14px;font-size:14px;line-height:1.7}
+  #hud-tl{top:10px;left:10px}
+  #hud-tr{top:10px;right:10px;min-width:150px}
+  #banner{position:absolute;top:22%;left:50%;transform:translateX(-50%);font-size:30px;font-weight:700;color:#ffd75e;text-shadow:0 0 18px #ff9d00;opacity:0;transition:opacity .3s;pointer-events:none;text-align:center}
+  .screen{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(5,8,14,.82);z-index:20}
+  .card{background:#111827;border:1px solid #33445f;border-radius:14px;padding:26px 34px;max-width:640px;max-height:92vh;overflow:auto}
+  .card h1{margin:.2em 0 .6em;color:#7ec8ff}
+  .card h2{margin:.4em 0;color:#ffd75e;font-size:16px}
+  button{background:#1d4ed8;color:#fff;border:0;border-radius:8px;padding:8px 16px;margin:4px;cursor:pointer;font-size:14px}
+  button:hover{background:#2f6af0}
+  button.sec{background:#374151}
+  label{display:block;margin:3px 0}
+  input[type=number]{width:70px;background:#0b1220;color:#dfe6f2;border:1px solid #345;border-radius:4px;padding:2px 4px}
+  .row{display:flex;gap:14px;flex-wrap:wrap}
+  #next{display:grid;gap:2px;margin-top:4px}
+  #next div{width:14px;height:14px;border-radius:2px;background:#16202f}
+  .inv-row{display:flex;justify-content:space-between;gap:8px}
+  .dim{color:#8899aa;font-size:12px}
+  kbd{background:#223;border:1px solid #445;border-radius:3px;padding:0 4px;font-size:12px}
+  #hud-fps{color:#7dff9b}
+
+  /* ===== M9 移动端 ===== */
+  #m-pause{display:none;position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:16;
+    width:46px;height:46px;border-radius:50%;background:rgba(30,41,59,.8);border:1px solid #3b5170;
+    color:#dfe6f2;font-size:18px;margin:0;touch-action:none}
+  #mobile-ui{position:absolute;left:0;right:0;bottom:0;display:none;justify-content:space-between;z-index:15;
+    padding:10px 14px calc(10px + env(safe-area-inset-bottom));pointer-events:none}
+  #mobile-ui .cluster{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;pointer-events:none;max-width:46vw}
+  #mobile-ui button{pointer-events:auto;width:56px;height:56px;border-radius:50%;margin:0;
+    background:rgba(30,41,59,.78);border:1px solid #3b5170;color:#dfe6f2;font-size:22px;
+    touch-action:none;user-select:none;-webkit-user-select:none}
+  #mobile-ui button:active{background:#2f6af0}
+  #mobile-ui .items{justify-content:flex-end}
+  #mobile-ui .items button{width:46px;height:46px;border-radius:10px;font-size:12px;line-height:1.15}
+  #mobile-ui button.aim.on{outline:2px solid #ffd75e}
+  #mobile-ui .cnt{font-size:10px;color:#9fb6d4}
+  #rotate-hint{position:absolute;inset:0;display:none;align-items:center;justify-content:center;
+    background:rgba(0,0,0,.55);z-index:30;font-size:20px;text-align:center;padding:20px}
+
+  /* 小屏 HUD/菜单自适应 */
+  @media (max-width:760px),(pointer:coarse){
+    .panel{font-size:11px;padding:6px 8px;border-radius:8px}
+    #hud-tr{min-width:104px}
+    #next div{width:9px;height:9px}
+    .card{padding:16px;max-width:92vw}
+    .card h1{font-size:22px}
+    .card button{padding:10px 14px;font-size:15px}
+    #banner{font-size:20px;top:14%}
+    .inv-row .dim{display:none}
+  }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud-tl" class="panel">
+  <div>分数 <b id="hud-score">0</b></div>
+  <div>阶段 <b id="hud-stage">1</b> <span class="dim" id="hud-stagename">一维</span></div>
+  <div>难度 <b id="hud-diff">-</b> <span class="dim" id="hud-pause"></span></div>
+  <div>FPS <span id="hud-fps">60</span></div>
+  <div class="dim" id="hud-event"></div>
+</div>
+<div id="hud-tr" class="panel">
+  <div>下一个</div><div id="next"></div>
+  <hr style="border-color:#263042"/>
+  <div id="hud-inv"></div>
+  <div class="dim">道具瞄准：鼠标悬停 / 🎯模式</div>
+</div>
+<button id="m-pause">⏸</button>
+<div id="banner"></div>
+<div id="rotate-hint">📱 建议横屏游玩<br/><span style="font-size:14px;color:#9fb6d4">（点按任意处继续）</span></div>
+<div id="screens"></div>
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>
