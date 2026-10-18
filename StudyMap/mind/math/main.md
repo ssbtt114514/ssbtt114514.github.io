@@ -40,12 +40,14 @@
 - **易错点**：使用前必须验证"正数、定值、等号能取到"三条件
 - 图示示例
   - ![基本不等式示意图](assets/basic-inequality.svg)
+  - <div class="jxg-board" data-graph='{"bounds":[-5,10,5,-2],"slider":{"name":"a","min":0.5,"max":6,"start":2,"fn":"x+a/x"},"label":"拖动滑块 a 观察 y=x+a/x 最小值变化（x>0）"}'></div>
 ### 2.3 二次函数与一元二次方程、不等式
 - **必考点·重难点**：三个"二次"关系（图象—方程根—不等式解集）
 - 解一元二次不等式"三步走"：化标准（二次项系数为正）→ 求根 → 看图写解集
   - $\Delta>0$：大于取两边、小于取中间；$\Delta=0$；$\Delta<0$
 - **易错点**：二次项系数含参数时讨论 $a>0,a=0,a<0$；注意 $\le,\ge$ 端点
 - 恒成立：$ax^2+bx+c>0$ 恒成立 $\Leftrightarrow a>0$ 且 $\Delta<0$
+- <div class="jxg-board" data-graph='{"bounds":[-5,8,5,-4],"slider":{"name":"a","min":-2,"max":3,"start":1,"fn":"a*x*x"},"functions":[{"fn":"0","color":"#94a3b8","strokeWidth":1}],"label":"拖动 a 观察 y=ax² 开口方向与宽窄"}'></div>
 ### 典型例题
 - 例：求 $y=x+\dfrac{4}{x}$（$x>0$）最小值：$y\ge2\sqrt4=4$，当 $x=2$ 取等
 - 例：解不等式 $x^2-x-6>0$：根为 $-2,3$，解集 $(-\infty,-2)\cup(3,+\infty)$
@@ -65,6 +67,7 @@
 ### 3.3 幂函数
 - $y=x^\alpha$；必记 $y=x,x^2,x^3,x^{1/2},x^{-1}$ 的图象与性质
 - **规律**：$\alpha>0$ 在一象限递增、过 $(0,0),(1,1)$；$\alpha<0$ 递减、过 $(1,1)$
+- <div class="jxg-board" data-graph='{"bounds":[-3,5,5,-3],"functions":[{"fn":"x","color":"#34A853","name":"y=x"},{"fn":"x*x","color":"#4285F4","name":"y=x²"},{"fn":"x*x*x","color":"#f59e0b","name":"y=x³"},{"fn":"sqrt(x)","color":"#ef4444","name":"y=√x"},{"fn":"1/x","color":"#8b5cf6","name":"y=1/x"}],"label":"五类幂函数图象对比，均过(1,1)"}'></div>
 ### 3.4 函数的应用（一）
 - 分段函数建模、一次/二次函数实际应用，注意自变量实际取值范围
 ### 典型例题
@@ -79,6 +82,7 @@
 - **必考点·重难点**：$y=a^x$（$a>0,a\ne1$）
   - $a>1$ 递增；$0<a<1$ 递减；恒过 $(0,1)$；值域 $(0,+\infty)$
 - **易错点**：底数范围；比较大小借助单调性与中间量（0、1）
+- <div class="jxg-board" data-graph='{"bounds":[-4,8,4,-2],"slider":{"name":"a","min":0.2,"max":3,"start":2,"fn":"Math.pow(a,x)"},"functions":[{"fn":"1","color":"#94a3b8","strokeWidth":1}],"label":"拖动 a 观察 y=aˣ 单调性（a>1递增，0<a<1递减）"}'></div>
 ### 4.3 对数
 - **必考点**：$\log_a N=b\Leftrightarrow a^b=N$（$a>0,a\ne1,N>0$）
 - 常用对数 $\lg$（底10）、自然对数 $\ln$（底e）
@@ -89,6 +93,7 @@
 - **必考点·重难点**：$y=\log_a x$，恒过 $(1,0)$，定义域 $(0,+\infty)$
   - $a>1$ 递增；$0<a<1$ 递减
 - **易错点**：定义域（真数>0）；底数含参讨论；指数与对数函数互为反函数（图象关于 $y=x$ 对称）
+- <div class="jxg-board" data-graph='{"bounds":[-1,5,8,-4],"slider":{"name":"a","min":0.3,"max":3,"start":2,"fn":"Math.log(x)/Math.log(a)"},"functions":[{"fn":"x","color":"#94a3b8","strokeWidth":1,"name":"y=x"}],"label":"拖动 a 观察 y=log_a(x)，与 y=aˣ 关于 y=x 对称"}'></div>
 ### 4.5 函数的应用（二）
 - **必考点**：零点存在定理——$y=f(x)$ 在 $[a,b]$ 连续且 $f(a)f(b)<0$，则 $(a,b)$ 内有零点
 - 二分法求零点近似值；函数模型（指数增长/对数增长/幂函数增长）的比较
@@ -105,11 +110,13 @@
 - **必考点**：单位圆定义 $\sin\alpha=y,\cos\alpha=x,\tan\alpha=\dfrac yx$
 - 各象限符号口诀"一全正、二正弦、三正切、四余弦"
 - 同角基本关系：$\sin^2\alpha+\cos^2\alpha=1$，$\dfrac{\sin\alpha}{\cos\alpha}=\tan\alpha$
+- <div class="jxg-board" data-graph='{"bounds":[-1.8,1.8,1.8,-1.8],"axes":false,"grid":true,"unitCircle":true,"label":"拖动红点 P 观察角度与 sin/cos 的变化"}'></div>
 ### 5.3 诱导公式
 - **必考点**：口诀"奇变偶不变，符号看象限"（$k\cdot\dfrac\pi2\pm\alpha$）
 ### 5.4 三角函数的图象与性质
 - **必考点·重难点**：$y=\sin x$、$y=\cos x$、$y=\tan x$ 的图象、周期、奇偶、单调区间、最值
 - 周期：$\sin,\cos$ 周期 $2\pi$，$\tan$ 周期 $\pi$
+- <div class="jxg-board" data-graph='{"bounds":[-7,2.5,7,-2.5],"functions":[{"fn":"sin(x)","color":"#34A853","name":"sin","strokeWidth":2},{"fn":"cos(x)","color":"#4285F4","name":"cos","strokeWidth":2},{"fn":"tan(x)","color":"#f59e0b","name":"tan","strokeWidth":1.5}],"label":"sin / cos / tan 图象，可拖动缩放查看周期"}'></div>
 ### 5.5 三角恒等变换
 - **必考点·重难点**：两角和差公式
   - $\cos(\alpha\pm\beta)=\cos\alpha\cos\beta\mp\sin\alpha\sin\beta$

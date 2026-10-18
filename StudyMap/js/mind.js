@@ -313,6 +313,8 @@
 
   async function renderMarkdown(markdown, baseFile, mode) {
     els.svg.replaceChildren();
+    // 切换学科前清理上一个学科的 JSXGraph 画板
+    if (window.JXGBoards) window.JXGBoards.clearAll();
 
     const prepared = prepareMarkdownImages(markdown, baseFile, mode);
 
@@ -351,6 +353,8 @@
     // the actual rendered DOM as a final safety net.
     rewriteRenderedImages(baseFile, mode);
     await waitForImages();
+    // 初始化 JSXGraph 可交互数学画板（含 MutationObserver 处理展开/折叠）
+    if (window.JXGBoards) window.JXGBoards.init(els.svg);
     requestAnimationFrame(() => requestAnimationFrame(() => state.markmap?.fit()));
     setLoading(false);
   }
@@ -407,6 +411,8 @@
     // renderData() 是 Markmap 0.18.x 的正确更新入口，会保留当前 INode
     // 和折叠状态；同时它是 async，等待完成后再 fit，避免布局尚未完成就缩放。
     await state.markmap.renderData(state.root);
+    // 展开/折叠后重新扫描 JSXGraph 画板
+    if (window.JXGBoards) window.JXGBoards.scan(els.svg);
     requestAnimationFrame(() => state.markmap?.fit());
   }
 
