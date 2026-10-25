@@ -7,8 +7,12 @@
 ```text
 index.html
 js/
-  mind.js          # 主框架
-  mind-data.js     # file:// 本地打开时使用的内置 Markdown 副本
+  mind.js              # 主框架
+  mind-data.js         # file:// 本地打开时使用的内置 Markdown 副本
+  jsxgraph-boards.js   # JSXGraph 数学画板管理器
+  webmolkit-boards.js  # WebMolKit 分子结构画板管理器
+  rapier-boards.js     # Rapier 物理演示管理器
+  rapier-loader.js     # Rapier ES Module 加载器（WASM 内联）
 mind/
   math/main.md
   biology/main.md
@@ -18,11 +22,13 @@ mind/
   chemistry/main.md
   history/main.md
   geography/main.md
-  */assets/       # 章节图片
+  */assets/            # 章节图片
 css/
   style.css
 other/
   # 第三方库说明
+tools/
+  gen-mind-data.js     # 从 mind/** 重新生成 js/mind-data.js
 ```
 
 ## 三种运行方式
@@ -80,6 +86,37 @@ Markmap 的 KaTeX 插件支持常见的 `$...$` 行内公式与 `$$...$$` 块公
 ```md
 - 基本不等式：$\frac{a+b}{2} \geq \sqrt{ab}$（$a>0,b>0$）
 - 常用形式：$a+b \geq 2\sqrt{ab}$
+```
+
+## 交互组件（V7）
+
+思维导图节点内可以直接嵌入三类可交互组件，写法都是"一行 HTML div"：
+
+1. **JSXGraph 数学画板**（`js/jsxgraph-boards.js`）
+   ```md
+   - <div class="jxg-board" data-graph='{"bounds":[-5,8,5,-4],"slider":{"name":"a","min":-2,"max":3,"start":1,"fn":"a*x*x"},"label":"拖动 a 观察 y=ax²"}'></div>
+   ```
+2. **WebMolKit 分子结构**（`js/webmolkit-boards.js`，静态 SVG + 交互式 Sketcher）
+   ```md
+   - <div class="wmk-mol" data-mol='{"mol":"h2o","label":"水分子 H₂O"}' style="width:300px;height:220px"></div>
+   - <div class="wmk-mol" data-mol='{"sketch":true,"mol":"h2o","box":"300,240","label":"结构式编辑器"}' style="width:300px;height:240px"></div>
+   ```
+3. **Rapier 物理演示**（`js/rapier-boards.js`，WASM 实时物理模拟）
+   ```md
+   - <div class="rp-demo" data-sim="freefall" style="width:320px;height:244px"></div>
+   ```
+
+物理预设：`freefall` `upthrow` `slide` `spring` `inclined` `push` `elevator` `collision`；
+分子预设（23 个）：`h2o` `co2` `nh3` `ch4` `n2` `o2` `cl2` `hcl` `ccl4` `so2` `so3` `h2so4` `hno3` `h2o2` `nacl` `naoh` `na2o` `na2o2` `na2co3` `nahco3` `fe2o3` `fe3o4` `al2o3`。
+
+组件会在思维导图渲染完成后自动扫描初始化，展开/折叠节点时也会自动补初始化；切换学科时统一清理，避免内存与动画泄漏。完整说明见 `other/README.md`。
+
+## 内置副本重新生成
+
+修改 `mind/**/*.md` 或新增 `assets/` 图片后，执行以下命令重新生成 `file://` 模式使用的内置副本：
+
+```bash
+node tools/gen-mind-data.js
 ```
 
 ## v3 修复
